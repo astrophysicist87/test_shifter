@@ -417,9 +417,9 @@ void shifter::set_RHS(
 
 	for (const auto & thisPair : sorted_list_of_pairs)
 	{
-		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair );
 		double RHS_derivative = 0.0;
-		RHS.push_back( std::make_pair( thisPair.first, RHS_integral, RHS_derivative ) );
+		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, RHS_derivative );
+		RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 		//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 	}
 
