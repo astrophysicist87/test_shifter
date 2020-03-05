@@ -526,6 +526,7 @@ void shifter::compute_shifts(
 		Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
 		const double Delta_z = xDiff.pz();	// units are 1/GeV here
 
+		const double thisPair_shift = 0.0;
 		//const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
 		//const double thisPair_shift = compute_shift( this_qz, Delta_z );
 		pairShifts.push_back( thisPair_shift );
