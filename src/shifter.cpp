@@ -591,25 +591,25 @@ double shifter::evaluate_RHS(
 	const int this2 = thisPair.second.second;
 
 	//cout << sorted_list_of_pairs.size() << "   " << RHS.size() << "   " << pairIndex << endl;
-	cout << "checkpoint(1): " << lower_qz << "   " << upper_qz << "   " << qz << endl;
+	//cout << "checkpoint(1): " << lower_qz << "   " << upper_qz << "   " << qz << endl;
 
 	// recycle previously computed RHS to save time
 	//int dumbcount = 0;
 	while ( upper_qz < qz )
 	{
-		pairIndex++;
+		//pairIndex++;
 		//cout << "checkpoint(2): " << lower_qz << "   " << upper_qz << "   " << qz << "   " << pairIndex << endl;
-		lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
-		upper_qz = sorted_list_of_pairs.at(pairIndex).first;
+		lower_qz = sorted_list_of_pairs.at(pairIndex).first;
+		upper_qz = sorted_list_of_pairs.at(++pairIndex).first;
 		//dumbcount++;
 	}
 	//if (dumbcount > 0) pairIndex--;
 
-	cout << sorted_list_of_pairs.size() << "   " << RHS.size() << "   " << denBar.size() << "   " << pairIndex << endl;
+	//cout << sorted_list_of_pairs.size() << "   " << RHS.size() << "   " << denBar.size() << "   " << pairIndex << endl;
 	lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
 	upper_qz = sorted_list_of_pairs.at(pairIndex).first;
 	double RHS_integral = RHS.at(pairIndex-1).second;
-	cout << "Integrating from " << lower_qz << " to " << upper_qz << "; RHS(lower) = " << RHS_integral << endl;
+	//cerr << "Integrating from " << lower_qz << " to " << upper_qz << "; RHS(lower) = " << RHS_integral << endl;
 
 	// the constant piece
 	RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
@@ -620,12 +620,12 @@ double shifter::evaluate_RHS(
 	// the BE enhancement piece
 	for (const auto & iPair : sorted_list_of_pairs)
 	{
-		if ( npairs_in_average == 0 ) { npairs_in_average++; continue; }
 		const int i1 = iPair.second.first;
 		const int i2 = iPair.second.second;
 
+		if ( i1<0 or i2<0 ) continue;
 		//if ( this1 != i1 and this2 != i2 ) continue;
-		//if ( this1 != i1 or this2 != i2 ) continue;
+		if ( this1 != i1 or this2 != i2 ) continue;
 
 		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 		const double Delta_z = xDiff.pz();
@@ -640,7 +640,7 @@ double shifter::evaluate_RHS(
 	RHS_integral       += RHS_BE_enhancement;
 	pairIndex++;
 
-	cout << "Result = " << RHS_integral << endl;
+	//cout << "Result = " << RHS_integral << endl;
 
 	return (RHS_integral);
 }

@@ -11,7 +11,7 @@
 ##  
 
 CC := g++
-CFLAGS= -O3 -std=c++11 -g -pg
+CFLAGS= -O3 -std=c++11 -g
 
 RM		=	rm -f
 O               =       .o
