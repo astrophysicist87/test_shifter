@@ -257,100 +257,6 @@ void shifter::shiftPairs_mode1()
 
 
 
-void shifter::compute_shifts(
-			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs
-			)
-{
-	const int npairs = sorted_list_of_pairs.size();
-
-	vector<double> pairShifts;
-	vector<bool> this_pair_shifted;
-
-	pairShifts.reserve( npairs );
-	this_pair_shifted.reserve( npairs );
-
-	// Compute the pair shifts themselves.
-	for (int i = 0; i < npairs; i++)
-	{
-		const auto & thisPair = sorted_list_of_pairs.at(i);
-		const double this_qz = thisPair.first;
-		const int this1 = thisPair.second.first;
-		const int this2 = thisPair.second.second;
-		Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
-		const double Delta_z = xDiff.pz();	// units are 1/GeV here
-
-		const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
-		pairShifts.push_back( thisPair_shift );
-		if (this1==0 or this2==0)	// choose a particle to track
-			cout << setprecision(24) << "CHECK: "
-					<< this1 << "   " << this2 << "   " << this_qz << "   "
-					<< Delta_z*HBARC << "   " << thisPair_shift << endl;
-		this_pair_shifted.push_back( true );
-	}
-
-	// Store them for each pair.
-	int pairIndex = 0;
-	int number_of_pairs_shifted = 0, number_of_pairs_not_shifted = 0;
-	for (const auto & iPair : sorted_list_of_pairs)
-	{
-		const double this_qz = iPair.first;
-		const int i1 = iPair.second.first;
-		const int i2 = iPair.second.second;
-
-		constexpr bool rescale_pair_momenta = true;
-
-		const double net_qz_shift = 0.5*pairShifts.at(pairIndex);
-		const double factor = net_qz_shift / this_qz;
-
-		// Add shifts to sum. (Energy component dummy.)
-		//Vec4 pDiff(0.0, 0.0, 0.0, net_qz_shift);
-		Vec4 pDiff = factor * (allParticles.at(i1).p - allParticles.at(i2).p);
-		if (i1==0 or i2==0)	// choose a particle to track
-			cout << setprecision(24) << "CHECK: "
-					<< i1 << "   " << i2 << "   " << this_qz << "   "
-					<< net_qz_shift << "   " << factor << "   " << pDiff;
-
-		if ( rescale_pair_momenta or this_pair_shifted.at(pairIndex) )
-		{
-			// Compute appropriate shift for pair
-			number_of_pairs_shifted++;
-
-			allParticles.at(i1).pShift += pDiff;
-			allParticles.at(i2).pShift -= pDiff;
-
-			if ( rescale_pair_momenta )
-			{
-				// add symmetrically to both momenta
-				pDiff = 0.5*(allParticles.at(i1).p + allParticles.at(i2).p);
-				allParticles.at(i1).pComp += pDiff;
-				allParticles.at(i2).pComp += pDiff;
-			}
-		}
-		else
-		{
-			// Use computed shift for compensation
-			number_of_pairs_not_shifted++;
-
-			//*/
-			//Vec4 pDiff = allParticles.at(i1).p - allParticles.at(i2).p;
-			allParticles.at(i1).pComp += pDiff;
-			allParticles.at(i2).pComp -= pDiff;
-		}
-
-		pairIndex++;
-
-	}
-
-	if ( BE_VERBOSE or true )
-	{
-		cout << "number_of_pairs_shifted = " << number_of_pairs_shifted << endl;
-		cout << "number_of_pairs_not_shifted = " << number_of_pairs_not_shifted << endl;
-	}
-
-	return;
-}
-
-
 
 
 //-------------------------------------
@@ -382,27 +288,10 @@ void shifter::evaluate_shift_relation_at_pair(
 	return;
 }
 
-double shifter::Newtons_Method( const double a, const double b )
+/*double shifter::Newtons_Method( const double a, const double b )
 {
 	const double ACCURACY = 1.e-6;
 	const int MAXTRIES = 100;
-
-	/*const double guess1 = -1.0/b;
-	const double guess2 = 0.0;
-	const double guess3 = 1.0/b;
-
-	const double f1 = guess1*b + sin(b*(a+guess1));
-	const double f2 = guess2*b + sin(b*(a+guess2));
-	const double f3 = guess3*b + sin(b*(a+guess3));
-
-	bool f1_lt_f2 = (f1*f1 < f2*f2);
-	bool f1_lt_f3 = (f1*f1 < f3*f3);
-	bool f2_lt_f3 = (f2*f2 < f3*f3);
-
-	// Solve equation given by x*b + sin((a+x)*b) == 0
-	const double initial_guess = guess1 * static_cast<double>(  f1_lt_f2 and f1_lt_f3 )
-									+ guess2 * static_cast<double>( not f1_lt_f2 and f2_lt_f3 )
-									+ guess3 * static_cast<double>( not f1_lt_f3 and not f2_lt_f3 );*/
 
 	const double guess1 = -1.0/b;
 	const double guess2 = 1.0/b;
@@ -431,10 +320,8 @@ double shifter::Newtons_Method( const double a, const double b )
 
 	if ( ntries == MAXTRIES ) cout << "WARNING: maximum number of tries reached! a=" << a << ", b=" << b << "; root x = " << x << endl;
 
-	//if ( abs(x) > 0.1*a ) cout << setprecision(24) << "WARNING: large shift! a=" << a << ", b=" << b << "; root x = " << x << endl;
-
 	return (x);
-}
+}*/
 
 
 void shifter::set_pair_density(	const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs )
@@ -513,9 +400,6 @@ double shifter::evaluate_LHS(
 		pairIndex++;
 	}
 
-	//if ( qz > previous_qz )
-	//	LHS_integral     += 2.0 * ( qz - previous_qz ) * denBar.at(pairIndex-1);
-
 	return (LHS_integral);
 }
 
@@ -527,45 +411,15 @@ void shifter::set_RHS(
 			vector< pair< double, double > > & RHS )
 {
 
-	// RHS similar to LHS
+	// RHS
 	const int npairs = sorted_list_of_pairs.size();
-	//const double one_by_npairs = 1.0 / npairs;
 	RHS.reserve( npairs );
-
-	/*for (const auto & eachPair : sorted_list_of_pairs)
-	{
-		// assumes pair density is constant for now
-		const double this_qz = eachPair.first;
-		const int this1 = eachPair.second.first;
-		const int this2 = eachPair.second.second;
-
-		double RHS_integral = 2.0 * this_qz;
-
-		int npairs_in_average = 0;
-		double RHS_BE_enhancement = 0.0;
-		for (const auto & iPair : sorted_list_of_pairs)
-		{
-			const int i1 = iPair.second.first;
-			const int i2 = iPair.second.second;
-
-			if ( this1 != i1 and this2 != i2 ) continue;
-
-			Vec4 xDiffPRF = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
-			//xDiffPRF.bstback( 0.5*(allParticles.at(i1).p + allParticles.at(i2).p) );
-			const double Delta_z = xDiffPRF.pz();
-
-			RHS_BE_enhancement += 2.0 * sin(this_qz*Delta_z) / Delta_z;
-			++npairs_in_average;
-		}
-
-		RHS_integral += RHS_BE_enhancement / static_cast<double>(npairs_in_average);
-		RHS.push_back( std::make_pair( eachPair.first, RHS_integral ) );
-	}*/
 
 	for (const auto & thisPair : sorted_list_of_pairs)
 	{
 		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair );
-		RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
+		double RHS_derivative = 0.0;
+		RHS.push_back( std::make_pair( thisPair.first, RHS_integral, RHS_derivative ) );
 		//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 	}
 
@@ -577,7 +431,8 @@ void shifter::set_RHS(
 double shifter::evaluate_RHS(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			const vector< pair< double, double > > & RHS,
-			const pair< double, pair <int,int> > & thisPair )
+			const pair< double, pair <int,int> > & thisPair,
+			double & RHS_derivative )
 {
 	int    pairIndex = 1;
 	double lower_qz  = sorted_list_of_pairs.at(pairIndex-1).first;
@@ -590,32 +445,24 @@ double shifter::evaluate_RHS(
 	const int this1 = thisPair.second.first;
 	const int this2 = thisPair.second.second;
 
-	//cout << sorted_list_of_pairs.size() << "   " << RHS.size() << "   " << pairIndex << endl;
-	//cout << "checkpoint(1): " << lower_qz << "   " << upper_qz << "   " << qz << endl;
-
 	// recycle previously computed RHS to save time
-	//int dumbcount = 0;
 	while ( upper_qz < qz )
 	{
-		//pairIndex++;
-		//cout << "checkpoint(2): " << lower_qz << "   " << upper_qz << "   " << qz << "   " << pairIndex << endl;
 		lower_qz = sorted_list_of_pairs.at(pairIndex).first;
 		upper_qz = sorted_list_of_pairs.at(++pairIndex).first;
-		//dumbcount++;
 	}
-	//if (dumbcount > 0) pairIndex--;
 
-	//cout << sorted_list_of_pairs.size() << "   " << RHS.size() << "   " << denBar.size() << "   " << pairIndex << endl;
 	lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
 	upper_qz = sorted_list_of_pairs.at(pairIndex).first;
 	double RHS_integral = RHS.at(pairIndex-1).second;
-	//cerr << "Integrating from " << lower_qz << " to " << upper_qz << "; RHS(lower) = " << RHS_integral << endl;
 
-	// the constant piece
+	// the constant piece (integrand assumed to be symmetric)
 	RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
+	RHS_derivative = 2.0 * denBar.at(pairIndex-1);
 
 	int npairs_in_average = 0;
 	double RHS_BE_enhancement = 0.0;
+	double RHS_BE_enhancement_derivative = 0.0;
 
 	// the BE enhancement piece
 	for (const auto & iPair : sorted_list_of_pairs)
@@ -625,25 +472,132 @@ double shifter::evaluate_RHS(
 
 		if ( i1<0 or i2<0 ) continue;
 		//if ( this1 != i1 and this2 != i2 ) continue;
-		if ( this1 != i1 or this2 != i2 ) continue;
+		//if ( this1 != i1 or this2 != i2 ) continue;
 
 		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 		const double Delta_z = xDiff.pz();
 
 		RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
 							* denBar.at(pairIndex-1) / Delta_z;
+		RHS_BE_enhancement_derivative += 2.0 * cos(upper_qz*Delta_z) * denBar.at(pairIndex-1);
 
 		npairs_in_average++;
 	}
 
 	RHS_BE_enhancement /= npairs_in_average;
-	RHS_integral       += RHS_BE_enhancement;
+	RHS_BE_enhancement_derivative /= npairs_in_average;
+	RHS_integral += RHS_BE_enhancement;
+	RHS_derivative += RHS_BE_enhancement_derivative;
 	pairIndex++;
-
-	//cout << "Result = " << RHS_integral << endl;
 
 	return (RHS_integral);
 }
+
+
+/*void shifter::compute_shift( int iPair )
+{
+	const double ACCURACY = 1.e-6;
+	const int MAXTRIES = 100;
+
+
+}*/
+
+
+
+void shifter::compute_shifts(
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs
+			)
+{
+	const int npairs = sorted_list_of_pairs.size();
+
+	vector<double> pairShifts;
+	vector<bool> this_pair_shifted;
+
+	pairShifts.reserve( npairs );
+	this_pair_shifted.reserve( npairs );
+
+	// Compute the pair shifts themselves.
+	for (int i = 0; i < npairs; i++)
+	{
+		const auto & thisPair = sorted_list_of_pairs.at(i);
+		const double this_qz = thisPair.first;
+		const int this1 = thisPair.second.first;
+		const int this2 = thisPair.second.second;
+		Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
+		const double Delta_z = xDiff.pz();	// units are 1/GeV here
+
+		//const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
+		//const double thisPair_shift = compute_shift( this_qz, Delta_z );
+		pairShifts.push_back( thisPair_shift );
+		if (this1==0 or this2==0)	// choose a particle to track
+			cout << setprecision(24) << "CHECK: "
+					<< this1 << "   " << this2 << "   " << this_qz << "   "
+					<< Delta_z*HBARC << "   " << thisPair_shift << endl;
+		this_pair_shifted.push_back( true );
+	}
+
+	// Store them for each pair.
+	int pairIndex = 0;
+	int number_of_pairs_shifted = 0, number_of_pairs_not_shifted = 0;
+	for (const auto & iPair : sorted_list_of_pairs)
+	{
+		const double this_qz = iPair.first;
+		const int i1 = iPair.second.first;
+		const int i2 = iPair.second.second;
+
+		constexpr bool rescale_pair_momenta = true;
+
+		const double net_qz_shift = 0.5*pairShifts.at(pairIndex);
+		const double factor = net_qz_shift / this_qz;
+
+		// Add shifts to sum. (Energy component dummy.)
+		//Vec4 pDiff(0.0, 0.0, 0.0, net_qz_shift);
+		Vec4 pDiff = factor * (allParticles.at(i1).p - allParticles.at(i2).p);
+		if (i1==0 or i2==0)	// choose a particle to track
+			cout << setprecision(24) << "CHECK: "
+					<< i1 << "   " << i2 << "   " << this_qz << "   "
+					<< net_qz_shift << "   " << factor << "   " << pDiff;
+
+		if ( rescale_pair_momenta or this_pair_shifted.at(pairIndex) )
+		{
+			// Compute appropriate shift for pair
+			number_of_pairs_shifted++;
+
+			allParticles.at(i1).pShift += pDiff;
+			allParticles.at(i2).pShift -= pDiff;
+
+			if ( rescale_pair_momenta )
+			{
+				// add symmetrically to both momenta
+				pDiff = 0.5*(allParticles.at(i1).p + allParticles.at(i2).p);
+				allParticles.at(i1).pComp += pDiff;
+				allParticles.at(i2).pComp += pDiff;
+			}
+		}
+		else
+		{
+			// Use computed shift for compensation
+			number_of_pairs_not_shifted++;
+
+			//*/
+			//Vec4 pDiff = allParticles.at(i1).p - allParticles.at(i2).p;
+			allParticles.at(i1).pComp += pDiff;
+			allParticles.at(i2).pComp -= pDiff;
+		}
+
+		pairIndex++;
+
+	}
+
+	if ( BE_VERBOSE or true )
+	{
+		cout << "number_of_pairs_shifted = " << number_of_pairs_shifted << endl;
+		cout << "number_of_pairs_not_shifted = " << number_of_pairs_not_shifted << endl;
+	}
+
+	return;
+}
+
 
 
 //End of file
