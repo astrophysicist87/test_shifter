@@ -470,8 +470,7 @@ double shifter::evaluate_RHS(
 		const int i1 = iPair.second.first;
 		const int i2 = iPair.second.second;
 
-		//if ( i1<0 or i2<0 ) continue;
-if ( npairs_in_average == 0 ) { npairs_in_average++; continue; }
+		if ( i1<0 or i2<0 ) continue;
 		//if ( this1 != i1 and this2 != i2 ) continue;
 		//if ( this1 != i1 or this2 != i2 ) continue;
 
