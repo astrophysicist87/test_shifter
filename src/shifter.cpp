@@ -223,8 +223,8 @@ bool shifter::setSortedPairs( )
 
 void shifter::shiftPairs_mode1()
 {
-	vector< pair< double, double > > LHS, RHS;
-	evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS );
+	vector< pair< double, double > > LHS, RHS, RHS_derivatives;
+	evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 	// some output to check stuff
 	const int npairs = LHS.size();
@@ -265,7 +265,8 @@ void shifter::shiftPairs_mode1()
 void shifter::evaluate_shift_relation_at_pair(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			vector< pair< double, double > > & LHS,
-			vector< pair< double, double > > & RHS
+			vector< pair< double, double > > & RHS,
+			vector< pair< double, double > > & RHS_derivatives
 			)
 {
 
@@ -273,6 +274,7 @@ void shifter::evaluate_shift_relation_at_pair(
 	// Reset.
 	LHS.clear();
 	RHS.clear();
+	RHS_derivatives.clear();
 
 	// Make sure pair density is stored, if needed.
 	set_pair_density( sorted_list_of_pairs );
@@ -283,45 +285,11 @@ void shifter::evaluate_shift_relation_at_pair(
 
 	//------------------
 	// Set RHS integral.
-	set_RHS( sorted_list_of_pairs, RHS );
+	set_RHS( sorted_list_of_pairs, RHS, RHS_derivatives );
 
 	return;
 }
 
-/*double shifter::Newtons_Method( const double a, const double b )
-{
-	const double ACCURACY = 1.e-6;
-	const int MAXTRIES = 100;
-
-	const double guess1 = -1.0/b;
-	const double guess2 = 1.0/b;
-
-	const double f1 = guess1*b + sin(b*(a+guess1));
-	const double f2 = guess2*b + sin(b*(a+guess2));
-
-	//cout << f1 << "   " << f2 << endl;
-
-	// Solve equation given by x*b + sin((a+x)*b) == 0
-	const double initial_guess = ( f1*f1 < f2*f2 ) ? guess1 : guess2;
-
-	double x = initial_guess;
-	double f = x*b + sin(b*(a+x));
-
-	int ntries = 0;
-	while ( abs(f) > ACCURACY and ntries < MAXTRIES )
-	{
-		double fp = b*(1.0 + cos(b*(a+x)));
-		//cout << setprecision(24) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
-		if ( abs(fp) < 1.e-100 ) break;
-		f = x*b + sin(b*(a+x));
-		x -= f / fp;
-		ntries++;
-	}
-
-	if ( ntries == MAXTRIES ) cout << "WARNING: maximum number of tries reached! a=" << a << ", b=" << b << "; root x = " << x << endl;
-
-	return (x);
-}*/
 
 
 void shifter::set_pair_density(	const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs )
@@ -341,18 +309,6 @@ void shifter::set_pair_density(	const vector< pair< double, pair <int,int> > > &
 			denBar.push_back( 1.0 );
 	}
 	
-	// Density must go to zero eventually.
-	//denBar.back() = 0.0;
-	//denBar.push_back( 0.0 );
-
-	/*cout << "Sizes: " << sorted_list_of_pairs.size() << "   " << denBar.size() << endl;
-	for (int iPair = 0; iPair < (int)sorted_list_of_pairs.size()-1; ++iPair)
-		cout << "DENSITY: " << sorted_list_of_pairs.at(iPair).first
-				<< " <= q <= " << sorted_list_of_pairs.at(iPair+1).first
-				<< ": den(q) = " << denBar.at(iPair) << endl;
-	*/
-
-		
 
 	return;
 }
@@ -408,7 +364,8 @@ double shifter::evaluate_LHS(
 // Set righthand side of shift relation.
 void shifter::set_RHS(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-			vector< pair< double, double > > & RHS )
+			vector< pair< double, double > > & RHS,
+			vector< pair< double, double > > & RHS_derivatives )
 {
 
 	// RHS
@@ -418,8 +375,9 @@ void shifter::set_RHS(
 	for (const auto & thisPair : sorted_list_of_pairs)
 	{
 		double RHS_derivative = 0.0;
-		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, RHS_derivative );
+		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, thisPair.first, RHS_derivative );
 		RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
+		RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
 		//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 	}
 
@@ -432,13 +390,13 @@ double shifter::evaluate_RHS(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			const vector< pair< double, double > > & RHS,
 			const pair< double, pair <int,int> > & thisPair,
-			double & RHS_derivative )
+			const double qz, double & RHS_derivative )
 {
 	int    pairIndex = 1;
 	double lower_qz  = sorted_list_of_pairs.at(pairIndex-1).first;
 	double upper_qz  = sorted_list_of_pairs.at(pairIndex).first;
 
-	const double qz = thisPair.first;
+	//const double qz = thisPair.first;
 
 	if ( qz < 1.e-20 ) return (0.0);
 
@@ -494,13 +452,79 @@ double shifter::evaluate_RHS(
 }
 
 
-/*void shifter::compute_shift( int iPair )
+
+/*double shifter::Newtons_Method( const double a, const double b )
 {
 	const double ACCURACY = 1.e-6;
 	const int MAXTRIES = 100;
 
+	const double guess1 = -1.0/b;
+	const double guess2 = 1.0/b;
 
+	const double f1 = guess1*b + sin(b*(a+guess1));
+	const double f2 = guess2*b + sin(b*(a+guess2));
+
+	//cout << f1 << "   " << f2 << endl;
+
+	// Solve equation given by x*b + sin((a+x)*b) == 0
+	const double initial_guess = ( f1*f1 < f2*f2 ) ? guess1 : guess2;
+
+	double x = initial_guess;
+	double f = x*b + sin(b*(a+x));
+
+	int ntries = 0;
+	while ( abs(f) > ACCURACY and ntries < MAXTRIES )
+	{
+		double fp = b*(1.0 + cos(b*(a+x)));
+		//cout << setprecision(24) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
+		if ( abs(fp) < 1.e-100 ) break;
+		f = x*b + sin(b*(a+x));
+		x -= f / fp;
+		ntries++;
+	}
+
+
+	if ( ntries == MAXTRIES ) cout << "WARNING: maximum number of tries reached! a=" << a << ", b=" << b << "; root x = " << x << endl;
+
+
+	return (x);
 }*/
+
+
+void shifter::compute_shift(
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+			const vector< pair< double, double > > & LHS,
+			const vector< pair< double, double > > & RHS,
+			const vector< pair< double, double > > & RHS_derivatives,
+			int iPair )
+{
+	const double ACCURACY = 1.e-6;
+	const int MAXTRIES = 100;
+
+	const double qz0 = LHS.at(iPair).first;
+
+	// Solve equation given by LHS(qz0) - RHS(qz0 + x) == 0
+	const double initial_guess = 0.0;
+
+	double x = initial_guess;
+	double f = LHS.at(iPair).second - RHS.at(iPair).second;
+
+	double fp = RHS_derivatives.at(iPair).second;
+
+	int ntries = 0;
+	while ( abs(f) > ACCURACY and ntries < MAXTRIES )
+	{
+		if ( abs(fp) < 1.e-100 ) break;
+		x -= f / fp;
+		f = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + x, fp );
+		ntries++;
+	}
+
+	if ( ntries == MAXTRIES ) cout << "WARNING: maximum number of tries reached! a=" << a << ", b=" << b << "; root x = " << x << endl;
+
+	return (x);
+
+}
 
 
 
