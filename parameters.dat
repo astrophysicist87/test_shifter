@@ -1,0 +1,18 @@
+#===========
+# particle mass
+mass       = 0.13957  # GeV
+
+#===========
+# get particles randomly
+RNG_R      = 5.0     #fm
+RNG_a      = 0.02     #GeV/fm
+RNG_Nev    = 1
+RNG_mult   = 250
+RNG_xDir   = 0
+RNG_yDir   = 0
+RNG_zDir   = 1
+RNG_seed   = 1
+RNG_nLoops = 1
+#===========
+
+# End of file
