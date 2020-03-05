@@ -19,6 +19,7 @@ using namespace std;
 class shifter
 {
 	private:
+
 		ParameterReader * paraRdr;
 
 		vector<ParticleRecord> allParticles;
@@ -28,8 +29,13 @@ class shifter
 		ostream & out;
 		ostream & err;
 
-		// May be useful
-		vector< pair< double, pair <int,int> > > sortedPairs;
+		bool include_pair_density;
+
+		// The pair density
+		vector<double> denBar;
+
+		// Various ways to sort pairs
+		vector< pair< double, pair <int,int> > > sortedPairs;	// sorted by Q^2
 		vector< pair< double, pair <int,int> > > pairs_sorted_by_qzPRF;
 		vector< pair< double, pair <int,int> > > pairs_sorted_by_abs_qzPRF;
 		vector< pair< double, pair <int,int> > > pairs_sorted_by_qz;
@@ -66,13 +72,19 @@ class shifter
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				vector< pair< double, double > > & LHS );
 
+		double evaluate_LHS(
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+			double qz );
+
 		void set_RHS(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				vector< pair< double, double > > & RHS );
 
+		double evaluate_RHS(
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+			const pair< double, pair <int,int> > & thisPair );
 
 		void compute_shifts( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
-
 
 		void evaluate_shift_relation_at_pair(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
@@ -81,6 +93,8 @@ class shifter
 				);
 
 		double Newtons_Method( const double a, const double b );
+
+		void set_pair_density( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
 
 };
 

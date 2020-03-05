@@ -30,6 +30,8 @@ constexpr int    NCOMPSTEP  = 10;
 void shifter::initialize_all( ParameterReader * paraRdr_in,
 	const vector<ParticleRecord> & allParticles_in )
 {
+	include_pair_density = true;
+
 	// Load parameters
 	paraRdr			= paraRdr_in;
 
@@ -204,6 +206,10 @@ bool shifter::setSortedPairs( )
 		return false;
 	}
 
+	sortedPairs.push_back( std::make_pair( 0.0, std::make_pair(-1, -1) ) );
+	pairs_sorted_by_abs_qzPRF.push_back( std::make_pair( 0.0, std::make_pair(-1, -1) ) );
+	pairs_sorted_by_abs_qz.push_back( std::make_pair( 0.0, std::make_pair(-1, -1) ) );
+
 	// THEN sort them (sorts on first column in ascending order automatically)
 	sort( sortedPairs.begin(), sortedPairs.end() );
 	sort( pairs_sorted_by_qzPRF.begin(), pairs_sorted_by_qzPRF.end() );
@@ -222,22 +228,24 @@ void shifter::shiftPairs_mode1()
 
 	// some output to check stuff
 	const int npairs = LHS.size();
-
-	cout << "CHECK LHS AND RHS AND SHIFTS: " << endl;
-	for (int i = 0; i < npairs; i++)
+	cout << "sizes: " << LHS.size() << "   " << pairs_sorted_by_abs_qz.size() << endl;
+	for (int i = 1; i < npairs; i++)
 	{
 		const auto & thisPair = pairs_sorted_by_abs_qz.at(i);
 		const double this_qz = thisPair.first;
 		const int this1 = thisPair.second.first;
 		const int this2 = thisPair.second.second;
-		Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
-		const double Delta_z = xDiff.pz();	// units are 1/GeV here
+		//Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
+		//const double Delta_z = xDiff.pz();	// units are 1/GeV here
 
-		const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
+		//const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
 
 		cout << setprecision(24) << "CHECK: "
-				<< LHS.at(i).first << "   " << LHS.at(i).second << "   "
-				<< RHS.at(i).second << "   " << thisPair_shift << endl;
+				<< LHS.at(i).first << "   "
+				<< LHS.at(i).second << "   "
+				<< RHS.at(i).second << "   "
+				//<< thisPair_shift
+				<< endl;
 	}
 
 	if (1) exit(8);
@@ -360,6 +368,9 @@ void shifter::evaluate_shift_relation_at_pair(
 	LHS.clear();
 	RHS.clear();
 
+	// Make sure pair density is stored, if needed.
+	set_pair_density( sorted_list_of_pairs );
+
 	//------------------
 	// Set LHS integral.
 	set_LHS( sorted_list_of_pairs, LHS );
@@ -426,6 +437,40 @@ double shifter::Newtons_Method( const double a, const double b )
 }
 
 
+void shifter::set_pair_density(	const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs )
+{
+	// Reset.
+	denBar.resize(0);
+
+	if ( include_pair_density )
+	{
+		// for counting number of particles below given |q_z|
+		for (int iPair = 0; iPair < (int)sorted_list_of_pairs.size()-1; ++iPair)
+			denBar.push_back( 0.5 / ( sorted_list_of_pairs.at(iPair+1).first - sorted_list_of_pairs.at(iPair).first ) );
+	}
+	else
+	{
+		for (int iPair = 0; iPair < (int)sorted_list_of_pairs.size()-1; ++iPair)
+			denBar.push_back( 1.0 );
+	}
+	
+	// Density must go to zero eventually.
+	//denBar.back() = 0.0;
+	//denBar.push_back( 0.0 );
+
+	/*cout << "Sizes: " << sorted_list_of_pairs.size() << "   " << denBar.size() << endl;
+	for (int iPair = 0; iPair < (int)sorted_list_of_pairs.size()-1; ++iPair)
+		cout << "DENSITY: " << sorted_list_of_pairs.at(iPair).first
+				<< " <= q <= " << sorted_list_of_pairs.at(iPair+1).first
+				<< ": den(q) = " << denBar.at(iPair) << endl;
+	*/
+
+		
+
+	return;
+}
+
+
 //-------------------------------------
 // Set lefthand side of shift relation.
 void shifter::set_LHS(
@@ -438,15 +483,40 @@ void shifter::set_LHS(
 	const int npairs = sorted_list_of_pairs.size();
 	LHS.reserve( npairs );
 
-	for (const auto & eachPair : sorted_list_of_pairs)
+	for (const auto & thisPair : sorted_list_of_pairs)
 	{
-		// assumes pair density is constant for now
-		const double LHS_integral = 2.0 * eachPair.first;
-
-		LHS.push_back( std::make_pair( eachPair.first, LHS_integral ) );
+		const double LHS_integral = evaluate_LHS( sorted_list_of_pairs, thisPair.first );
+		LHS.push_back( std::make_pair( thisPair.first, LHS_integral ) );
+		//cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
 	}
 
 	return;
+}
+
+double shifter::evaluate_LHS(
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+			double qz )
+{
+	int    pairIndex    = 1;
+	double previous_qz  = 0.0;
+	double this_qz      = 0.0;
+	double LHS_integral = 0.0;
+
+	if ( qz < 1.e-20 ) return (0.0);
+
+	while ( this_qz < qz )
+	{
+		//cout << "checkpoint: " << previous_qz << "   " << this_qz << endl;
+		previous_qz   = sorted_list_of_pairs.at(pairIndex-1).first;
+		this_qz       = sorted_list_of_pairs.at(pairIndex).first;
+		LHS_integral += 2.0 * ( this_qz - previous_qz ) * denBar.at(pairIndex-1);
+		pairIndex++;
+	}
+
+	//if ( qz > previous_qz )
+	//	LHS_integral     += 2.0 * ( qz - previous_qz ) * denBar.at(pairIndex-1);
+
+	return (LHS_integral);
 }
 
 
@@ -462,7 +532,7 @@ void shifter::set_RHS(
 	//const double one_by_npairs = 1.0 / npairs;
 	RHS.reserve( npairs );
 
-	for (const auto & eachPair : sorted_list_of_pairs)
+	/*for (const auto & eachPair : sorted_list_of_pairs)
 	{
 		// assumes pair density is constant for now
 		const double this_qz = eachPair.first;
@@ -490,9 +560,76 @@ void shifter::set_RHS(
 
 		RHS_integral += RHS_BE_enhancement / static_cast<double>(npairs_in_average);
 		RHS.push_back( std::make_pair( eachPair.first, RHS_integral ) );
+	}*/
+
+	for (const auto & thisPair : sorted_list_of_pairs)
+	{
+		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, thisPair );
+		RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
+		//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 	}
 
+
+
 	return;
+}
+
+double shifter::evaluate_RHS(
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+			const vector< pair< double, double > > & RHS,
+			const pair< double, pair <int,int> > & thisPair )
+{
+	int    pairIndex    = 1;
+	double previous_qz  = 0.0;
+	double this_qz      = 0.0;
+	double RHS_integral = 0.0;
+
+	const double qz = thisPair.first;
+
+	if ( qz < 1.e-20 ) return (0.0);
+
+	const int this1 = thisPair.second.first;
+	const int this2 = thisPair.second.second;
+
+	while ( this_qz < qz )
+	{
+		//cout << "checkpoint: " << previous_qz << "   " << this_qz << endl;
+		previous_qz   = sorted_list_of_pairs.at(pairIndex-1).first;
+		this_qz       = sorted_list_of_pairs.at(pairIndex).first;
+		// the constant piece
+		RHS_integral += 2.0 * ( this_qz - previous_qz ) * denBar.at(pairIndex-1);
+
+		int npairs_in_average = 0;
+		double RHS_BE_enhancement = 0.0;
+
+		// the BE enhancement piece
+		for (const auto & iPair : sorted_list_of_pairs)
+		{
+			if ( npairs_in_average == 0 ) { npairs_in_average++; continue; }
+			const int i1 = iPair.second.first;
+			const int i2 = iPair.second.second;
+
+			//if ( this1 != i1 and this2 != i2 ) continue;
+			//if ( this1 != i1 or this2 != i2 ) continue;
+
+			Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+			const double Delta_z = xDiff.pz();
+
+			RHS_BE_enhancement += 2.0 * ( sin(this_qz*Delta_z) - sin(previous_qz*Delta_z) )
+								* denBar.at(pairIndex-1) / Delta_z;
+
+			npairs_in_average++;
+		}
+
+		RHS_BE_enhancement /= npairs_in_average;
+		RHS_integral       += RHS_BE_enhancement;
+		pairIndex++;
+	}
+
+
+
+
+	return (RHS_integral);
 }
 
 
