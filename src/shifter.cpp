@@ -564,7 +564,7 @@ void shifter::set_RHS(
 
 	for (const auto & thisPair : sorted_list_of_pairs)
 	{
-		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, thisPair );
+		const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair );
 		RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 		//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 	}
@@ -579,10 +579,9 @@ double shifter::evaluate_RHS(
 			const vector< pair< double, double > > & RHS,
 			const pair< double, pair <int,int> > & thisPair )
 {
-	int    pairIndex    = 1;
-	double previous_qz  = 0.0;
-	double this_qz      = 0.0;
-	double RHS_integral = 0.0;
+	int    pairIndex = 1;
+	double lower_qz  = sorted_list_of_pairs.at(pairIndex-1).first;
+	double upper_qz  = sorted_list_of_pairs.at(pairIndex).first;
 
 	const double qz = thisPair.first;
 
@@ -591,43 +590,57 @@ double shifter::evaluate_RHS(
 	const int this1 = thisPair.second.first;
 	const int this2 = thisPair.second.second;
 
-	while ( this_qz < qz )
+	//cout << sorted_list_of_pairs.size() << "   " << RHS.size() << "   " << pairIndex << endl;
+	cout << "checkpoint(1): " << lower_qz << "   " << upper_qz << "   " << qz << endl;
+
+	// recycle previously computed RHS to save time
+	//int dumbcount = 0;
+	while ( upper_qz < qz )
 	{
-		//cout << "checkpoint: " << previous_qz << "   " << this_qz << endl;
-		previous_qz   = sorted_list_of_pairs.at(pairIndex-1).first;
-		this_qz       = sorted_list_of_pairs.at(pairIndex).first;
-		// the constant piece
-		RHS_integral += 2.0 * ( this_qz - previous_qz ) * denBar.at(pairIndex-1);
-
-		int npairs_in_average = 0;
-		double RHS_BE_enhancement = 0.0;
-
-		// the BE enhancement piece
-		for (const auto & iPair : sorted_list_of_pairs)
-		{
-			if ( npairs_in_average == 0 ) { npairs_in_average++; continue; }
-			const int i1 = iPair.second.first;
-			const int i2 = iPair.second.second;
-
-			//if ( this1 != i1 and this2 != i2 ) continue;
-			//if ( this1 != i1 or this2 != i2 ) continue;
-
-			Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
-			const double Delta_z = xDiff.pz();
-
-			RHS_BE_enhancement += 2.0 * ( sin(this_qz*Delta_z) - sin(previous_qz*Delta_z) )
-								* denBar.at(pairIndex-1) / Delta_z;
-
-			npairs_in_average++;
-		}
-
-		RHS_BE_enhancement /= npairs_in_average;
-		RHS_integral       += RHS_BE_enhancement;
 		pairIndex++;
+		//cout << "checkpoint(2): " << lower_qz << "   " << upper_qz << "   " << qz << "   " << pairIndex << endl;
+		lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
+		upper_qz = sorted_list_of_pairs.at(pairIndex).first;
+		//dumbcount++;
+	}
+	//if (dumbcount > 0) pairIndex--;
+
+	cout << sorted_list_of_pairs.size() << "   " << RHS.size() << "   " << denBar.size() << "   " << pairIndex << endl;
+	lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
+	upper_qz = sorted_list_of_pairs.at(pairIndex).first;
+	double RHS_integral = RHS.at(pairIndex-1).second;
+	cout << "Integrating from " << lower_qz << " to " << upper_qz << "; RHS(lower) = " << RHS_integral << endl;
+
+	// the constant piece
+	RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
+
+	int npairs_in_average = 0;
+	double RHS_BE_enhancement = 0.0;
+
+	// the BE enhancement piece
+	for (const auto & iPair : sorted_list_of_pairs)
+	{
+		if ( npairs_in_average == 0 ) { npairs_in_average++; continue; }
+		const int i1 = iPair.second.first;
+		const int i2 = iPair.second.second;
+
+		//if ( this1 != i1 and this2 != i2 ) continue;
+		//if ( this1 != i1 or this2 != i2 ) continue;
+
+		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+		const double Delta_z = xDiff.pz();
+
+		RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
+							* denBar.at(pairIndex-1) / Delta_z;
+
+		npairs_in_average++;
 	}
 
+	RHS_BE_enhancement /= npairs_in_average;
+	RHS_integral       += RHS_BE_enhancement;
+	pairIndex++;
 
-
+	cout << "Result = " << RHS_integral << endl;
 
 	return (RHS_integral);
 }
