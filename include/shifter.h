@@ -83,7 +83,8 @@ class shifter
 		double evaluate_RHS(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			const vector< pair< double, double > > & RHS,
-			const pair< double, pair <int,int> > & thisPair );
+			const pair< double, pair <int,int> > & thisPair,
+			double & RHS_derivative );
 
 		void compute_shifts( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
 
