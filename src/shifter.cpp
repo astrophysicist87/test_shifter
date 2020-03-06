@@ -86,6 +86,14 @@ void shifter::shiftEvent()
 		shiftPairs_mode1();
 	}
 
+
+	int iParticle = 0;
+	for (const auto & thisParticle: allParticles)
+		cout << iParticle << "   " << thisParticle.p 
+				<< iParticle << "   " << thisParticle.p + thisParticle.pShift;
+
+
+
 	/*
 	// Must have at least two pairs to carry out compensation.
 	//if (nStored[9] < 2) return true;
@@ -226,8 +234,9 @@ void shifter::shiftPairs_mode1()
 	vector< pair< double, double > > LHS, RHS, RHS_derivatives;
 	evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
-	//compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
+	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
+	/*
 	// some output to check stuff
 	const int npairs = LHS.size();
 	cout << "sizes: "
@@ -242,17 +251,18 @@ void shifter::shiftPairs_mode1()
 		const double this_qz = thisPair.first;
 		const int this1 = thisPair.second.first;
 		const int this2 = thisPair.second.second;
-		//const double thisPair_shift = pairShifts.at(i-1);
+		const double thisPair_shift = pairShifts.at(i-1);
 
 		cout << setprecision(16) << "CHECK: "
 				<< LHS.at(i).first << "   "
 				<< LHS.at(i).second << "   "
 				<< RHS.at(i).second << "   "
-				//<< thisPair_shift
+				<< thisPair_shift
 				<< endl;
 	}
 
 	if (1) exit (8);
+	*/
 
 	return;
 }
@@ -410,12 +420,10 @@ double shifter::evaluate_RHS(
 			const pair< double, pair <int,int> > & thisPair,
 			const double qz_in, double & RHS_derivative )
 {
-//cout << "Made it to line = " << __LINE__ << endl;
 	int    pairIndex = 1;
 	double lower_qz  = sorted_list_of_pairs.at(pairIndex-1).first;
 	double upper_qz  = sorted_list_of_pairs.at(pairIndex).first;
 
-//cout << "Made it to line = " << __LINE__ << endl;
 	//const double qz = thisPair.first;
 
 	double qz = abs(qz_in);
@@ -427,23 +435,19 @@ double shifter::evaluate_RHS(
 	// recycle previously computed RHS to save time
 	while ( upper_qz < qz and pairIndex < sorted_list_of_pairs.size() - 1 )
 	{
-//cout << "Made it to line = " << __LINE__ << endl;
 		lower_qz = sorted_list_of_pairs.at(pairIndex).first;
 		upper_qz = sorted_list_of_pairs.at(++pairIndex).first;
-//cout << "Made it to line = " << __LINE__ << endl;
 	}
 
-//cout << "Made it to line = " << __LINE__ << endl;
 	lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
 	upper_qz = sorted_list_of_pairs.at(pairIndex).first;
 	double RHS_integral = RHS.at(pairIndex-1).second;
-//cout << "Made it to line = " << __LINE__ << endl;
 
 	// the constant piece (integrand assumed to be symmetric)
 	//RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
 	RHS_integral += 2.0 * ( qz - lower_qz ) * denBar.at(pairIndex-1);
 	RHS_derivative = 2.0 * denBar.at(pairIndex-1);
-//cout << "Made it to line = " << __LINE__ << endl;
+
 	int npairs_in_average = 0;
 	double RHS_BE_enhancement = 0.0;
 	double RHS_BE_enhancement_derivative = 0.0;
@@ -458,23 +462,14 @@ double shifter::evaluate_RHS(
 		//if ( this1 != i1 and this2 != i2 ) continue;
 		//if ( this1 != i1 or  this2 != i2 ) continue;
 
-//cout << "Made it to line = " << __LINE__ << endl;
-
 		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 
-//cout << "Made it to line = " << __LINE__ << endl;
 		const double Delta_z = xDiff.pz();
 
-		//RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
-		//					* denBar.at(pairIndex-1) / Delta_z;
 		RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
 							* denBar.at(pairIndex-1) / Delta_z;
 
-//cout << "Made it to line = " << __LINE__ << endl;
-		//RHS_BE_enhancement_derivative += 2.0 * cos(upper_qz*Delta_z) * denBar.at(pairIndex-1);
 		RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
-
-//cout << "Made it to line = " << __LINE__ << endl;
 
 		npairs_in_average++;
 	}
@@ -565,7 +560,7 @@ double shifter::compute_shift(
 		cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
 	}
 
-	// if we haven't converged yet, try something else
+	// if we haven't converged yet, try bisection instead
 	if ( ntries == MAXTRIES )
 	{
 		cout << "WARNING: maximum number of tries reached! Q=" << qz0 << ": LHS="
@@ -643,27 +638,18 @@ void shifter::compute_shifts(
 	// Compute the pair shifts themselves (skip i=0 case, not physical pair).
 	for (int i = 1; i < npairs; i++)
 	{
-//cout << "Made it to line = " << __LINE__ << endl;
 		const auto & thisPair = sorted_list_of_pairs.at(i);
 		const double this_qz = thisPair.first;
 		const int this1 = thisPair.second.first;
 		const int this2 = thisPair.second.second;
-//cout << "Made it to line = " << __LINE__ << endl;
+
 		Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
-//cout << "Made it to line = " << __LINE__ << endl;
 		const double Delta_z = xDiff.pz();	// units are 1/GeV here
 
-		//const double thisPair_shift = 0.0;
-		//const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
-//cout << "Made it to line = " << __LINE__ << endl;
 		const double thisPair_shift
 						= compute_shift( sorted_list_of_pairs, LHS, RHS, RHS_derivatives, i );
-//cout << "Made it to line = " << __LINE__ << endl;
+
 		pairShifts.push_back( thisPair_shift );
-		/*if (this1==0 or this2==0)	// choose a particle to track
-			cout << setprecision(24) << "CHECK: "
-					<< this1 << "   " << this2 << "   " << this_qz << "   "
-					<< Delta_z*HBARC << "   " << thisPair_shift << endl;*/
 		this_pair_shifted.push_back( true );
 	}
 
@@ -680,21 +666,12 @@ void shifter::compute_shifts(
 		if (i1<0 or i2<0) continue;
 
 		constexpr bool rescale_pair_momenta = true;
-//cout << "Made it to line = " << __LINE__ << endl;
+
 		const double net_qz_shift = 0.5*pairShifts.at(pairIndex);
 		const double factor = net_qz_shift / this_qz;
-//cout << "Made it to line = " << __LINE__ << endl;
-		// Add shifts to sum. (Energy component dummy.)
-		//Vec4 pDiff(0.0, 0.0, 0.0, net_qz_shift);
-//cout << "Made it to line = " << __LINE__ << endl;
-		Vec4 pDiff = factor * (allParticles.at(i1).p - allParticles.at(i2).p);
-//cout << "Made it to line = " << __LINE__ << endl;
-		/*if (i1==0 or i2==0)	// choose a particle to track
-			cout << setprecision(24) << "CHECK: "
-					<< i1 << "   " << i2 << "   " << this_qz << "   "
-					<< net_qz_shift << "   " << factor << "   " << pDiff;*/
 
-//cout << "Made it to line = " << __LINE__ << endl;
+		Vec4 pDiff = factor * (allParticles.at(i1).p - allParticles.at(i2).p);
+
 		if ( rescale_pair_momenta or this_pair_shifted.at(pairIndex) )
 		{
 			// Compute appropriate shift for pair
@@ -721,7 +698,6 @@ void shifter::compute_shifts(
 			allParticles.at(i1).pComp += pDiff;
 			allParticles.at(i2).pComp -= pDiff;
 		}
-//cout << "Made it to line = " << __LINE__ << endl;
 
 		pairIndex++;
 
