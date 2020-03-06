@@ -626,6 +626,8 @@ const double Delta_z = xDiff.pz();
 const double check_root = Newtons_Method(qz0, Delta_z);
 cout << "Newton's method gives " << check_root << endl;*/
 
+cout << thisPair.first << "   " << x << endl;
+
 	return (x);
 
 }
