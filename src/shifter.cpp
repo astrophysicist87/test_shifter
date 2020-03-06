@@ -201,7 +201,7 @@ bool shifter::setSortedPairs( const vector<ParticleRecord> & particles_to_sort )
 	for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
 	for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
 	{
-		Vec4 q = allParticles.at(i1).p - allParticles.at(i2).p;
+		Vec4 q = particles_to_sort.at(i1).p - particles_to_sort.at(i2).p;
 		Vec4 qPRF = q;
 		qPRF.bstback( 0.5*( particles_to_sort.at(i1).p + particles_to_sort.at(i2).p ) );
 
