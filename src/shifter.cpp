@@ -391,10 +391,12 @@ double shifter::evaluate_RHS(
 			const pair< double, pair <int,int> > & thisPair,
 			const double qz, double & RHS_derivative )
 {
+cout << "Made it to line = " << __LINE__ << endl;
 	int    pairIndex = 1;
 	double lower_qz  = sorted_list_of_pairs.at(pairIndex-1).first;
 	double upper_qz  = sorted_list_of_pairs.at(pairIndex).first;
 
+cout << "Made it to line = " << __LINE__ << endl;
 	//const double qz = thisPair.first;
 
 	if ( qz < 1.e-20 ) return (0.0);
@@ -405,18 +407,22 @@ double shifter::evaluate_RHS(
 	// recycle previously computed RHS to save time
 	while ( upper_qz < qz )
 	{
+cout << "Made it to line = " << __LINE__ << endl;
 		lower_qz = sorted_list_of_pairs.at(pairIndex).first;
 		upper_qz = sorted_list_of_pairs.at(++pairIndex).first;
+cout << "Made it to line = " << __LINE__ << endl;
 	}
 
+cout << "Made it to line = " << __LINE__ << endl;
 	lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
 	upper_qz = sorted_list_of_pairs.at(pairIndex).first;
 	double RHS_integral = RHS.at(pairIndex-1).second;
+cout << "Made it to line = " << __LINE__ << endl;
 
 	// the constant piece (integrand assumed to be symmetric)
 	RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
 	RHS_derivative = 2.0 * denBar.at(pairIndex-1);
-
+cout << "Made it to line = " << __LINE__ << endl;
 	int npairs_in_average = 0;
 	double RHS_BE_enhancement = 0.0;
 	double RHS_BE_enhancement_derivative = 0.0;
@@ -431,12 +437,20 @@ double shifter::evaluate_RHS(
 		//if ( this1 != i1 and this2 != i2 ) continue;
 		//if ( this1 != i1 or this2 != i2 ) continue;
 
+cout << "Made it to line = " << __LINE__ << endl;
+
 		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+
+cout << "Made it to line = " << __LINE__ << endl;
 		const double Delta_z = xDiff.pz();
 
 		RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
 							* denBar.at(pairIndex-1) / Delta_z;
+
+cout << "Made it to line = " << __LINE__ << endl;
 		RHS_BE_enhancement_derivative += 2.0 * cos(upper_qz*Delta_z) * denBar.at(pairIndex-1);
+
+cout << "Made it to line = " << __LINE__ << endl;
 
 		npairs_in_average++;
 	}
