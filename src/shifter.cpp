@@ -30,7 +30,7 @@ constexpr int    NCOMPSTEP  = 10;
 void shifter::initialize_all( ParameterReader * paraRdr_in,
 	const vector<ParticleRecord> & allParticles_in )
 {
-	include_pair_density = false;
+	include_pair_density = true;
 
 	// Load parameters
 	paraRdr			= paraRdr_in;
@@ -243,7 +243,7 @@ void shifter::shiftPairs_mode1()
 		const int this2 = thisPair.second.second;
 		const double thisPair_shift = pairShifts.at(i-1);
 
-		cout << setprecision(24) << "CHECK: "
+		cout << setprecision(16) << "CHECK: "
 				<< LHS.at(i).first << "   "
 				<< LHS.at(i).second << "   "
 				<< RHS.at(i).second << "   "
@@ -386,7 +386,7 @@ void shifter::set_RHS(
 	}
 
 
-/*cout << "Symmetry check of RHS: " << endl;
+cout << "Symmetry check of RHS: " << endl;
 const double delQ = 2.0*sorted_list_of_pairs.back().first / 1000.0;
 double tmp = 0.0, tmp_d = 0.0;
 for (int i = -500; i <= 500; i++)
@@ -397,7 +397,7 @@ for (int i = -500; i <= 500; i++)
 								sorted_list_of_pairs.front(),
 								tmp, tmp_d ) << endl;
 }
-if (1) exit(8);*/
+/*if (1) exit(8);*/
 
 
 	return;
