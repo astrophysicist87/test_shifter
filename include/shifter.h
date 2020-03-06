@@ -78,15 +78,16 @@ class shifter
 
 		void set_RHS(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				vector< pair< double, double > > & RHS );
+				vector< pair< double, double > > & RHS,
+				vector< pair< double, double > > & RHS_derivatives );
 
 		double evaluate_RHS(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			const vector< pair< double, double > > & RHS,
 			const pair< double, pair <int,int> > & thisPair,
-			double & RHS_derivative );
+			const double qz, double & RHS_derivative );
 
-		void compute_shift(
+		double compute_shift(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			const vector< pair< double, double > > & LHS,
 			const vector< pair< double, double > > & RHS,
@@ -98,7 +99,8 @@ class shifter
 		void evaluate_shift_relation_at_pair(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				vector< pair< double, double > > & LHS,
-				vector< pair< double, double > > & RHS
+				vector< pair< double, double > > & RHS,
+				vector< pair< double, double > > & RHS_derivatives
 				);
 
 		//double Newtons_Method( const double a, const double b );

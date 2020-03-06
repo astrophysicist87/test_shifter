@@ -250,7 +250,8 @@ void shifter::shiftPairs_mode1()
 
 	if (1) exit(8);
 
-	compute_shifts( pairs_sorted_by_abs_qz );
+	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
+ );
 
 	return;
 }
@@ -491,7 +492,7 @@ double shifter::evaluate_RHS(
 }*/
 
 
-void shifter::compute_shift(
+double shifter::compute_shift(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			const vector< pair< double, double > > & LHS,
 			const vector< pair< double, double > > & RHS,
@@ -520,7 +521,9 @@ void shifter::compute_shift(
 		ntries++;
 	}
 
-	if ( ntries == MAXTRIES ) cout << "WARNING: maximum number of tries reached! a=" << a << ", b=" << b << "; root x = " << x << endl;
+	if ( ntries == MAXTRIES )
+		cout << "WARNING: maximum number of tries reached! Q=" << qz0 << ": LHS="
+				<< LHS.at(iPair).second << ", RHS=" << RHS.at(iPair).second << "; root x = " << x << endl;
 
 	return (x);
 
@@ -529,7 +532,10 @@ void shifter::compute_shift(
 
 
 void shifter::compute_shifts(
-			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+			const vector< pair< double, double > > & LHS,
+			const vector< pair< double, double > > & RHS,
+			const vector< pair< double, double > > & RHS_derivatives
 			)
 {
 	const int npairs = sorted_list_of_pairs.size();
@@ -540,8 +546,8 @@ void shifter::compute_shifts(
 	pairShifts.reserve( npairs );
 	this_pair_shifted.reserve( npairs );
 
-	// Compute the pair shifts themselves.
-	for (int i = 0; i < npairs; i++)
+	// Compute the pair shifts themselves (skip i=0 case, not physical pair).
+	for (int i = 1; i < npairs; i++)
 	{
 		const auto & thisPair = sorted_list_of_pairs.at(i);
 		const double this_qz = thisPair.first;
@@ -550,9 +556,10 @@ void shifter::compute_shifts(
 		Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
 		const double Delta_z = xDiff.pz();	// units are 1/GeV here
 
-		const double thisPair_shift = 0.0;
+		//const double thisPair_shift = 0.0;
 		//const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
-		//const double thisPair_shift = compute_shift( this_qz, Delta_z );
+		const double thisPair_shift
+						= compute_shift( sorted_list_of_pairs, LHS, RHS, RHS_derivatives, i );
 		pairShifts.push_back( thisPair_shift );
 		if (this1==0 or this2==0)	// choose a particle to track
 			cout << setprecision(24) << "CHECK: "
