@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
 	}
 	*/
 
-	for ( auto const particle: allParticles )
-		cout << particle;
+	//for ( auto const particle: allParticles )
+	//	cout << particle;
 
 	// Wrap it up!
 	return (0);
