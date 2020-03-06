@@ -386,6 +386,19 @@ void shifter::set_RHS(
 	}
 
 
+cout << "Symmetry check of RHS: " << endl;
+const double delQ = 2.0*sorted_list_of_pairs.back().first / 1000.0;
+double tmp = 0.0, tmp_d = 0.0;
+for (int i = -500; i <= 500; i++)
+{
+	tmp = delQ * i;
+	cout << tmp << "   "
+			<< evaluate_RHS( sorted_list_of_pairs, RHS,
+								sorted_list_of_pairs.front(),
+								tmp, tmp_d ) << endl;
+}
+if (1) exit(8);
+
 
 	return;
 }
@@ -442,7 +455,7 @@ double shifter::evaluate_RHS(
 
 		if ( i1<0 or i2<0 ) continue;
 		//if ( this1 != i1 and this2 != i2 ) continue;
-		if ( this1 != i1 or this2 != i2 ) continue;
+		//if ( this1 != i1 or  this2 != i2 ) continue;
 
 //cout << "Made it to line = " << __LINE__ << endl;
 
@@ -476,7 +489,7 @@ double shifter::evaluate_RHS(
 
 
 
-double shifter::Newtons_Method( const double a, const double b )
+/*double shifter::Newtons_Method( const double a, const double b )
 {
 	const double ACCURACY = 1.e-6;
 	const int MAXTRIES = 100;
@@ -511,7 +524,7 @@ double shifter::Newtons_Method( const double a, const double b )
 
 
 	return (x);
-}
+}*/
 
 
 double shifter::compute_shift(
@@ -553,12 +566,12 @@ cout << setprecision(16) << "Check shift computation: " << iPair << "   " << LHS
 				<< LHS.at(iPair).second << ", RHS=" << RHS.at(iPair).second << "; root x = " << x << endl;
 
 //cout << "Made it to line = " << __LINE__ << endl;
-const int i1 = thisPair.second.first;
+/*const int i1 = thisPair.second.first;
 const int i2 = thisPair.second.second;
 Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 const double Delta_z = xDiff.pz();
 const double check_root = Newtons_Method(qz0, Delta_z);
-cout << "Newton's method gives " << check_root << endl;
+cout << "Newton's method gives " << check_root << endl;*/
 
 	return (x);
 

@@ -111,7 +111,7 @@ class shifter
 				vector< pair< double, double > > & RHS_derivatives
 				);
 
-		double Newtons_Method( const double a, const double b );
+		//double Newtons_Method( const double a, const double b );
 
 		void set_pair_density( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
 
