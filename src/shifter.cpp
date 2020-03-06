@@ -401,7 +401,7 @@ double shifter::evaluate_RHS(
 //cout << "Made it to line = " << __LINE__ << endl;
 	//const double qz = thisPair.first;
 
-	if ( qz < 1.e-20 ) return (0.0);
+	if ( abs(qz) < 1.e-20 ) return (0.0);
 
 	const int this1 = thisPair.second.first;
 	const int this2 = thisPair.second.second;
