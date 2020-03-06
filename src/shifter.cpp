@@ -675,10 +675,12 @@ void shifter::compute_shifts(
 		//const double this_qz = iPair.first;
 		const int i1 = iPair.second.first;
 		const int i2 = iPair.second.second;
-		const double this_qz = allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz();
 
 		// skip first unphysical "pair"
 		if (i1<0 or i2<0) continue;
+		const double this_qz = allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz();
+
+
 //cout << "CHECK SIGNS: " << this_qz << "   " << allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() << endl;
 		constexpr bool rescale_pair_momenta = true;
 
