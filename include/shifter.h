@@ -94,7 +94,12 @@ class shifter
 			const vector< pair< double, double > > & RHS_derivatives,
 			int iPair );
 
-		void compute_shifts( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
+		void compute_shifts(
+			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+			const vector< pair< double, double > > & LHS,
+			const vector< pair< double, double > > & RHS,
+			const vector< pair< double, double > > & RHS_derivatives
+			);
 
 		void evaluate_shift_relation_at_pair(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,

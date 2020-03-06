@@ -251,7 +251,6 @@ void shifter::shiftPairs_mode1()
 	if (1) exit(8);
 
 	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
- );
 
 	return;
 }
@@ -503,6 +502,7 @@ double shifter::compute_shift(
 	const int MAXTRIES = 100;
 
 	const double qz0 = LHS.at(iPair).first;
+	const auto & thisPair = sorted_list_of_pairs.at(iPair);
 
 	// Solve equation given by LHS(qz0) - RHS(qz0 + x) == 0
 	const double initial_guess = 0.0;
