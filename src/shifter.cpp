@@ -392,7 +392,7 @@ double tmp = 0.0, tmp_d = 0.0;
 for (int i = -500; i <= 500; i++)
 {
 	tmp = delQ * i;
-	cout << tmp << "   "
+	cout << "fineRHS: " << tmp << "   "
 			<< evaluate_RHS( sorted_list_of_pairs, RHS,
 								sorted_list_of_pairs.front(),
 								tmp, tmp_d ) << endl;
