@@ -577,15 +577,14 @@ double shifter::compute_shift(
 		double a = LHS.front().first, b = LHS.back().first;
 		double sa = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, 0.0, fpdummy ) - LHS_thisPair );
 		double sb = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, b, fpdummy ) - LHS_thisPair );
-		//double fold = RHS.at(iPair).second;
+		double c = 0.0;
 		double fnew = 0.0;
 		while (N <= NMAX) // limit iterations to prevent infinite loop
 		{
 			cout << "--> root in between " << a << " and " << b << endl;
 
-			double c=0.5*(a + b); // new midpoint
 			fnew = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + c, fpdummy ) - LHS_thisPair;
-			if ( abs(fnew) < TOL or 0.5*(b - a) < TOL )
+			if ( abs(fnew) < TOL and 0.5*(b - a) < TOL )
 			{
 				x = c;
 				break;
@@ -601,6 +600,7 @@ double shifter::compute_shift(
 				b = c; // new interval
 				sb = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + b, fpdummy ) - LHS_thisPair );
 			}
+			c=0.5*(a + b); // new midpoint
 		}
 		
 	}
