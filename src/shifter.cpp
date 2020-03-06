@@ -423,7 +423,8 @@ double shifter::evaluate_RHS(
 //cout << "Made it to line = " << __LINE__ << endl;
 
 	// the constant piece (integrand assumed to be symmetric)
-	RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
+	//RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
+	RHS_integral += 2.0 * ( qz - lower_qz ) * denBar.at(pairIndex-1);
 	RHS_derivative = 2.0 * denBar.at(pairIndex-1);
 //cout << "Made it to line = " << __LINE__ << endl;
 	int npairs_in_average = 0;
@@ -447,11 +448,14 @@ double shifter::evaluate_RHS(
 //cout << "Made it to line = " << __LINE__ << endl;
 		const double Delta_z = xDiff.pz();
 
-		RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
+		//RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
+		//					* denBar.at(pairIndex-1) / Delta_z;
+		RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
 							* denBar.at(pairIndex-1) / Delta_z;
 
 //cout << "Made it to line = " << __LINE__ << endl;
-		RHS_BE_enhancement_derivative += 2.0 * cos(upper_qz*Delta_z) * denBar.at(pairIndex-1);
+		//RHS_BE_enhancement_derivative += 2.0 * cos(upper_qz*Delta_z) * denBar.at(pairIndex-1);
+		RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
 
 //cout << "Made it to line = " << __LINE__ << endl;
 
@@ -515,7 +519,7 @@ double shifter::compute_shift(
 			int iPair )
 {
 	const double ACCURACY = 1.e-6;
-	const int MAXTRIES = 100;
+	const int MAXTRIES = 10;
 //cout << "Made it to line = " << __LINE__ << endl;
 	const double qz0 = LHS.at(iPair).first;
 	const auto & thisPair = sorted_list_of_pairs.at(iPair);
