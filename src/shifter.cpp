@@ -386,7 +386,7 @@ void shifter::set_RHS(
 	}
 
 
-cout << "Symmetry check of RHS: " << endl;
+/*cout << "Symmetry check of RHS: " << endl;
 const double delQ = 2.0*sorted_list_of_pairs.back().first / 1000.0;
 double tmp = 0.0, tmp_d = 0.0;
 for (int i = -500; i <= 500; i++)
@@ -397,7 +397,7 @@ for (int i = -500; i <= 500; i++)
 								sorted_list_of_pairs.front(),
 								tmp, tmp_d ) << endl;
 }
-if (1) exit(8);
+if (1) exit(8);*/
 
 
 	return;
