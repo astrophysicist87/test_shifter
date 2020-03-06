@@ -226,7 +226,7 @@ void shifter::shiftPairs_mode1()
 	vector< pair< double, double > > LHS, RHS, RHS_derivatives;
 	evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
-	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
+	//compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 	// some output to check stuff
 	const int npairs = LHS.size();
@@ -234,20 +234,21 @@ void shifter::shiftPairs_mode1()
 			<< LHS.size() << "   "
 			<< RHS.size() << "   "
 			<< pairs_sorted_by_abs_qz.size() << "   "
-			<< pairShifts.size() << endl;
+			//<< pairShifts.size()
+			<< endl;
 	for (int i = 1; i < npairs; i++)
 	{
 		const auto & thisPair = pairs_sorted_by_abs_qz.at(i);
 		const double this_qz = thisPair.first;
 		const int this1 = thisPair.second.first;
 		const int this2 = thisPair.second.second;
-		const double thisPair_shift = pairShifts.at(i-1);
+		//const double thisPair_shift = pairShifts.at(i-1);
 
 		cout << setprecision(16) << "CHECK: "
 				<< LHS.at(i).first << "   "
 				<< LHS.at(i).second << "   "
 				<< RHS.at(i).second << "   "
-				<< thisPair_shift
+				//<< thisPair_shift
 				<< endl;
 	}
 
