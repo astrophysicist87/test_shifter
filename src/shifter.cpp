@@ -678,11 +678,11 @@ void shifter::compute_shifts(
 
 		// skip first unphysical "pair"
 		if (i1<0 or i2<0) continue;
-
+cout << "CHECK SIGNS: " << this_qz << "   " << allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() << endl;
 		constexpr bool rescale_pair_momenta = true;
 
-		const double net_qz_shift = 0.5*pairShifts.at(pairIndex);
-		const double factor = net_qz_shift / this_qz;
+		const double net_qz_shift = pairShifts.at(pairIndex);
+		const double factor = 0.5 * net_qz_shift / this_qz;
 
 		Vec4 pDiff = factor * (allParticles.at(i1).p - allParticles.at(i2).p);
 
