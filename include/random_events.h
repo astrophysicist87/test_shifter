@@ -50,9 +50,9 @@ void generate_events(vector<ParticleRecord> & allParticles, ParameterReader * pa
 			double yP = RNG_yDir ? distribution(generator) : 0.0;
 			double zP = RNG_zDir ? distribution(generator) : 0.0;
 
-			double px = RNG_xDir ? distribution(generator) : 0.0;
-			double py = RNG_yDir ? distribution(generator) : 0.0;
-			double pz = RNG_zDir ? distribution(generator) : 0.0;
+			double px = 0.2*RNG_xDir ? distribution(generator) : 0.0;
+			double py = 0.2*RNG_yDir ? distribution(generator) : 0.0;
+			double pz = 0.2*RNG_zDir ? distribution(generator) : 0.0;
 			double Ep = sqrt( mass*mass + px*px + py*py + pz*pz );
 
 			ParticleRecord particle;
