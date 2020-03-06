@@ -226,31 +226,30 @@ void shifter::shiftPairs_mode1()
 	vector< pair< double, double > > LHS, RHS, RHS_derivatives;
 	evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
+	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
+
 	// some output to check stuff
 	const int npairs = LHS.size();
-	cout << "sizes: " << LHS.size() << "   " << pairs_sorted_by_abs_qz.size() << endl;
+	cout << "sizes: "
+			<< LHS.size() << "   "
+			<< RHS.size() << "   "
+			<< pairs_sorted_by_abs_qz.size() << "   "
+			<< pairShifts.size() << endl;
 	for (int i = 1; i < npairs; i++)
 	{
 		const auto & thisPair = pairs_sorted_by_abs_qz.at(i);
 		const double this_qz = thisPair.first;
 		const int this1 = thisPair.second.first;
 		const int this2 = thisPair.second.second;
-		//Vec4 xDiff = ( allParticles.at(this1).x - allParticles.at(this2).x ) / HBARC;
-		//const double Delta_z = xDiff.pz();	// units are 1/GeV here
-
-		//const double thisPair_shift = Newtons_Method( this_qz, Delta_z );
+		const double thisPair_shift = pairShifts.at(i);
 
 		cout << setprecision(24) << "CHECK: "
 				<< LHS.at(i).first << "   "
 				<< LHS.at(i).second << "   "
 				<< RHS.at(i).second << "   "
-				//<< thisPair_shift
+				<< thisPair_shift
 				<< endl;
 	}
-
-	if (1) exit(8);
-
-	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 	return;
 }
@@ -540,8 +539,8 @@ void shifter::compute_shifts(
 {
 	const int npairs = sorted_list_of_pairs.size();
 
-	vector<double> pairShifts;
-	vector<bool> this_pair_shifted;
+	pairShifts.clear();
+	this_pair_shifted.clear();
 
 	pairShifts.reserve( npairs );
 	this_pair_shifted.reserve( npairs );
@@ -561,10 +560,10 @@ void shifter::compute_shifts(
 		const double thisPair_shift
 						= compute_shift( sorted_list_of_pairs, LHS, RHS, RHS_derivatives, i );
 		pairShifts.push_back( thisPair_shift );
-		if (this1==0 or this2==0)	// choose a particle to track
+		/*if (this1==0 or this2==0)	// choose a particle to track
 			cout << setprecision(24) << "CHECK: "
 					<< this1 << "   " << this2 << "   " << this_qz << "   "
-					<< Delta_z*HBARC << "   " << thisPair_shift << endl;
+					<< Delta_z*HBARC << "   " << thisPair_shift << endl;*/
 		this_pair_shifted.push_back( true );
 	}
 
@@ -585,10 +584,10 @@ void shifter::compute_shifts(
 		// Add shifts to sum. (Energy component dummy.)
 		//Vec4 pDiff(0.0, 0.0, 0.0, net_qz_shift);
 		Vec4 pDiff = factor * (allParticles.at(i1).p - allParticles.at(i2).p);
-		if (i1==0 or i2==0)	// choose a particle to track
+		/*if (i1==0 or i2==0)	// choose a particle to track
 			cout << setprecision(24) << "CHECK: "
 					<< i1 << "   " << i2 << "   " << this_qz << "   "
-					<< net_qz_shift << "   " << factor << "   " << pDiff;
+					<< net_qz_shift << "   " << factor << "   " << pDiff;*/
 
 		if ( rescale_pair_momenta or this_pair_shifted.at(pairIndex) )
 		{

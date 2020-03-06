@@ -31,6 +31,9 @@ class shifter
 
 		bool include_pair_density;
 
+		vector<double> pairShifts;
+		vector<bool> this_pair_shifted;
+
 		// The pair density
 		vector<double> denBar;
 
