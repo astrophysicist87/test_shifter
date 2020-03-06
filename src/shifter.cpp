@@ -536,20 +536,23 @@ double shifter::compute_shift(
 {
 	const double ACCURACY = 1.e-6;
 	const int MAXTRIES = 10;
-//cout << "Made it to line = " << __LINE__ << endl;
+
 	const double qz0 = LHS.at(iPair).first;
 	const auto & thisPair = sorted_list_of_pairs.at(iPair);
 	const double LHS_thisPair = LHS.at(iPair).second;
-//cout << "Made it to line = " << __LINE__ << endl;
+
 	// Solve equation given by LHS(qz0) - RHS(qz0 + x) == 0
 	const double initial_guess = 0.0;
-cout << setprecision(16) << "Check shift computation: " << iPair << "   " << qz0 << "   " << LHS.at(iPair).second << "   " << RHS.at(iPair).second << endl;
+
+	cout << setprecision(16) << "Check shift computation: "
+			<< iPair << "   " << qz0 << "   "
+			<< LHS.at(iPair).second << "   "
+			<< RHS.at(iPair).second << endl;
 
 	double x = initial_guess;
 	double f = RHS.at(iPair).second - LHS_thisPair;
-//cout << "Made it to line = " << __LINE__ << endl;
+
 	double fp = RHS_derivatives.at(iPair).second;
-//cout << "Made it to line = " << __LINE__ << endl;
 	int ntries = 0;
 	cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
 	while ( abs(f) > ACCURACY and ntries < MAXTRIES )
@@ -561,9 +564,49 @@ cout << setprecision(16) << "Check shift computation: " << iPair << "   " << qz0
 		cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
 	}
 
+	// if we haven't converged yet, try something else
 	if ( ntries == MAXTRIES )
+	{
 		cout << "WARNING: maximum number of tries reached! Q=" << qz0 << ": LHS="
 				<< LHS.at(iPair).second << ", RHS=" << RHS.at(iPair).second << "; root x = " << x << endl;
+
+		const int NMAX = 10*MAXTRIES;
+		const double TOL = ACCURACY;
+		int N=1;
+		double fpdummy = 0.0;
+		double a = LHS.front().first, b = LHS.back().first;
+		double sa = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, 0.0, fpdummy ) - LHS_thisPair );
+		double sb = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, b, fpdummy ) - LHS_thisPair );
+		//double fold = RHS.at(iPair).second;
+		double fnew = 0.0;
+		while (N <= NMAX) // limit iterations to prevent infinite loop
+		{
+			double c=0.5*(a + b); // new midpoint
+			fnew = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + c, fpdummy ) - LHS_thisPair;
+			if ( abs(fnew) < TOL or 0.5*(b – a) < TOL ) // solution found
+			{
+				x = c;
+				break;
+			}
+			N++;
+			if ( sgn(fnew) == sa )
+			{
+				a = c;
+				sa = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + a, fpdummy ) - LHS_thisPair );
+			}
+			else
+			{
+				b = c; // new interval
+				sb = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + b, fpdummy ) - LHS_thisPair );
+			}
+		}
+		
+	}
+
+
+
+
+
 
 //cout << "Made it to line = " << __LINE__ << endl;
 /*const int i1 = thisPair.second.first;
