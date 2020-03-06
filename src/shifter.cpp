@@ -581,6 +581,8 @@ double shifter::compute_shift(
 		double fnew = 0.0;
 		while (N <= NMAX) // limit iterations to prevent infinite loop
 		{
+			cout << "--> root in between " << a << " and " << b << endl;
+
 			double c=0.5*(a + b); // new midpoint
 			fnew = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + c, fpdummy ) - LHS_thisPair;
 			if ( abs(fnew) < TOL or 0.5*(b - a) < TOL )
