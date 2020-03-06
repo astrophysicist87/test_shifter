@@ -673,9 +673,9 @@ void shifter::compute_shifts(
 	for (const auto & iPair : sorted_list_of_pairs)
 	{
 		//const double this_qz = iPair.first;
-		const double this_qz = allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz();
 		const int i1 = iPair.second.first;
 		const int i2 = iPair.second.second;
+		const double this_qz = allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz();
 
 		// skip first unphysical "pair"
 		if (i1<0 or i2<0) continue;
