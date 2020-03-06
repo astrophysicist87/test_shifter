@@ -557,7 +557,7 @@ const int i1 = thisPair.second.first;
 const int i2 = thisPair.second.second;
 Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 const double Delta_z = xDiff.pz();
-const double check_root = Newtons_method(qz, Delta_z);
+const double check_root = Newtons_method(qz0, Delta_z);
 cout << "Newton's method gives " << check_root << endl;
 
 	return (x);
