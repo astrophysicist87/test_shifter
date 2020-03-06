@@ -13,6 +13,12 @@
 
 using namespace std;
 
+template <class T>
+inline T
+sgn(T v) {
+    return T(v > T(0)) - T(v < T(0));
+}
+
 void generate_events(vector<ParticleRecord> & allParticles, ParameterReader * paraRdr)
 {
 	//cout << "Using random number generator for toy model calculation!" << endl;
