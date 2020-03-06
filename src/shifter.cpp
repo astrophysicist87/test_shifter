@@ -358,7 +358,7 @@ double shifter::evaluate_LHS(
 		pairIndex++;
 	}
 
-	LHS_integral += 2.0 * ( qz - previous_qz ) * denBar.at(pairIndex-1);
+	//LHS_integral += 2.0 * ( qz - previous_qz ) * denBar.at(pairIndex-1);
 
 	return (LHS_integral);
 }
