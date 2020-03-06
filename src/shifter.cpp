@@ -552,31 +552,31 @@ double shifter::compute_shift(
 	// Solve equation given by LHS(qz0) - RHS(qz0 + x) == 0
 	const double initial_guess = 0.0;
 
-	cout << setprecision(16) << "Check shift computation: "
+	/*cout << setprecision(16) << "Check shift computation: "
 			<< iPair << "   " << qz0 << "   "
 			<< LHS.at(iPair).second << "   "
-			<< RHS.at(iPair).second << endl;
+			<< RHS.at(iPair).second << endl;*/
 
 	double x = initial_guess;
 	double f = RHS.at(iPair).second - LHS_thisPair;
 
 	double fp = RHS_derivatives.at(iPair).second;
 	int ntries = 0;
-	cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
+	//cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
 	while ( abs(f) > ACCURACY and ntries < MAXTRIES )
 	{
 		if ( abs(fp) < 1.e-100 ) break;
 		x -= f / fp;
 		f = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + x, fp ) - LHS_thisPair;
 		ntries++;
-		cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
+		//cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
 	}
 
 	// if we haven't converged yet, try bisection instead
 	if ( ntries == MAXTRIES )
 	{
-		cout << "WARNING: maximum number of tries reached! Q=" << qz0 << ": LHS="
-				<< LHS.at(iPair).second << ", RHS=" << RHS.at(iPair).second << "; root x = " << x << endl;
+		//cout << "WARNING: maximum number of tries reached! Q=" << qz0 << ": LHS="
+		//		<< LHS.at(iPair).second << ", RHS=" << RHS.at(iPair).second << "; root x = " << x << endl;
 
 		const int NMAX = 10*MAXTRIES;
 		const double TOL = ACCURACY;
@@ -589,7 +589,7 @@ double shifter::compute_shift(
 		double fnew = 0.0;
 		while (N <= NMAX) // limit iterations to prevent infinite loop
 		{
-			cout << "--> root in between " << a << " and " << b << endl;
+			//cout << "--> root in between " << a << " and " << b << endl;
 
 			fnew = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + c, fpdummy ) - LHS_thisPair;
 			if ( abs(fnew) < TOL and 0.5*(b - a) < TOL )
