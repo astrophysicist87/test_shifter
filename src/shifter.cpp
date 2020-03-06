@@ -30,7 +30,7 @@ constexpr int    NCOMPSTEP  = 10;
 void shifter::initialize_all( ParameterReader * paraRdr_in,
 	const vector<ParticleRecord> & allParticles_in )
 {
-	include_pair_density = true;
+	include_pair_density = false;
 
 	// Load parameters
 	paraRdr			= paraRdr_in;
@@ -339,13 +339,14 @@ void shifter::set_LHS(
 
 double shifter::evaluate_LHS(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-			double qz )
+			double qz_in )
 {
 	int    pairIndex    = 1;
 	double previous_qz  = 0.0;
 	double this_qz      = 0.0;
 	double LHS_integral = 0.0;
 
+	double qz = abs(qz_in);
 	if ( qz < 1.e-20 ) return (0.0);
 
 	while ( this_qz < qz )
@@ -356,6 +357,8 @@ double shifter::evaluate_LHS(
 		LHS_integral += 2.0 * ( this_qz - previous_qz ) * denBar.at(pairIndex-1);
 		pairIndex++;
 	}
+
+	LHS_integral += 2.0 * ( qz - previous_qz ) * denBar.at(pairIndex-1);
 
 	return (LHS_integral);
 }
