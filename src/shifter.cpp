@@ -519,6 +519,7 @@ double shifter::compute_shift(
 //cout << "Made it to line = " << __LINE__ << endl;
 	// Solve equation given by LHS(qz0) - RHS(qz0 + x) == 0
 	const double initial_guess = 0.0;
+cout << "Check shift computation: " << iPair << "   " << LHS.at(iPair).second << "   " << RHS.at(iPair).second << endl;
 
 	double x = initial_guess;
 	double f = LHS.at(iPair).second - RHS.at(iPair).second;
@@ -528,6 +529,7 @@ double shifter::compute_shift(
 	int ntries = 0;
 	while ( abs(f) > ACCURACY and ntries < MAXTRIES )
 	{
+		cout << setprecision(24) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
 		if ( abs(fp) < 1.e-100 ) break;
 		x -= f / fp;
 		f = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + x, fp );
