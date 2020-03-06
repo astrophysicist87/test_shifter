@@ -31,6 +31,7 @@ class shifter
 		ParameterReader * paraRdr;
 
 		vector<ParticleRecord> allParticles;
+		vector<ParticleRecord> allParticles_Shifted;
 		
 		// miscellaneous
 		string path;
@@ -75,7 +76,7 @@ class shifter
 
 		void shiftEvent();
 
-		bool setSortedPairs();
+		bool setSortedPairs( const vector<ParticleRecord> & particles_to_sort );
 
 		void shiftPairs_mode1();
 

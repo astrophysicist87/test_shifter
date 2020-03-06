@@ -79,23 +79,31 @@ void shifter::shiftEvent()
 	*/
 
 	// Loop through pairs of identical particles and find shifts.
-	bool enoughPairsToProceed = setSortedPairs();
+	bool enoughPairsToProceed = setSortedPairs( allParticles );
 	if ( enoughPairsToProceed )
 	{
 		cout << "shifterCheck: NPair = " << sortedPairs.size() << endl;
 		shiftPairs_mode1();
 	}
 
+	int iPair = 0;
+	for (const auto & thisPair: pairs_sorted_by_abs_qz)
+		cout << "Unshifted: " << iPair++ << "   " << thisPair.first << "   "
+				<< thisPair.second.first << "   " << thisPair.second.second << endl;
 
-	int iParticle = 0;
-	for (const auto & thisParticle: allParticles)
-	{
-		cout << iParticle << "   " << thisParticle.p 
-				<< iParticle << "   " << thisParticle.pShift
-				<< iParticle << "   " << thisParticle.p + thisParticle.pShift;
-		iParticle++;
-	}
 
+
+	// Add in shifts without compensations
+	allParticles_Shifted = allParticles;
+	for (const auto & thisParticle: allParticles_Shifted)
+		thisParticle.p += thisParticle.pShift;
+
+	// Reconstruct original vs. new qz distributions
+	enoughPairsToProceed = setSortedPairs( allParticles_Shifted );
+	iPair = 0;
+	for (const auto & thisPair: pairs_sorted_by_abs_qz)
+		cout << "Shifted: " << iPair++ << "   " << thisPair.first << "   "
+				<< thisPair.second.first << "   " << thisPair.second.second << endl;
 
 
 	/*
@@ -176,7 +184,7 @@ void shifter::shiftEvent()
 }
 
 //--------------------------------
-bool shifter::setSortedPairs( )
+bool shifter::setSortedPairs( const vector<ParticleRecord> & particles_to_sort )
 {
 	// Reset.
 	sortedPairs.clear();
@@ -187,7 +195,7 @@ bool shifter::setSortedPairs( )
 	pairs_sorted_by_qz.clear();
 	pairs_sorted_by_abs_qz.clear();
 
-	const int number_of_particles = allParticles.size();
+	const int number_of_particles = particles_to_sort.size();
 
 	// get all values in vector first
 	for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
@@ -195,11 +203,11 @@ bool shifter::setSortedPairs( )
 	{
 		Vec4 q = allParticles.at(i1).p - allParticles.at(i2).p;
 		Vec4 qPRF = q;
-		qPRF.bstback( 0.5*( allParticles.at(i1).p + allParticles.at(i2).p ) );
+		qPRF.bstback( 0.5*( particles_to_sort.at(i1).p + particles_to_sort.at(i2).p ) );
 
 		/*sortedPairs.push_back(
 			std::make_pair(
-				sqrt( m2(allParticles.at(i1).p, allParticles.at(i2).p) - m2Pair[iTab] ),
+				sqrt( m2(particles_to_sort.at(i1).p, particles_to_sort.at(i2).p) - m2Pair[iTab] ),
 				std::make_pair(i1, i2)
 			)
 		);*/
