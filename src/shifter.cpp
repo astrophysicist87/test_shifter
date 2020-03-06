@@ -583,7 +583,7 @@ double shifter::compute_shift(
 		{
 			double c=0.5*(a + b); // new midpoint
 			fnew = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + c, fpdummy ) - LHS_thisPair;
-			if ( abs(fnew) < TOL or 0.5*(b – a) < TOL ) // solution found
+			if ( abs(fnew) < TOL or 0.5*(b - a) < TOL )
 			{
 				x = c;
 				break;

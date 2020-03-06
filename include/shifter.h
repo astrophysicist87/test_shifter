@@ -16,6 +16,14 @@
 
 using namespace std;
 
+
+template <class T>
+inline T
+sgn(T v) {
+    return T(v > T(0)) - T(v < T(0));
+}
+
+
 class shifter
 {
 	private:
