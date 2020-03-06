@@ -391,7 +391,7 @@ double shifter::evaluate_RHS(
 			const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 			const vector< pair< double, double > > & RHS,
 			const pair< double, pair <int,int> > & thisPair,
-			const double qz, double & RHS_derivative )
+			const double qz_in, double & RHS_derivative )
 {
 //cout << "Made it to line = " << __LINE__ << endl;
 	int    pairIndex = 1;
@@ -401,7 +401,8 @@ double shifter::evaluate_RHS(
 //cout << "Made it to line = " << __LINE__ << endl;
 	//const double qz = thisPair.first;
 
-	if ( abs(qz) < 1.e-20 ) return (0.0);
+	double qz = abs(qz_in);
+	if ( qz < 1.e-20 ) return (0.0);
 
 	const int this1 = thisPair.second.first;
 	const int this2 = thisPair.second.second;
