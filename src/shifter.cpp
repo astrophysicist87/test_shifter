@@ -386,7 +386,7 @@ void shifter::set_RHS(
 	}
 
 
-cout << "Symmetry check of RHS: " << endl;
+/*cout << "Symmetry check of RHS: " << endl;
 const double delQ = 2.0*sorted_list_of_pairs.back().first / 1000.0;
 double tmp = 0.0, tmp_d = 0.0;
 for (int i = -500; i <= 500; i++)
@@ -397,7 +397,7 @@ for (int i = -500; i <= 500; i++)
 								sorted_list_of_pairs.front(),
 								tmp, tmp_d ) << endl;
 }
-/*if (1) exit(8);*/
+if (1) exit(8);*/
 
 
 	return;
@@ -543,7 +543,7 @@ double shifter::compute_shift(
 //cout << "Made it to line = " << __LINE__ << endl;
 	// Solve equation given by LHS(qz0) - RHS(qz0 + x) == 0
 	const double initial_guess = 0.0;
-cout << setprecision(16) << "Check shift computation: " << iPair << "   " << LHS.at(iPair).second << "   " << RHS.at(iPair).second << endl;
+cout << setprecision(16) << "Check shift computation: " << iPair << "   " << qz0 << "   " << LHS.at(iPair).second << "   " << RHS.at(iPair).second << endl;
 
 	double x = initial_guess;
 	double f = RHS.at(iPair).second - LHS_thisPair;
