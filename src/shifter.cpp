@@ -96,7 +96,10 @@ void shifter::shiftEvent()
 	// Add in shifts without compensations
 	allParticles_Shifted = allParticles;
 	for (const auto & thisParticle: allParticles_Shifted)
-		thisParticle.p += thisParticle.pShift;
+	{
+		Vec4 thisShift = thisParticle.pShift;
+		thisParticle.p += thisShift;
+	}
 
 	// Reconstruct original vs. new qz distributions
 	enoughPairsToProceed = setSortedPairs( allParticles_Shifted );
