@@ -405,7 +405,7 @@ cout << "Made it to line = " << __LINE__ << endl;
 	const int this2 = thisPair.second.second;
 
 	// recycle previously computed RHS to save time
-	while ( upper_qz < qz )
+	while ( upper_qz < qz and pairIndex < sorted_list_of_pairs.size - 1 )
 	{
 cout << "Made it to line = " << __LINE__ << endl;
 		lower_qz = sorted_list_of_pairs.at(pairIndex).first;
