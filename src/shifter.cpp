@@ -89,8 +89,12 @@ void shifter::shiftEvent()
 
 	int iParticle = 0;
 	for (const auto & thisParticle: allParticles)
+	{
 		cout << iParticle << "   " << thisParticle.p 
-				<< iParticle++ << "   " << thisParticle.p + thisParticle.pShift;
+				<< iParticle << "   " << thisParticle.pShift;
+				<< iParticle << "   " << thisParticle.p + thisParticle.pShift;
+		iParticle++;
+	}
 
 
 
