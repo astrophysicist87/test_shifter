@@ -574,7 +574,7 @@ double shifter::compute_shift(
 		const double TOL = ACCURACY;
 		int N=1;
 		double fpdummy = 0.0;
-		double a = LHS.front().first, b = LHS.back().first;
+		double a = LHS.front().first - qz0, b = LHS.back().first - qz0;
 		double sa = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, 0.0, fpdummy ) - LHS_thisPair );
 		double sb = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, b, fpdummy ) - LHS_thisPair );
 		double c = 0.0;
