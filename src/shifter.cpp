@@ -241,7 +241,7 @@ void shifter::shiftPairs_mode1()
 		const double this_qz = thisPair.first;
 		const int this1 = thisPair.second.first;
 		const int this2 = thisPair.second.second;
-		const double thisPair_shift = pairShifts.at(i);
+		const double thisPair_shift = pairShifts.at(i-1);
 
 		cout << setprecision(24) << "CHECK: "
 				<< LHS.at(i).first << "   "
