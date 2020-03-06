@@ -595,6 +595,9 @@ cout << "Made it to line = " << __LINE__ << endl;
 		const int i1 = iPair.second.first;
 		const int i2 = iPair.second.second;
 
+		// skip first unphysical "pair"
+		if (i1<0 or i2<0) continue;
+
 		constexpr bool rescale_pair_momenta = true;
 cout << "Made it to line = " << __LINE__ << endl;
 		const double net_qz_shift = 0.5*pairShifts.at(pairIndex);
