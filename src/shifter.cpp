@@ -30,7 +30,7 @@ constexpr int    NCOMPSTEP  = 10;
 void shifter::initialize_all( ParameterReader * paraRdr_in,
 	const vector<ParticleRecord> & allParticles_in )
 {
-	include_pair_density = false;
+	include_pair_density = true;
 
 	// Load parameters
 	paraRdr			= paraRdr_in;
