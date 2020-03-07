@@ -257,6 +257,14 @@ void shifter::shiftPairs_mode1()
 	vector< pair< double, double > > LHS, RHS, RHS_derivatives;
 	evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
+
+	const double dqz = 0.01;	// GeV
+	for (double qzVal = 0.0; qzVal < 20.0 + 0.5*dqz; qzVal+=dqz)
+		cout << "Effective source: " << dqz << "   "
+				<< evaluate_effective_source( pairs_sorted_by_abs_qz, qzVal ) << endl;
+
+if (1) exit(8);
+
 	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 	/*
@@ -738,6 +746,35 @@ void shifter::compute_shifts(
 	}
 
 	return;
+}
+
+
+// current effective source is 1 + < cos(qz Delta_z) >
+double shifter::evaluate_effective_source(
+				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+				const double qz )
+{
+	const double effective_source = 0.0;
+
+	// the BE enhancement piece
+	for (const auto & iPair : sorted_list_of_pairs)
+	{
+		const int i1 = iPair.second.first;
+		const int i2 = iPair.second.second;
+
+		if ( i1<0 or i2<0 ) continue;
+		//if ( this1 != i1 and this2 != i2 ) continue;
+		//if ( this1 != i1 or  this2 != i2 ) continue;
+
+		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+		const double Delta_z = xDiff.pz();
+
+		effective_source += cos(qz*Delta_z);
+
+		npairs_in_average++;
+	}
+
+	return ( 1.0 + effective_source / npairs_in_average );
 }
 
 

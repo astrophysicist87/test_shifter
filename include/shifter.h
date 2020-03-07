@@ -124,6 +124,10 @@ class shifter
 
 		void set_pair_density( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
 
+		double evaluate_effective_source(
+				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+				const double qz );
+
 };
 
 // End of file
