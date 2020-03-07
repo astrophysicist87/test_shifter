@@ -754,7 +754,8 @@ double shifter::evaluate_effective_source(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				const double qz )
 {
-	const double effective_source = 0.0;
+	const int npairs_in_average = 0;
+	double effective_source = 0.0;
 
 	// the BE enhancement piece
 	for (const auto & iPair : sorted_list_of_pairs)
