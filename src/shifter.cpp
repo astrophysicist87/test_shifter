@@ -168,7 +168,7 @@ void shifter::shiftEvent()
 		//infoPtr->errorMsg("Warning in shifter::shiftEvent: no consistent BE shift topology found, so skip BE");
 		cout << setprecision(16) << "shifterCheck: This event did not pass! Check: "
 				<< abs(eSumShifted - eSumOriginal) << " < " << COMPRELERR * eSumOriginal << "\n";
-		return true;
+		return;
 	}
 	else
 	{
