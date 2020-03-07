@@ -67,6 +67,9 @@ void generate_events(vector<ParticleRecord> & allParticles, ParameterReader * pa
 			particle.x.py(yP);
 			particle.x.pz(zP);
 
+			particle.m = mass;
+			particle.m2 = mass*mass;
+
 			//event.particles.push_back( particle );
 			allParticles.push_back( particle );
 

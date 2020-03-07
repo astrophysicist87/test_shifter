@@ -108,7 +108,7 @@ void shifter::shiftEvent()
 
 	// Must have at least two pairs to carry out compensation.
 	const int nParticles = allParticles.size();
-	if (nParticles < 2) return true;
+	if (nParticles < 2) return;
 
 	// Add in compensations until energy is conserved
 	double eSumOriginal = 0.;
@@ -117,8 +117,8 @@ void shifter::shiftEvent()
 	for (auto & particle: allParticles)
 	{
 		eSumOriginal  += particle.p.e();
-		allParticles.at(i).p += particle.pShift;
-		allParticles.at(i).p.e( sqrt( particle.p.pAbs2() + particle.m2 ) );
+		particle.p    += particle.pShift;
+		particle.p.e( sqrt( particle.p.pAbs2() + particle.m2 ) );
 		eSumShifted   += particle.p.e();
 		eDiffByComp   += dot3( particle.pComp, particle.p) / particle.p.e();
 	}
@@ -140,7 +140,7 @@ void shifter::shiftEvent()
 		eDiffByComp      = 0.;
 		for (auto & particle: allParticles)
 		{
-			particle.p += compFac * particle.pComp;
+			particle.p    += compFac * particle.pComp;
 			particle.p.e( sqrt( particle.p.pAbs2() + particle.m2 ) );
 			eSumShifted   += particle.p.e();
 			eDiffByComp   += dot3( particle.pComp, particle.p) / particle.p.e();

@@ -14,6 +14,8 @@ typedef struct
 {
 	int particleID;
 
+	double m, m2;
+
 	Vec4 x, p, pShift, pComp;	
 } ParticleRecord;
 
