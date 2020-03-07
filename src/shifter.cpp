@@ -258,12 +258,12 @@ void shifter::shiftPairs_mode1()
 	evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 
-	const double dqz = 0.001;	// GeV
+	/*const double dqz = 0.001;	// GeV
 	for (double qzVal = 0.0; qzVal < 20.0 + 0.5*dqz; qzVal+=dqz)
 		cout << "Effective source: " << qzVal << "   "
 				<< evaluate_effective_source( pairs_sorted_by_abs_qz, qzVal ) << endl;
 
-if (1) exit(8);
+	if (1) exit(8);*/
 
 	compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
@@ -483,26 +483,29 @@ double shifter::evaluate_RHS(
 	double RHS_BE_enhancement = 0.0;
 	double RHS_BE_enhancement_derivative = 0.0;
 
-	// the BE enhancement piece
-	for (const auto & iPair : sorted_list_of_pairs)
+	if ( qz <= 0.15 )
 	{
-		const int i1 = iPair.second.first;
-		const int i2 = iPair.second.second;
+		// the BE enhancement piece
+		for (const auto & iPair : sorted_list_of_pairs)
+		{
+			const int i1 = iPair.second.first;
+			const int i2 = iPair.second.second;
 
-		if ( i1<0 or i2<0 ) continue;
-		//if ( this1 != i1 and this2 != i2 ) continue;
-		//if ( this1 != i1 or  this2 != i2 ) continue;
+			if ( i1<0 or i2<0 ) continue;
+			//if ( this1 != i1 and this2 != i2 ) continue;
+			//if ( this1 != i1 or  this2 != i2 ) continue;
 
-		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+			Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 
-		const double Delta_z = xDiff.pz();
+			const double Delta_z = xDiff.pz();
 
-		RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
-							* denBar.at(pairIndex-1) / Delta_z;
+			RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
+								* denBar.at(pairIndex-1) / Delta_z;
 
-		RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
+			RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
 
-		npairs_in_average++;
+			npairs_in_average++;
+		}
 	}
 
 	RHS_BE_enhancement /= npairs_in_average;
