@@ -106,22 +106,24 @@ void shifter::shiftEvent()
 				<< thisPair.second.first << "   " << thisPair.second.second << endl;
 
 
-	/*
 	// Must have at least two pairs to carry out compensation.
-	//if (nStored[9] < 2) return true;
+	const int nParticles = allParticles.size();
+	if (nParticles < 2) return true;
 
-	// Shift momenta and recalculate energies.
+	// Add in compensations until energy is conserved
 	double eSumOriginal = 0.;
 	double eSumShifted  = 0.;
 	double eDiffByComp  = 0.;
-	for (int i = 0; i < nStored[9]; ++i)
+	for (auto & particle: allParticles)
 	{
-		eSumOriginal  += allParticles.at(i).p.e();
-		allParticles.at(i).p += allParticles.at(i).pShift;
-		allParticles.at(i).p.e( sqrt( allParticles.at(i).p.pAbs2() + allParticles.at(i).m2 ) );
-		eSumShifted   += allParticles.at(i).p.e();
-		eDiffByComp   += dot3( allParticles.at(i).pComp, allParticles.at(i).p) / allParticles.at(i).p.e();
+		eSumOriginal  += particle.p.e();
+		allParticles.at(i).p += particle.pShift;
+		allParticles.at(i).p.e( sqrt( particle.p.pAbs2() + particle.m2 ) );
+		eSumShifted   += particle.p.e();
+		eDiffByComp   += dot3( particle.pComp, particle.p) / particle.p.e();
 	}
+	
+
 
 	constexpr bool perform_compensation = true;
 
@@ -136,14 +138,24 @@ void shifter::shiftEvent()
 		double compFac   = (eSumOriginal - eSumShifted) / eDiffByComp;
 		eSumShifted      = 0.;
 		eDiffByComp      = 0.;
-		for (int i = 0; i < nStored[9]; ++i)
+		for (auto & particle: allParticles)
 		{
-			allParticles.at(i).p += compFac * allParticles.at(i).pComp;
-			allParticles.at(i).p.e( sqrt( allParticles.at(i).p.pAbs2() + allParticles.at(i).m2 ) );
-			eSumShifted   += allParticles.at(i).p.e();
-			eDiffByComp   += dot3( allParticles.at(i).pComp, allParticles.at(i).p) / allParticles.at(i).p.e();
+			particle.p += compFac * particle.pComp;
+			particle.p.e( sqrt( particle.p.pAbs2() + particle.m2 ) );
+			eSumShifted   += particle.p.e();
+			eDiffByComp   += dot3( particle.pComp, particle.p) / particle.p.e();
 		}
 	}
+
+
+	// Output final qz distribution
+	enoughPairsToProceed = setSortedPairs( allParticles );
+	iPair = 0;
+	for (const auto & thisPair: pairs_sorted_by_abs_qz)
+		cout << "Compensated: " << iPair++ << "   " << thisPair.first << "   "
+				<< thisPair.second.first << "   " << thisPair.second.second << endl;
+
+
 
 	constexpr bool check_for_bad_events = false;
 
@@ -153,25 +165,24 @@ void shifter::shiftEvent()
 	and check_for_bad_events
 	and abs(eSumShifted - eSumOriginal) > COMPRELERR * eSumOriginal )
 	{
-		infoPtr->errorMsg("Warning in shifter::shiftEvent: no consistent BE shift topology found, so skip BE");
+		//infoPtr->errorMsg("Warning in shifter::shiftEvent: no consistent BE shift topology found, so skip BE");
 		cout << setprecision(16) << "shifterCheck: This event did not pass! Check: "
-			<< abs(eSumShifted - eSumOriginal) << " < " << COMPRELERR * eSumOriginal << "\n";
+				<< abs(eSumShifted - eSumOriginal) << " < " << COMPRELERR * eSumOriginal << "\n";
 		return true;
 	}
 	else
 	{
 		cout << setprecision(16) << "shifterCheck: This event passes! Check: "
-		<< abs(eSumShifted - eSumOriginal) << " < " << COMPRELERR * eSumOriginal << "\n";
+				<< abs(eSumShifted - eSumOriginal) << " < " << COMPRELERR * eSumOriginal << "\n";
 	}
 
 
 	// Store new particle copies with shifted momenta.
-	for (int i = 0; i < nStored[9]; ++i)
+	/*for (int i = 0; i < nStored[9]; ++i)
 	{
 		int iNew = event.copy( allParticles.at(i).iPos, 99);
 		event[ iNew ].p( allParticles.at(i).p );
-	}
-	*/
+	}*/
 
 	//auto end = std::chrono::system_clock::now();
 
