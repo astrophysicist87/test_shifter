@@ -49,8 +49,8 @@ INC			= 	$(INCDIR)/random_events.h \
 #					$(basename $(SRC))))
 OBJECTS				=	$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,\
 					$(sort $(wildcard $(SRCDIR)/*.cpp)))
-OBJECTS			   +=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
-					$(basename $(MAINSRC))))
+OBJECTS			   +=	$(patsubst %.cpp,$(OBJDIR)/%.o,\
+					$(sort $(wildcard *.cpp)))
 #OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
 #					$(notdir $(basename $(SRC)))))
 TARGET			=	$(MAIN)
