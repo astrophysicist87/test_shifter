@@ -56,7 +56,7 @@ INSTPATH		=	..
 
 # --------------- Pattern rules -------------------
 
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBDIR)/libshifter.a: $(OBJECTS)
