@@ -68,8 +68,7 @@ $(LIBDIR)/libshifter.a: $(OBJECTS)
 
 .PHONY:		all mkobjdir clean distclean install target lib
 
-all:		mkobjdir $(TARGET)
-			mkobjdir $(TARGET_LIBRARY)
+all:		mkobjdir $(TARGET) $(TARGET_LIBRARY)
 
 target:		mkobjdir $(TARGET)
 
