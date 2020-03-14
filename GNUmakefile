@@ -49,6 +49,8 @@ INC			= 	$(INCDIR)/random_events.h \
 #					$(basename $(SRC))))
 OBJECTS				=	$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,\
 					$(sort $(wildcard $(SRCDIR)/*.cpp)))
+OBJECTS			   +=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
+					$(basename $(MAINSRC))))
 #OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
 #					$(notdir $(basename $(SRC)))))
 TARGET			=	$(MAIN)
@@ -59,10 +61,6 @@ INSTPATH		=	..
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
-
-$(OBJDIR)/main.o: $(MAINSRC)
-	$(CC) $(CFLAGS) -c $< -o $@
-	OBJECTS+=$(OBJDIR)/main.o
 
 $(LIBDIR)/libshifter.a: $(OBJECTS)
 	#rm -f $(LIBDIR)/libpythia8$(LIB_SUFFIX)
