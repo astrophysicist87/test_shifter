@@ -10,15 +10,20 @@
 
 using namespace std;
 
-typedef struct
+namespace shift_lib
 {
-	int particleID;
 
-	double m, m2;
+	typedef struct
+	{
+		int particleID;
 
-	Vec4 x, p, pShift, pComp;	
-} ParticleRecord;
+		double m, m2;
 
-std::ostream& operator << (std::ostream& out, const ParticleRecord & a);
+		Vec4 x, p, pShift, pComp;	
+	} ParticleRecord;
+
+	std::ostream& operator << (std::ostream& out, const ParticleRecord & a);
+
+}
 
 #endif

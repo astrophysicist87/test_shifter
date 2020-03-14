@@ -5,6 +5,7 @@
 #include "include/random_events.h"
 
 using namespace std;
+using namespace shift_lib;
 
 int main(int argc, char *argv[])
 {
