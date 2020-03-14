@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	//for ( auto const particle: allParticles )
 	//	cout << particle;
 
-	// Wrap it up!
+	// Done.
 	return (0);
 }
 
