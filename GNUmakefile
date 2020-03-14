@@ -1,6 +1,6 @@
-# ============================================================================
-#  Makefile HBTeg                             Chris Plumberg, October 31, 2018
-# ============================================================================
+# =============================================================
+#  Makefile                             Christopher J. Plumberg
+# =============================================================
 ##
 ##  Environments :	MAIN	= 	main sourcefile	
 ##
@@ -13,12 +13,13 @@
 CC := g++
 CFLAGS= -O3 -std=c++11 -g
 
-RM		=	rm -f
-O               =       .o
-LDFLAGS         =       $(CFLAGS)
-SYSTEMFILES     =       $(SRCGNU)
-INCDIR		=	include
-SRCDIR		=	src
+RM				=	rm -f
+O               =	.o
+LDFLAGS         =	$(CFLAGS)
+SYSTEMFILES     =	$(SRCGNU)
+INCDIR			=	include
+SRCDIR			=	src
+LIBDIR			=	lib
 
 # --------------- Files involved ------------------
 
@@ -48,6 +49,7 @@ OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
 #OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
 #					$(notdir $(basename $(SRC)))))
 TARGET			=	$(MAIN)
+TARGET_LIBRARY	=	$(LIBDIR)/libshifter.a
 INSTPATH		=	..
 
 # --------------- Pattern rules -------------------
@@ -55,16 +57,23 @@ INSTPATH		=	..
 $(OBJDIR)/%.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(LIBDIR)/libshifter.a: $(OBJECTS)
+	#rm -f $(LIBDIR)/libpythia8$(LIB_SUFFIX)
+	ar cru $@ $^
+
 %.cpp:
 	if [ -f $@ ] ; then touch $@ ; else false ; fi
 
 # -------------------------------------------------
 
-.PHONY:		all mkobjdir clean distclean install target
+.PHONY:		all mkobjdir clean distclean install target lib
 
 all:		mkobjdir $(TARGET)
+			mkobjdir $(TARGET_LIBRARY)
 
 target:		mkobjdir $(TARGET)
+
+lib:		mkobjdir $(TARGET_LIBRARY)
 
 help:
 		@grep '^##' GNUmakefile
