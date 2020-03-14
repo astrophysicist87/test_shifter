@@ -391,6 +391,7 @@ double shifter::evaluate_LHS(
 	double qz = abs(qz_in);
 	if ( qz < 1.e-20 ) return (0.0);
 
+	// Loop over preceding intervals
 	while ( this_qz < qz )
 	{
 		//cout << "checkpoint: " << previous_qz << "   " << this_qz << endl;
@@ -400,6 +401,7 @@ double shifter::evaluate_LHS(
 		pairIndex++;
 	}
 
+	// No need to include this part, since qz_in is always a grid point
 	//LHS_integral += 2.0 * ( qz - previous_qz ) * denBar.at(pairIndex-1);
 
 	return (LHS_integral);
@@ -464,6 +466,7 @@ double shifter::evaluate_RHS(
 	const int this2 = thisPair.second.second;
 
 	// recycle previously computed RHS to save time
+	// N.B. - does not work if RHS is different for each pair!!!
 	while ( upper_qz < qz and pairIndex < sorted_list_of_pairs.size() - 1 )
 	{
 		lower_qz = sorted_list_of_pairs.at(pairIndex).first;
@@ -483,29 +486,26 @@ double shifter::evaluate_RHS(
 	double RHS_BE_enhancement = 0.0;
 	double RHS_BE_enhancement_derivative = 0.0;
 
-	if ( qz <= 0.15 )
+	// the BE enhancement piece
+	for (const auto & iPair : sorted_list_of_pairs)
 	{
-		// the BE enhancement piece
-		for (const auto & iPair : sorted_list_of_pairs)
-		{
-			const int i1 = iPair.second.first;
-			const int i2 = iPair.second.second;
+		const int i1 = iPair.second.first;
+		const int i2 = iPair.second.second;
 
-			if ( i1<0 or i2<0 ) continue;
-			//if ( this1 != i1 and this2 != i2 ) continue;
-			//if ( this1 != i1 or  this2 != i2 ) continue;
+		if ( i1<0 or i2<0 ) continue;
+		//if ( this1 != i1 and this2 != i2 ) continue;
+		//if ( this1 != i1 or  this2 != i2 ) continue;
 
-			Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+		Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 
-			const double Delta_z = xDiff.pz();
+		const double Delta_z = xDiff.pz();
 
-			RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
-								* denBar.at(pairIndex-1) / Delta_z;
+		RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
+							* denBar.at(pairIndex-1) / Delta_z;
 
-			RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
+		RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
 
-			npairs_in_average++;
-		}
+		npairs_in_average++;
 	}
 
 	RHS_BE_enhancement /= npairs_in_average;
@@ -635,11 +635,6 @@ double shifter::compute_shift(
 		
 	}
 
-
-
-
-
-
 //cout << "Made it to line = " << __LINE__ << endl;
 /*const int i1 = thisPair.second.first;
 const int i2 = thisPair.second.second;
@@ -663,6 +658,8 @@ void shifter::compute_shifts(
 			const vector< pair< double, double > > & RHS_derivatives
 			)
 {
+	//-------
+	// Setup.
 	const int npairs = sorted_list_of_pairs.size();
 
 	pairShifts.clear();
@@ -671,7 +668,9 @@ void shifter::compute_shifts(
 	pairShifts.reserve( npairs );
 	this_pair_shifted.reserve( npairs );
 
-	// Compute the pair shifts themselves (skip i=0 case, not physical pair).
+	//------------------------------------
+	// Compute the pair shifts themselves
+	// (skip i=0 case, not physical pair).
 	for (int i = 1; i < npairs; i++)
 	{
 		const auto & thisPair = sorted_list_of_pairs.at(i);
@@ -689,6 +688,7 @@ void shifter::compute_shifts(
 		this_pair_shifted.push_back( true );
 	}
 
+	//--------------------------
 	// Store them for each pair.
 	int pairIndex = 0;
 	int number_of_pairs_shifted = 0, number_of_pairs_not_shifted = 0;
