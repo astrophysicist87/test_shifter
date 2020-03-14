@@ -28,9 +28,10 @@ ifeq "$(MAIN)" ""
 MAIN		=	shifter.e
 endif
 
-MAINSRC		=	main.cpp
+#MAINSRC		=	main.cpp
 
-SRC			=	$(SRCDIR)/shifter.cpp \
+SRC			=	main.cpp \
+				$(SRCDIR)/shifter.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
 				$(SRCDIR)/ParticleRecord.cpp \
@@ -45,10 +46,10 @@ INC			= 	$(INCDIR)/random_events.h \
 
 # -------------------------------------------------
 
-#OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
-#					$(basename $(SRC))))
-OBJECTS				=	$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,\
-					$(sort $(wildcard $(SRCDIR)/*.cpp *.cpp)))
+OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
+					$(basename $(SRC))))
+#OBJECTS				=	$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,\
+#					$(sort $(wildcard $(SRCDIR)/*.cpp *.cpp)))
 #OBJECTS			   +=	$(patsubst %.cpp,$(OBJDIR)/%.o,\
 #					$(sort $(wildcard *.cpp)))
 #OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
@@ -59,7 +60,7 @@ INSTPATH		=	..
 
 # --------------- Pattern rules -------------------
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBDIR)/libshifter.a: $(OBJECTS)
