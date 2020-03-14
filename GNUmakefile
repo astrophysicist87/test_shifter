@@ -28,8 +28,9 @@ ifeq "$(MAIN)" ""
 MAIN		=	shifter.e
 endif
 
-SRC			=	main.cpp \
-				$(SRCDIR)/shifter.cpp \
+MAINSRC		=	main.cpp
+
+SRC			=	$(SRCDIR)/shifter.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
 				$(SRCDIR)/ParticleRecord.cpp \
@@ -57,6 +58,9 @@ INSTPATH		=	..
 # --------------- Pattern rules -------------------
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/main.o: $(MAINSRC)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBDIR)/libshifter.a: $(OBJECTS)
