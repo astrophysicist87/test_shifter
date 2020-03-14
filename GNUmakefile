@@ -20,7 +20,7 @@ SYSTEMFILES     =	$(SRCGNU)
 INCDIR			=	include
 SRCDIR			=	src
 LIBDIR			=	lib
-OBJDIR			=	obj
+OBJDIR			=	.
 
 # --------------- Files involved ------------------
 
