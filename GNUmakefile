@@ -62,6 +62,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 
 $(OBJDIR)/main.o: $(MAINSRC)
 	$(CC) $(CFLAGS) -c $< -o $@
+	OBJECTS+=$(OBJDIR)/main.o
 
 $(LIBDIR)/libshifter.a: $(OBJECTS)
 	#rm -f $(LIBDIR)/libpythia8$(LIB_SUFFIX)
