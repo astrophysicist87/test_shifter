@@ -20,6 +20,7 @@ SYSTEMFILES     =	$(SRCGNU)
 INCDIR			=	include
 SRCDIR			=	src
 LIBDIR			=	lib
+OBJDIR			=	obj
 
 # --------------- Files involved ------------------
 
@@ -43,9 +44,10 @@ INC			= 	$(INCDIR)/random_events.h \
 
 # -------------------------------------------------
 
-OBJDIR			=	.
-OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
-					$(basename $(SRC))))
+#OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
+#					$(basename $(SRC))))
+OBJECTS				=	$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,\
+					$(sort $(wildcard $(SRCDIR)/*.cpp)))
 #OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
 #					$(notdir $(basename $(SRC)))))
 TARGET			=	$(MAIN)
