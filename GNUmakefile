@@ -78,10 +78,12 @@ $(TARGET):	$(OBJECTS)
 $(TARGET_LIBRARY): $(OBJECTS)
 	-@mkdir -p $(LIBDIR)
 	ar cru $@ $^
+	ln -sf `readlink -e $@` ~/$(TARGET_LIBRARY)
 
 $(TARGET_DYN_LIBRARY): $(OBJECTS)
 	-@mkdir -p $(LIBDIR)
 	$(CC) -shared $^ -o $@
+	ln -sf `readlink -e $@` ~/$(TARGET_DYN_LIBRARY)
 
 # -------------------------------------------------
 
