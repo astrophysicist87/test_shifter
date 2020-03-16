@@ -1,5 +1,5 @@
-#ifndef ARSENAL_H
-#define ARSENAL_H
+#ifndef SHIFT_LIB_ARSENAL_H
+#define SHIFT_LIB_ARSENAL_H
 
 #include "stdlib.h"
 #include <vector>

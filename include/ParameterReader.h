@@ -3,8 +3,8 @@ ParameterReader class is used to simplify the process of reading parameters from
 Version 1.01 (09-20-2011) Zhi Qiu
 ***********************************************************************/
 
-#ifndef _ParameterReaderHeader
-#define _ParameterReaderHeader
+#ifndef SHIFT_LIB_ParameterReaderHeader
+#define SHIFT_LIB_ParameterReaderHeader
 
 #include <vector>
 #include <string>

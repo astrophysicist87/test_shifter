@@ -1,5 +1,5 @@
-#ifndef SHIFTER_H
-#define SHIFTER_H
+#ifndef SHIFT_LIB_SHIFTER_H
+#define SHIFT_LIB_SHIFTER_H
 
 #include <omp.h>
 #include <iostream>

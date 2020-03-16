@@ -1,5 +1,5 @@
-#ifndef FOURVECTOR_H
-#define FOURVECTOR_H
+#ifndef SHIFT_LIB_FOURVECTOR_H
+#define SHIFT_LIB_FOURVECTOR_H
 
 #include <iostream>
 #include <iomanip>

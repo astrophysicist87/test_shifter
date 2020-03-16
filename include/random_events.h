@@ -1,5 +1,5 @@
-#ifndef RANDOM_EVENTS_H
-#define RANDOM_EVENTS_H
+#ifndef SHIFT_LIB_RANDOM_EVENTS_H
+#define SHIFT_LIB_RANDOM_EVENTS_H
 
 #include <iostream>
 #include <string>
