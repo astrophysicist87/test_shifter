@@ -31,18 +31,21 @@ namespace shift_lib
 
 
 	void shifter::initialize_all( ParameterReader * paraRdr_in,
-		const vector<ParticleRecord> & allParticles_in )
+		vector<ParticleRecord> & allParticles_in )
 	{
 		include_pair_density = false;
 
-		// Load parameters
+		// Load parameters.
 		paraRdr			= paraRdr_in;
 
-		// Load particle
+		// Load particles.
 		allParticles	= allParticles_in;
 
-		// Perform shifts
+		// Perform shifts.
 		shiftEvent();
+
+		// Return shifted results.
+		allParticles_in	= allParticles;
 
 		return;
 	}

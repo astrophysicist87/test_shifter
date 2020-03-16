@@ -1,5 +1,5 @@
-#ifndef PARTICLERECORD_v2_H
-#define PARTICLERECORD_v2_H
+#ifndef SHIFT_LIB_PARTICLERECORD_H
+#define SHIFT_LIB_PARTICLERECORD_H
 
 #include <vector>
 #include <iostream>

@@ -61,7 +61,7 @@ namespace shift_lib
 
 			// Constructors, destructors, and initializers
 			shifter( ParameterReader * paraRdr_in,
-						const vector<ParticleRecord> & allParticles_in,
+						vector<ParticleRecord> & allParticles_in,
 						ostream & out_stream = std::cout,
 						ostream & err_stream = std::cerr )
 						:
@@ -70,7 +70,7 @@ namespace shift_lib
 						{ initialize_all( paraRdr_in, allParticles_in ); };
 
 
-			void initialize_all( ParameterReader * paraRdr_in, const vector<ParticleRecord> & allParticles_in );
+			void initialize_all( ParameterReader * paraRdr_in, vector<ParticleRecord> & allParticles_in );
 
 			void update_records( vector<ParticleRecord> & allParticles_in );
 
