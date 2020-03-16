@@ -20,7 +20,7 @@ SYSTEMFILES     =	$(SRCGNU)
 INCDIR			=	include
 SRCDIR			=	src
 LIBDIR			=	lib
-OBJDIR			=	.
+OBJDIR			=	obj
 
 # --------------- Files involved ------------------
 
@@ -28,10 +28,9 @@ ifeq "$(MAIN)" ""
 MAIN		=	shifter.e
 endif
 
-#MAINSRC		=	main.cpp
+MAINSRC		=	main.cpp
 
-SRC			=	main.cpp \
-				$(SRCDIR)/shifter.cpp \
+SRC			=	$(SRCDIR)/shifter.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
 				$(SRCDIR)/ParticleRecord.cpp \
@@ -46,58 +45,72 @@ INC			= 	$(INCDIR)/random_events.h \
 
 # -------------------------------------------------
 
-OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
-					$(basename $(SRC))))
-#OBJECTS				=	$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,\
-#					$(sort $(wildcard $(SRCDIR)/*.cpp *.cpp)))
-#OBJECTS			   +=	$(patsubst %.cpp,$(OBJDIR)/%.o,\
-#					$(sort $(wildcard *.cpp)))
-#OBJECTS			=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
-#					$(notdir $(basename $(SRC)))))
-TARGET			=	$(MAIN)
-TARGET_LIBRARY	=	$(LIBDIR)/libshifter.a
-INSTPATH		=	..
+#OBJECTS				=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
+#						$(basename $(SRC))))
+#OBJECTS					=	$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,\
+#						$(sort $(wildcard $(SRCDIR)/*.cpp)))
+OBJECTS				=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
+						$(notdir $(basename $(SRC)))))
+OBJECTS				+=	$(addsuffix $O, $(basename $(MAINSRC)))
+#OBJECTS				=	$(addprefix $(OBJDIR)/, $(addsuffix $O, \
+#						$(notdir $(basename $(SRC)))))
+TARGET				=	$(MAIN)
+TARGET_LIBRARY		=	$(LIBDIR)/libshifter.a
+TARGET_DYN_LIBRARY	=	$(LIBDIR)/libshifter.so
+INSTPATH			=	..
 
 # --------------- Pattern rules -------------------
 
-$(OBJDIR)/%.o: %.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c -fPIC $< -o $@
 
-$(LIBDIR)/libshifter.a: $(OBJECTS)
-	#rm -f $(LIBDIR)/libpythia8$(LIB_SUFFIX)
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	-@mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) -c -fPIC $< -o $@
+
+$(SRCDIR)/%.cpp:
+	if [ -f $@ ] ; then touch $@ ; else false ; fi
+
+$(TARGET):	$(OBJECTS)	
+	-@mkdir -p $(LIBDIR)
+		$(CC) $(OBJECTS) -o $(TARGET) $(LDFLAGS) 
+
+$(TARGET_LIBRARY): $(OBJECTS)
+	-@mkdir -p $(LIBDIR)
 	ar cru $@ $^
 
-%.cpp:
-	if [ -f $@ ] ; then touch $@ ; else false ; fi
+$(TARGET_DYN_LIBRARY): $(OBJECTS)
+	-@mkdir -p $(LIBDIR)
+	$(CC) -shared $^ -o $@
 
 # -------------------------------------------------
 
-.PHONY:		all mkobjdir clean distclean install target lib
+.PHONY:		all mkdirs clean distclean install target lib
 
-all:		mkobjdir $(TARGET) $(TARGET_LIBRARY)
+all:		mkdirs $(TARGET) $(TARGET_LIBRARY) $(TARGET_DYN_LIBRARY)
 
-target:		mkobjdir $(TARGET)
+target:		mkdirs $(TARGET)
 
-lib:		mkobjdir $(TARGET_LIBRARY)
+lib:		mkdirs $(TARGET_LIBRARY) $(TARGET_DYN_LIBRARY)
 
 help:
-		@grep '^##' GNUmakefile
+	@grep '^##' GNUmakefile
 
-mkobjdir:	
-		-@mkdir -p $(OBJDIR)
-
-$(TARGET):	$(OBJECTS)	
-		$(CC) $(OBJECTS) -o $(TARGET) $(LDFLAGS) 
+mkdirs:	
+	-@mkdir -p $(OBJDIR)
+	-@mkdir -p $(LIBDIR)
 
 clean:		
-		-rm -f $(OBJECTS)
+	-rm -f $(OBJECTS)
 
 distclean:	
-		-rm -f $(TARGET)
-		-rm -f $(OBJECTS)
+	-rm -f $(TARGET)
+	-rm -f $(TARGET_LIBRARY)
+	-rm -f $(TARGET_DYN_LIBRARY)
+	-rm -f $(OBJECTS)
 
 install:	$(TARGET)
-		cp $(TARGET) $(INSTPATH)
+	cp $(TARGET) $(INSTPATH)
 
 # --------------- Dependencies -------------------
 $(SRCDIR)/Arsenal.cpp: $(INCDIR)/Arsenal.h
