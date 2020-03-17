@@ -84,6 +84,8 @@ namespace shift_lib
 			}
 		*/
 
+cout << "allParticles.size() = " << allParticles.size() << endl;
+
 		// Loop through pairs of identical particles and find shifts.
 		bool enoughPairsToProceed = setSortedPairs( allParticles );
 		///*
