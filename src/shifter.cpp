@@ -92,12 +92,12 @@ namespace shift_lib
 			shiftPairs_mode1();
 		}
 
-		/*
+		///*
 		int iPair = 0;
 		for (const auto & thisPair: pairs_sorted_by_abs_qz)
 			cout << "Unshifted: " << iPair++ << "   " << thisPair.first << "   "
 					<< thisPair.second.first << "   " << thisPair.second.second << endl;
-		*/
+		//*/
 
 
 		// Add in shifts without compensations
@@ -105,14 +105,14 @@ namespace shift_lib
 		for (auto & thisParticle: allParticles_Shifted)
 			thisParticle.p += thisParticle.pShift;
 
-		/*
+		///*
 		// Reconstruct original vs. new qz distributions
 		enoughPairsToProceed = setSortedPairs( allParticles_Shifted );
 		iPair = 0;
 		for (const auto & thisPair: pairs_sorted_by_abs_qz)
 			cout << "Shifted: " << iPair++ << "   " << thisPair.first << "   "
 					<< thisPair.second.first << "   " << thisPair.second.second << endl;
-		*/
+		//*/
 
 		// Must have at least two pairs to carry out compensation.
 		const int nParticles = allParticles.size();
