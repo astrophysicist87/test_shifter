@@ -711,7 +711,8 @@ namespace shift_lib
 
 			// skip first unphysical "pair"
 			if (i1<0 or i2<0) continue;
-			const double this_qz = allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz();
+			//const double this_qz = allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz();
+			const double this_qz = abs( allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() );
 
 
 	//cout << "CHECK SIGNS: " << this_qz << "   " << allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() << endl;
