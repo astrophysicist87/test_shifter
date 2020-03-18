@@ -134,7 +134,7 @@ namespace shift_lib
 	
 
 
-		constexpr bool perform_compensation = true;
+		constexpr bool perform_compensation = false;
 
 		// Iterate compensation shift until convergence.
 		int iStep = 0;
