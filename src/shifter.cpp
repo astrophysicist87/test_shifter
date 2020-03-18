@@ -84,16 +84,16 @@ namespace shift_lib
 			}
 		*/
 
-cout << "allParticles.size() = " << allParticles.size() << endl;
+		//cout << "allParticles.size() = " << allParticles.size() << endl;
 
 		// Loop through pairs of identical particles and find shifts.
 		bool enoughPairsToProceed = setSortedPairs( allParticles );
-		///*
+		/*
 		int iPair = 0;
 		for (const auto & thisPair: pairs_sorted_by_abs_qz)
 			cout << "Unshifted: " << iPair++ << "   " << thisPair.first << "   "
 					<< thisPair.second.first << "   " << thisPair.second.second << endl;
-		//*/
+		*/
 		if ( enoughPairsToProceed )
 		{
 			cout << "shifterCheck: NPair = " << sortedPairs.size() << endl;
@@ -106,14 +106,14 @@ cout << "allParticles.size() = " << allParticles.size() << endl;
 		for (auto & thisParticle: allParticles_Shifted)
 			thisParticle.p += thisParticle.pShift;
 
-		///*
+		/*
 		// Reconstruct original vs. new qz distributions
 		enoughPairsToProceed = setSortedPairs( allParticles_Shifted );
 		iPair = 0;
 		for (const auto & thisPair: pairs_sorted_by_abs_qz)
 			cout << "Shifted: " << iPair++ << "   " << thisPair.first << "   "
 					<< thisPair.second.first << "   " << thisPair.second.second << endl;
-		//*/
+		*/
 
 		// Must have at least two pairs to carry out compensation.
 		const int nParticles = allParticles.size();
@@ -167,7 +167,7 @@ cout << "allParticles.size() = " << allParticles.size() << endl;
 		*/
 
 
-		constexpr bool check_for_bad_events = false;
+		constexpr bool check_for_bad_events = true;
 
 		// Error if no convergence, and then return without doing BE shift.
 		// However, not grave enough to kill event, so return true.
@@ -354,7 +354,8 @@ cout << "allParticles.size() = " << allParticles.size() << endl;
 		{
 			// for counting number of particles below given |q_z|
 			for (int iPair = 0; iPair < (int)sorted_list_of_pairs.size()-1; ++iPair)
-				denBar.push_back( 0.5 / ( sorted_list_of_pairs.at(iPair+1).first - sorted_list_of_pairs.at(iPair).first ) );
+				denBar.push_back( 0.5 / ( sorted_list_of_pairs.at(iPair+1).first
+										- sorted_list_of_pairs.at(iPair).first ) );
 		}
 		else
 		{
@@ -640,7 +641,7 @@ cout << "allParticles.size() = " << allParticles.size() << endl;
 					b = c; // new interval
 					sb = sgn( evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + b, fpdummy ) - LHS_thisPair );
 				}
-				c=0.5*(a + b); // new midpoint
+				c = 0.5 * ( a + b ); // new midpoint
 			}
 		
 		}
