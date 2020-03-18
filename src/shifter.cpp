@@ -33,7 +33,7 @@ namespace shift_lib
 	void shifter::initialize_all( ParameterReader * paraRdr_in,
 		vector<ParticleRecord> & allParticles_in )
 	{
-		include_pair_density = true;
+		include_pair_density = false;
 
 		// Load parameters.
 		paraRdr			= paraRdr_in;
@@ -134,7 +134,7 @@ namespace shift_lib
 	
 
 
-		constexpr bool perform_compensation = false;
+		constexpr bool perform_compensation = true;
 
 		// Iterate compensation shift until convergence.
 		int iStep = 0;
