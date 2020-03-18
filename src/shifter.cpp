@@ -134,7 +134,7 @@ namespace shift_lib
 	
 
 
-		constexpr bool perform_compensation = true;
+		constexpr bool perform_compensation = false;
 
 		// Iterate compensation shift until convergence.
 		int iStep = 0;
@@ -167,7 +167,7 @@ namespace shift_lib
 		*/
 
 
-		constexpr bool check_for_bad_events = true;
+		constexpr bool check_for_bad_events = false;
 
 		// Error if no convergence, and then return without doing BE shift.
 		// However, not grave enough to kill event, so return true.
