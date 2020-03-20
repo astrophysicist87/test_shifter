@@ -21,8 +21,8 @@ namespace shift_lib
 
 	constexpr bool BE_VERBOSE = false;
 
-	constexpr double MM2FM = 1.e12;
-	constexpr double FM2MM = 1.e-12;
+	constexpr double MM2FM = 1e12;
+	constexpr double FM2MM = 1e-12;
 	constexpr double HBARC = 0.19733;
 
 	constexpr double COMPRELERR = 1e-10;
@@ -33,7 +33,7 @@ namespace shift_lib
 	void shifter::initialize_all( ParameterReader * paraRdr_in,
 		vector<ParticleRecord> & allParticles_in )
 	{
-		include_pair_density = true;
+		include_pair_density = false;
 
 		// Load parameters.
 		paraRdr			= paraRdr_in;
@@ -62,8 +62,6 @@ namespace shift_lib
 
 		return;
 	}
-
-
 
 	//--------------------------------------------------------------------------
 	// Perform Bose-Einstein corrections on an event.
@@ -307,10 +305,6 @@ namespace shift_lib
 
 		return;
 	}
-
-
-
-
 
 	//-------------------------------------
 	// Compute the unshifted pair integrals
