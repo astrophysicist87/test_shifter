@@ -144,6 +144,8 @@ namespace shift_lib
 		// pairs to which it belongs
 		// --> but shifts are only computed for a given pair, not for individual particles!
 		// --> how to directly compute shift for only single particle?
+		// ==> BEST WAY IS APPARENTLY JUST TO GET N SHIFTS AND COMPUTE AVERAGE SHIFT FOR EACH PARTICLE
+		// ==> THIS IS ALREADY WHAT IS DONE BY DEFAULT
 
 		//-------
 		// Reset.
