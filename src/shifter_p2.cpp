@@ -115,7 +115,7 @@ namespace shift_lib
 	void shifter::shiftPairs_mode2()
 	{
 		vector< pair< double, double > > LHS, RHS, RHS_derivatives;
-		evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
+		evaluate_shift_relation_at_pair_mode2( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 		compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
