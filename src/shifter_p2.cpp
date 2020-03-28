@@ -236,11 +236,11 @@ namespace shift_lib
 		{
 			// the constant piece (integrand assumed to be symmetric; hence factor of 2)
 			RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
-			RHS_derivative = 2.0 * denBar.at(pairIndex-1);
+			//RHS_derivative = 2.0 * denBar.at(pairIndex-1);
 
 			int npairs_in_average = 0;
 			double RHS_BE_enhancement = 0.0;
-			double RHS_BE_enhancement_derivative = 0.0;
+			//double RHS_BE_enhancement_derivative = 0.0;
 	
 			// the BE enhancement piece
 			for (const auto & iPair : sorted_list_of_pairs)
@@ -256,18 +256,18 @@ namespace shift_lib
 	
 				const double Delta_z = xDiff.pz();
 	
-				RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
+				RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
 									* denBar.at(pairIndex-1) / Delta_z;
 	
-				RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
+				//RHS_BE_enhancement_derivative += 2.0 * cos(upper_qz*Delta_z) * denBar.at(pairIndex-1);
 	
 				npairs_in_average++;
 			}
 	
 			RHS_BE_enhancement /= npairs_in_average;
-			RHS_BE_enhancement_derivative /= npairs_in_average;
+			//RHS_BE_enhancement_derivative /= npairs_in_average;
 			RHS_integral += RHS_BE_enhancement;
-			RHS_derivative += RHS_BE_enhancement_derivative;
+			//RHS_derivative += RHS_BE_enhancement_derivative;
 
 			// shift to next interval
 			pairIndex++;
