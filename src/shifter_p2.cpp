@@ -167,7 +167,7 @@ namespace shift_lib
 		return;
 	}
 	
-	void set_LHS_mode2(
+	void shifter::set_LHS_mode2(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				vector< pair< double, double > > & LHS )
 	{
@@ -186,7 +186,7 @@ namespace shift_lib
 		return;
 	}
 	
-	void set_RHS_mode2(
+	void shifter::set_RHS_mode2(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				vector< pair< double, double > > & RHS,
 				vector< pair< double, double > > & RHS_derivatives )
