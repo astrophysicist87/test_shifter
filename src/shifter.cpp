@@ -394,7 +394,7 @@ namespace shift_lib
 		double LHS_integral = 0.0;
 
 		double qz = abs(qz_in);
-		if ( qz < 1.e-20 ) return (0.0);
+		if ( qz < 1e-20 ) return (0.0);
 
 		// Loop over preceding intervals
 		while ( this_qz < qz )
@@ -465,7 +465,7 @@ namespace shift_lib
 		//const double qz = thisPair.first;
 
 		double qz = abs(qz_in);
-		if ( qz < 1.e-20 ) return (0.0);
+		if ( qz < 1e-20 ) return (0.0);
 
 		const int this1 = thisPair.second.first;
 		const int this2 = thisPair.second.second;
@@ -569,7 +569,7 @@ namespace shift_lib
 				const vector< pair< double, double > > & RHS_derivatives,
 				int iPair )
 	{
-		const double ACCURACY = 1.e-6;
+		const double ACCURACY = 1e-6;
 		const int MAXTRIES = 10;
 
 		const double qz0 = LHS.at(iPair).first;
@@ -592,7 +592,7 @@ namespace shift_lib
 		//cout << setprecision(16) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
 		while ( abs(f) > ACCURACY and ntries < MAXTRIES )
 		{
-			if ( abs(fp) < 1.e-100 ) break;
+			if ( abs(fp) < 1e-100 ) break;
 			x -= f / fp;
 			f = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, qz0 + x, fp ) - LHS_thisPair;
 			ntries++;

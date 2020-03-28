@@ -145,7 +145,7 @@ namespace shift_lib
 		// --> but shifts are only computed for a given pair, not for individual particles!
 		// --> how to directly compute shift for only single particle?
 		// ==> BEST WAY IS APPARENTLY JUST TO GET N SHIFTS AND COMPUTE AVERAGE SHIFT FOR EACH PARTICLE
-		// ==> THIS IS ALREADY WHAT IS DONE BY DEFAULT
+		// ==> THIS IS ALREADY WHAT IS DONE BY DEFAULT...
 
 		//-------
 		// Reset.
@@ -167,16 +167,150 @@ namespace shift_lib
 		return;
 	}
 	
-	void set_LHS_mode2()
+	void set_LHS_mode2(
+				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+				vector< pair< double, double > > & LHS )
 	{
-		
+		// LHS is symmetric integral about q = 0 up to q = q_pair, for each pair
+		// ==>> most efficient to start with smallest |q_pair| and work my way up
+		const int npairs = sorted_list_of_pairs.size();
+		LHS.reserve( npairs );
+
+		for (const auto & thisPair : sorted_list_of_pairs)
+		{
+			const double LHS_integral = evaluate_LHS( sorted_list_of_pairs, thisPair.first );
+			LHS.push_back( std::make_pair( thisPair.first, LHS_integral ) );
+			//cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
+		}
+
+		return;
 	}
 	
-	void set_RHS_mode2()
+	void set_RHS_mode2(
+				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+				vector< pair< double, double > > & RHS,
+				vector< pair< double, double > > & RHS_derivatives )
 	{
-		
+		// RHS
+		const int npairs = sorted_list_of_pairs.size();
+		RHS.reserve( npairs );
+
+		for (const auto & thisPair : sorted_list_of_pairs)
+		{
+			double RHS_derivative = 0.0;
+			const double RHS_integral = evaluate_RHS_mode2( sorted_list_of_pairs, thisPair, thisPair.first, RHS_derivative );
+			RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
+			RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
+		}
+
+		return;
 	}
 
+
+	double shifter::evaluate_RHS_mode2(
+				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+				const pair< double, pair <int,int> > & thisPair,
+				const double qz_in, double & RHS_derivative )
+	{
+		int    pairIndex = 1;
+		double lower_qz  = sorted_list_of_pairs.at(pairIndex-1).first;
+		double upper_qz  = sorted_list_of_pairs.at(pairIndex).first;
+
+		double qz = abs(qz_in);
+		if ( qz < 1e-20 ) return (0.0);
+
+		const int this1 = thisPair.second.first;
+		const int this2 = thisPair.second.second;
+
+		double RHS_integral = 0.0;
+
+		while ( upper_qz < qz )
+		{
+			// the constant piece (integrand assumed to be symmetric; hence factor of 2)
+			RHS_integral += 2.0 * ( upper_qz - lower_qz ) * denBar.at(pairIndex-1);
+			RHS_derivative = 2.0 * denBar.at(pairIndex-1);
+
+			int npairs_in_average = 0;
+			double RHS_BE_enhancement = 0.0;
+			double RHS_BE_enhancement_derivative = 0.0;
+	
+			// the BE enhancement piece
+			for (const auto & iPair : sorted_list_of_pairs)
+			{
+				const int i1 = iPair.second.first;
+				const int i2 = iPair.second.second;
+	
+				if ( i1<0 or i2<0 ) continue;
+				//if ( this1 != i1 and this2 != i2 ) continue;
+				//if ( this1 != i1 or  this2 != i2 ) continue;
+	
+				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+	
+				const double Delta_z = xDiff.pz();
+	
+				RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
+									* denBar.at(pairIndex-1) / Delta_z;
+	
+				RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
+	
+				npairs_in_average++;
+			}
+	
+			RHS_BE_enhancement /= npairs_in_average;
+			RHS_BE_enhancement_derivative /= npairs_in_average;
+			RHS_integral += RHS_BE_enhancement;
+			RHS_derivative += RHS_BE_enhancement_derivative;
+
+			// shift to next interval
+			pairIndex++;
+			lower_qz = sorted_list_of_pairs.at(pairIndex-1).first;
+			upper_qz = sorted_list_of_pairs.at(pairIndex).first;
+		}
+
+		// ------------------------
+		// Do last partial interval
+		// ------------------------
+
+		// the constant piece (integrand assumed to be symmetric)
+		RHS_integral += 2.0 * ( qz - lower_qz ) * denBar.at(pairIndex-1);
+		RHS_derivative = 2.0 * denBar.at(pairIndex-1);
+
+		// Use a block here in order to re-use variables used above
+		{
+			int npairs_in_average = 0;
+			double RHS_BE_enhancement = 0.0;
+			double RHS_BE_enhancement_derivative = 0.0;
+	
+			// the BE enhancement piece
+			for (const auto & iPair : sorted_list_of_pairs)
+			{
+				const int i1 = iPair.second.first;
+				const int i2 = iPair.second.second;
+	
+				if ( i1<0 or i2<0 ) continue;
+				//if ( this1 != i1 and this2 != i2 ) continue;
+				//if ( this1 != i1 or  this2 != i2 ) continue;
+	
+				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
+	
+				const double Delta_z = xDiff.pz();
+	
+				RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
+									* denBar.at(pairIndex-1) / Delta_z;
+	
+				RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
+	
+				npairs_in_average++;
+			}
+	
+			RHS_BE_enhancement /= npairs_in_average;
+			RHS_BE_enhancement_derivative /= npairs_in_average;
+			RHS_integral += RHS_BE_enhancement;
+			RHS_derivative += RHS_BE_enhancement_derivative;
+		}
+
+		return (RHS_integral);
+	}
 
 
 }	//End of namespace

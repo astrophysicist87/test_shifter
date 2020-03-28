@@ -101,6 +101,12 @@ namespace shift_lib
 				const pair< double, pair <int,int> > & thisPair,
 				const double qz, double & RHS_derivative );
 
+			/*double evaluate_RHS_mode2(
+				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+				const vector< pair< double, double > > & RHS,
+				const pair< double, pair <int,int> > & thisPair,
+				const double qz, double & RHS_derivative );*/
+
 			double compute_shift(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				const vector< pair< double, double > > & LHS,
