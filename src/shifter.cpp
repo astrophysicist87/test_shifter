@@ -137,6 +137,9 @@ namespace shift_lib
 
 
 		constexpr bool perform_compensation = false;
+		if ( not perform_compensation )
+			cout << "WARNING: compensation currently turned off!" << endl;
+
 
 		// Iterate compensation shift until convergence.
 		int iStep = 0;
@@ -170,6 +173,9 @@ namespace shift_lib
 
 
 		constexpr bool check_for_bad_events = false;
+		if ( not check_for_bad_events )
+			cout << "WARNING: checking for bad events currently turned off!" << endl;
+
 
 		// Error if no convergence, and then return without doing BE shift.
 		// However, not grave enough to kill event, so return true.
@@ -382,7 +388,7 @@ namespace shift_lib
 		{
 			const double LHS_integral = evaluate_LHS( sorted_list_of_pairs, thisPair.first );
 			LHS.push_back( std::make_pair( thisPair.first, LHS_integral ) );
-			//cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
+			cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
 		}
 
 		return;
@@ -435,7 +441,7 @@ namespace shift_lib
 			const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, thisPair.first, RHS_derivative );
 			RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 			RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
-			//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
+			cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 		}
 
 
