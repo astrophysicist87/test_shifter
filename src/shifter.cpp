@@ -42,7 +42,11 @@ namespace shift_lib
 		allParticles	= allParticles_in;
 
 		// Perform shifts.
-		shiftEvent();
+		constexpr int shift_mode = 2;
+		if ( shift_mode == 1 )
+			shiftEvent();
+		else
+			shiftEvent_v2();
 
 		// Return shifted results.
 		allParticles_in	= allParticles;
