@@ -129,7 +129,7 @@ namespace shift_lib
 	// at each pair's relative momentum.
 	void shifter::evaluate_shift_relation_at_pair_mode2(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				//vector< pair< double, double > > & LHS,
+				vector< pair< double, double > > & LHS,
 				vector< pair< double, double > > & RHS,
 				vector< pair< double, double > > & RHS_derivatives
 				)
