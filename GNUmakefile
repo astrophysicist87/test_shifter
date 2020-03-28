@@ -31,6 +31,7 @@ endif
 MAINSRC		=	main.cpp
 
 SRC			=	$(SRCDIR)/shifter.cpp \
+				$(SRCDIR)/shifter_p2.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
 				$(SRCDIR)/ParticleRecord.cpp \
