@@ -388,7 +388,7 @@ namespace shift_lib
 		{
 			const double LHS_integral = evaluate_LHS( sorted_list_of_pairs, thisPair.first );
 			LHS.push_back( std::make_pair( thisPair.first, LHS_integral ) );
-			cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
+			//cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
 		}
 
 		return;
@@ -441,7 +441,7 @@ namespace shift_lib
 			const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, thisPair.first, RHS_derivative );
 			RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 			RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
-			cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
+			//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 		}
 
 
