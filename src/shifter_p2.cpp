@@ -253,7 +253,7 @@ namespace shift_lib
 	
 				//if ( this1 != i1 and this2 != i2 ) continue;
 				//if ( this1 != i1 or this2 != i2 ) continue;
-				if ( i1<0 or i2<0 ) continue;
+				//if ( i1<0 or i2<0 ) continue;
 	
 				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 	
@@ -302,8 +302,8 @@ namespace shift_lib
 				const int i2 = iPair.second.second;
 	
 				//if ( this1 != i1 and this2 != i2 ) continue;
-				if ( this1 != i1 or this2 != i2 ) continue;
-				if ( i1<0 or i2<0 ) continue;
+				//if ( this1 != i1 or this2 != i2 ) continue;
+				//if ( i1<0 or i2<0 ) continue;
 	
 				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 	
