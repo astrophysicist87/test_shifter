@@ -116,9 +116,14 @@ install:	$(TARGET)
 	cp $(TARGET) $(INSTPATH)
 
 # --------------- Dependencies -------------------
-$(SRCDIR)/Arsenal.cpp: $(INCDIR)/Arsenal.h
-$(SRCDIR)/ParameterReader.cpp: $(INCDIR)/ParameterReader.h $(INCDIR)/Arsenal.h
-$(SRCDIR)/shifter.cpp: $(INCDIR)/shifter.h $(INCDIR)/ParameterReader.h \
-						$(INCDIR)/Arsenal.h $(INCDIR)/ParticleRecord.h
-./main.cpp: $(INCDIR)/shifter.h $(INCDIR)/ParameterReader.h $(INCDIR)/ParticleRecord.h
+$(SRCDIR)/Arsenal.cpp:         $(INCDIR)/Arsenal.h
+$(SRCDIR)/ParameterReader.cpp: $(INCDIR)/ParameterReader.h \
+                               $(INCDIR)/Arsenal.h
+$(SRCDIR)/shifter.cpp:         $(INCDIR)/shifter.h \
+                               $(INCDIR)/ParameterReader.h \
+                               $(INCDIR)/Arsenal.h \
+                               $(INCDIR)/ParticleRecord.h
+./main.cpp:                    $(INCDIR)/shifter.h \
+                               $(INCDIR)/ParameterReader.h \
+                               $(INCDIR)/ParticleRecord.h
 
