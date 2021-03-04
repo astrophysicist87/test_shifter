@@ -243,17 +243,19 @@ namespace shift_lib
 			//double RHS_BE_enhancement_derivative = 0.0;
 	
 			// the BE enhancement piece
-			//for (const auto & iPair : sorted_list_of_pairs)
+			for (const auto & iPair : sorted_list_of_pairs)
 			{
 				// JUST FOR NOW TO AVOID SO MANY BRANCHES AT RUNTIME
-				const auto & iPair = thisPair;
+				//const auto & iPair = thisPair;
 				
 				const int i1 = iPair.second.first;
 				const int i2 = iPair.second.second;
 	
-				//if ( this1 != i1 and this2 != i2 ) continue;
+				// include pairs with at least one particle in common with current pair
+				if ( this1 != i1 and this2 != i2 ) continue;
+				// include only the current pair
 				//if ( this1 != i1 or this2 != i2 ) continue;
-				//if ( i1<0 or i2<0 ) continue;
+				if ( i1<0 or i2<0 ) continue;
 	
 				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 	
@@ -293,17 +295,19 @@ namespace shift_lib
 			double RHS_BE_enhancement_derivative = 0.0;
 	
 			// the BE enhancement piece
-			//for (const auto & iPair : sorted_list_of_pairs)
+			for (const auto & iPair : sorted_list_of_pairs)
 			{
 				// JUST FOR NOW TO AVOID SO MANY BRANCHES AT RUNTIME
-				const auto & iPair = thisPair;
+				//const auto & iPair = thisPair;
 
 				const int i1 = iPair.second.first;
 				const int i2 = iPair.second.second;
 	
-				//if ( this1 != i1 and this2 != i2 ) continue;
+				// include pairs with at least one particle in common with current pair
+				if ( this1 != i1 and this2 != i2 ) continue;
+				// include only the current pair
 				//if ( this1 != i1 or this2 != i2 ) continue;
-				//if ( i1<0 or i2<0 ) continue;
+				if ( i1<0 or i2<0 ) continue;
 	
 				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 	
