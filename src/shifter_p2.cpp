@@ -208,7 +208,7 @@ namespace shift_lib
 			const double RHS_integral = evaluate_RHS_mode2( sorted_list_of_pairs, thisPair, thisPair.first, RHS_derivative );
 			RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 			RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
-			//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
+			cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 		}
 
 		return;
@@ -304,7 +304,7 @@ namespace shift_lib
 				const int i2 = iPair.second.second;
 	
 				// include pairs with at least one particle in common with current pair
-				if ( this1 != i1 and this2 != i2 ) continue;
+				//if ( this1 != i1 and this2 != i2 ) continue;
 				// include only the current pair
 				//if ( this1 != i1 or this2 != i2 ) continue;
 				if ( i1<0 or i2<0 ) continue;

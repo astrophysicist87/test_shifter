@@ -21,7 +21,9 @@ int main(int argc, char *argv[])
 	vector<ParticleRecord> allParticles;
 
 	// Read in the files
+  cout << "Generating events...";
 	generate_events(allParticles, paraRdr);
+  cout << "finished." << endl;
 
 	// Create HBT_event_generator object from allEvents
 	shifter event( paraRdr, allParticles, cout, cerr );
