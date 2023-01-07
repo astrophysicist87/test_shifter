@@ -6,8 +6,8 @@ mass       = 0.13957  # GeV
 # get particles randomly
 RNG_R      = 5.0     #fm
 RNG_a      = 0.2     #GeV/fm
-RNG_Nev    = 10
-RNG_mult   = 10
+RNG_Nev    = 1000
+RNG_mult   = 50
 RNG_xDir   = 0
 RNG_yDir   = 0
 RNG_zDir   = 1
