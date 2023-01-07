@@ -688,6 +688,8 @@ namespace shift_lib
 		// (skip i=0 case, not physical pair).
 		for (int i = 1; i < npairs; i++)
 		{
+      cout << "Computing shift for pair #" << i << " of " << npairs << endl;
+
 			const auto & thisPair = sorted_list_of_pairs.at(i);
 			const double this_qz = thisPair.first;
 			const int this1 = thisPair.second.first;

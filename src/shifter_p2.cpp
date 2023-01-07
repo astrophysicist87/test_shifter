@@ -162,14 +162,17 @@ namespace shift_lib
 
 		// Make sure pair density is stored, if needed.
 		set_pair_density( sorted_list_of_pairs );
+    cout << "Set pair density" << endl;
 
 		//------------------
 		// Set LHS integral.
 		set_LHS_mode2( sorted_list_of_pairs, LHS );
+    cout << "Set LHS mode 2" << endl;
 
 		//------------------
 		// Set RHS integral.
 		set_RHS_mode2( sorted_list_of_pairs, RHS, RHS_derivatives );
+    cout << "Set RHS mode 2" << endl;
 
 		return;
 	}
@@ -187,7 +190,7 @@ namespace shift_lib
 		{
 			const double LHS_integral = evaluate_LHS( sorted_list_of_pairs, thisPair.first );
 			LHS.push_back( std::make_pair( thisPair.first, LHS_integral ) );
-			cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
+			//cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
 		}
 
 		return;
@@ -208,7 +211,7 @@ namespace shift_lib
 			const double RHS_integral = evaluate_RHS_mode2( sorted_list_of_pairs, thisPair, thisPair.first, RHS_derivative );
 			RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 			RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
-			cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
+			//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 		}
 
 		return;
