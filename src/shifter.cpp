@@ -90,12 +90,12 @@ namespace shift_lib
 
 		// Loop through pairs of identical particles and find shifts.
 		bool enoughPairsToProceed = setSortedPairs( allParticles );
-		/*
+		///*
 		int iPair = 0;
 		for (const auto & thisPair: pairs_sorted_by_abs_qz)
 			cout << "Unshifted: " << iPair++ << "   " << thisPair.first << "   "
 					<< thisPair.second.first << "   " << thisPair.second.second << endl;
-		*/
+		//*/
 		if ( enoughPairsToProceed )
 		{
 			cout << "shifterCheck: NPair = " << sortedPairs.size() << endl;
@@ -108,14 +108,14 @@ namespace shift_lib
 		for (auto & thisParticle: allParticles_Shifted)
 			thisParticle.p += thisParticle.pShift;
 
-		/*
+		///*
 		// Reconstruct original vs. new qz distributions
 		enoughPairsToProceed = setSortedPairs( allParticles_Shifted );
 		iPair = 0;
 		for (const auto & thisPair: pairs_sorted_by_abs_qz)
 			cout << "Shifted: " << iPair++ << "   " << thisPair.first << "   "
 					<< thisPair.second.first << "   " << thisPair.second.second << endl;
-		*/
+		//*/
 
 		// Must have at least two pairs to carry out compensation.
 		const int nParticles = allParticles.size();
@@ -162,14 +162,14 @@ namespace shift_lib
 		}
 
 
-		/*
+		///*
 		// Output final qz distribution
 		enoughPairsToProceed = setSortedPairs( allParticles );
 		iPair = 0;
 		for (const auto & thisPair: pairs_sorted_by_abs_qz)
 			cout << "Compensated: " << iPair++ << "   " << thisPair.first << "   "
 					<< thisPair.second.first << "   " << thisPair.second.second << endl;
-		*/
+		//*/
 
 
 		constexpr bool check_for_bad_events = false;
