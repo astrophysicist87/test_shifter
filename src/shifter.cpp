@@ -133,7 +133,7 @@ namespace shift_lib
 			eSumShifted   += particle.p.e();
 			eDiffByComp   += dot3( particle.pComp, particle.p) / particle.p.e();
 		}
-	
+
 
 
 		constexpr bool perform_compensation = false;
@@ -266,6 +266,9 @@ namespace shift_lib
 		sort( pairs_sorted_by_qz.begin(), pairs_sorted_by_qz.end() );
 		sort( pairs_sorted_by_abs_qz.begin(), pairs_sorted_by_abs_qz.end() );
 
+		//std::cout << "Original:" << std::endl;
+		//for (const auto & pair : sortedPairs) std::cout << pair.first << std::endl;
+
 		return (true);
 	}
 
@@ -366,7 +369,7 @@ namespace shift_lib
 			for (int iPair = 0; iPair < (int)sorted_list_of_pairs.size()-1; ++iPair)
 				denBar.push_back( 1.0 );
 		}
-	
+
 
 		return;
 	}
@@ -647,7 +650,7 @@ namespace shift_lib
 				}
 				c = 0.5 * ( a + b ); // new midpoint
 			}
-		
+
 		}
 
 	//cout << "Made it to line = " << __LINE__ << endl;

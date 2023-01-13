@@ -121,10 +121,16 @@ namespace shift_lib
 
 	void shifter::shiftPairs_mode2()
 	{
+		std::cout << "Original:" << std::endl;
+		for (const auto & pair : pairs_sorted_by_abs_qz) std::cout << pair.first << std::endl;
+
 		vector< pair< double, double > > LHS, RHS, RHS_derivatives;
 		evaluate_shift_relation_at_pair_mode2( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 		compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
+
+		std::cout << "Shifted:" << std::endl;
+		for (const auto & pair : pairs_sorted_by_abs_qz) std::cout << pair.first << std::endl;
 
 		return;
 	}
