@@ -42,7 +42,7 @@ namespace shift_lib
 		allParticles	= allParticles_in;
 
 		// Perform shifts.
-		constexpr int shift_mode = 2;
+		constexpr int shift_mode = 1;
 		if ( shift_mode == 1 )
 			shiftEvent();
 		else
@@ -279,12 +279,12 @@ namespace shift_lib
 		evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
 
-		/*const double dqz = 0.001;	// GeV
+		const double dqz = 0.001;	// GeV
 		for (double qzVal = 0.0; qzVal < 20.0 + 0.5*dqz; qzVal+=dqz)
 			cout << "Effective source: " << qzVal << "   "
 					<< evaluate_effective_source( pairs_sorted_by_abs_qz, qzVal ) << endl;
 
-		if (1) exit(8);*/
+		if (1) exit(8);
 
 		compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
