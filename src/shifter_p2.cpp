@@ -63,10 +63,10 @@ namespace shift_lib
 			eSumShifted   += particle.p.e();
 			eDiffByComp   += dot3( particle.pComp, particle.p) / particle.p.e();
 		}
-	
 
 
-		constexpr bool perform_compensation = false;
+
+		constexpr bool perform_compensation = true;
 		if ( not perform_compensation )
 			cout << "WARNING: compensation currently turned off!" << endl;
 
@@ -118,7 +118,7 @@ namespace shift_lib
 		return;
 
 	}
-	
+
 	void shifter::shiftPairs_mode2()
 	{
 		vector< pair< double, double > > LHS, RHS, RHS_derivatives;
@@ -128,8 +128,8 @@ namespace shift_lib
 
 		return;
 	}
-	
-	
+
+
 
 	//-------------------------------------
 	// Compute the unshifted pair integrals
@@ -176,7 +176,7 @@ namespace shift_lib
 
 		return;
 	}
-	
+
 	void shifter::set_LHS_mode2(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				vector< pair< double, double > > & LHS )
@@ -195,7 +195,7 @@ namespace shift_lib
 
 		return;
 	}
-	
+
 	void shifter::set_RHS_mode2(
 				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 				vector< pair< double, double > > & RHS,
@@ -244,34 +244,34 @@ namespace shift_lib
 			int npairs_in_average = 0;
 			double RHS_BE_enhancement = 0.0;
 			//double RHS_BE_enhancement_derivative = 0.0;
-	
+
 			// the BE enhancement piece
 			for (const auto & iPair : sorted_list_of_pairs)
 			{
 				// JUST FOR NOW TO AVOID SO MANY BRANCHES AT RUNTIME
 				//const auto & iPair = thisPair;
-				
+
 				const int i1 = iPair.second.first;
 				const int i2 = iPair.second.second;
-	
+
 				// include pairs with at least one particle in common with current pair
 				if ( this1 != i1 and this2 != i2 ) continue;
 				// include only the current pair
 				//if ( this1 != i1 or this2 != i2 ) continue;
 				if ( i1<0 or i2<0 ) continue;
-	
+
 				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
-	
+
 				const double Delta_z = xDiff.pz();
-	
+
 				RHS_BE_enhancement += 2.0 * ( sin(upper_qz*Delta_z) - sin(lower_qz*Delta_z) )
 									* denBar.at(pairIndex-1) / Delta_z;
-	
+
 				//RHS_BE_enhancement_derivative += 2.0 * cos(upper_qz*Delta_z) * denBar.at(pairIndex-1);
-	
+
 				npairs_in_average++;
 			}
-	
+
 			RHS_BE_enhancement /= npairs_in_average;
 			//RHS_BE_enhancement_derivative /= npairs_in_average;
 			RHS_integral += RHS_BE_enhancement;
@@ -296,7 +296,7 @@ namespace shift_lib
 			int npairs_in_average = 0;
 			double RHS_BE_enhancement = 0.0;
 			double RHS_BE_enhancement_derivative = 0.0;
-	
+
 			// the BE enhancement piece
 			for (const auto & iPair : sorted_list_of_pairs)
 			{
@@ -305,25 +305,25 @@ namespace shift_lib
 
 				const int i1 = iPair.second.first;
 				const int i2 = iPair.second.second;
-	
+
 				// include pairs with at least one particle in common with current pair
 				//if ( this1 != i1 and this2 != i2 ) continue;
 				// include only the current pair
 				//if ( this1 != i1 or this2 != i2 ) continue;
 				if ( i1<0 or i2<0 ) continue;
-	
+
 				Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
-	
+
 				const double Delta_z = xDiff.pz();
-	
+
 				RHS_BE_enhancement += 2.0 * ( sin(qz*Delta_z) - sin(lower_qz*Delta_z) )
 									* denBar.at(pairIndex-1) / Delta_z;
-	
+
 				RHS_BE_enhancement_derivative += 2.0 * cos(qz*Delta_z) * denBar.at(pairIndex-1);
-	
+
 				npairs_in_average++;
 			}
-	
+
 			RHS_BE_enhancement /= npairs_in_average;
 			RHS_BE_enhancement_derivative /= npairs_in_average;
 			RHS_integral += RHS_BE_enhancement;
