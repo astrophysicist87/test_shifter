@@ -278,13 +278,13 @@ namespace shift_lib
 		vector< pair< double, double > > LHS, RHS, RHS_derivatives;
 		evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
-
+		///*
 		const double dqz = 0.001;	// GeV
 		for (double qzVal = 0.0; qzVal < 20.0 + 0.5*dqz; qzVal+=dqz)
 			cout << "Effective source: " << qzVal << "   "
 					<< evaluate_effective_source( pairs_sorted_by_abs_qz, qzVal ) << endl;
 
-		if (1) exit(8);
+		if (1) exit(8);//*/
 
 		compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
@@ -444,7 +444,7 @@ namespace shift_lib
 			const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, thisPair.first, RHS_derivative );
 			RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 			RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
-			cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
+			//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 		}
 
 
