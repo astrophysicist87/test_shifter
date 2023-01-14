@@ -323,8 +323,13 @@ namespace shift_lib
 		{
 			// for counting number of particles below given |q_z|
 			for (int iPair = 0; iPair < (int)sorted_list_of_pairs.size()-1; ++iPair)
+      {
 				denBar.push_back( 0.5 / ( sorted_list_of_pairs.at(iPair+1).first
 										- sorted_list_of_pairs.at(iPair).first ) );
+        cout << "denBar: " << iPair << "   " << denBar.back() << endl;
+      }
+if (1) exit(8);
+
 		}
 		else
 		{
