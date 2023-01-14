@@ -33,7 +33,7 @@ namespace shift_lib
 	void shifter::initialize_all( ParameterReader * paraRdr_in,
 		vector<ParticleRecord> & allParticles_in )
 	{
-		include_pair_density = true;
+		include_pair_density = false;
 
 		// Load parameters.
 		paraRdr			= paraRdr_in;
@@ -615,7 +615,7 @@ namespace shift_lib
 			const double this_qz = abs( allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() );
 
 
-			constexpr bool rescale_pair_momenta = true;
+			constexpr bool rescale_pair_momenta = false;
 
 			const double net_qz_shift = pairShifts.at(pairIndex);
 			const double factor = 0.5 * net_qz_shift / this_qz;
