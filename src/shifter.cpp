@@ -42,11 +42,7 @@ namespace shift_lib
 		allParticles	= allParticles_in;
 
 		// Perform shifts.
-		constexpr int shift_mode = 1;
-		if ( shift_mode == 1 )
-			shiftEvent();
-		else
-			shiftEvent_v2();
+		shiftEvent();
 
 		// Return shifted results.
 		allParticles_in	= allParticles;
@@ -63,6 +59,26 @@ namespace shift_lib
 
 	void shifter::update_records( vector<ParticleRecord> & allParticles_in )
 	{
+		allParticles.clear();
+		allParticles_Shifted.clear();
+		pairShifts.clear();
+		this_pair_shifted.clear();
+
+		denBar.clear();
+
+		sortedPairs.clear();
+		pairs_sorted_by_qzPRF.clear();
+		pairs_sorted_by_abs_qzPRF.clear();
+		pairs_sorted_by_qz.clear();
+		pairs_sorted_by_abs_qz.clear();
+
+		allParticles = allParticles_in;
+
+		// Perform shifts.
+		shiftEvent();
+
+		// Return shifted results.
+		allParticles_in	= allParticles;
 
 		return;
 	}
@@ -72,22 +88,6 @@ namespace shift_lib
 
 	void shifter::shiftEvent()
 	{
-		// Reset list of identical particles.
-		//allParticles.resize(0);
-
-		//auto start = std::chrono::system_clock::now();
-
-		// Loop through event record to store copies of current species.
-		/*for (int i = 0; i < event.size(); ++i)
-			if ( event[i].id() == idNow and (event[i].isFinal() or debugging) )
-			{
-				allParticles.push_back(
-				shifterHadron( idNow, i, event[i].p(), event[i].m(), event[i].vProd() ) );
-			}
-		*/
-
-		//cout << "allParticles.size() = " << allParticles.size() << endl;
-
 		// Loop through pairs of identical particles and find shifts.
 		bool enoughPairsToProceed = setSortedPairs( allParticles );
 		///*
@@ -136,7 +136,7 @@ namespace shift_lib
 
 
 
-		constexpr bool perform_compensation = false;
+		constexpr bool perform_compensation = true;
 		if ( not perform_compensation )
 			cout << "WARNING: compensation currently turned off!" << endl;
 
@@ -183,7 +183,6 @@ namespace shift_lib
 		and check_for_bad_events
 		and abs(eSumShifted - eSumOriginal) > COMPRELERR * eSumOriginal )
 		{
-			//infoPtr->errorMsg("Warning in shifter::shiftEvent: no consistent BE shift topology found, so skip BE");
 			cout << setprecision(16) << "shifterCheck: This event did not pass! Check: "
 					<< abs(eSumShifted - eSumOriginal) << " < " << COMPRELERR * eSumOriginal << "\n";
 			return;
@@ -193,19 +192,6 @@ namespace shift_lib
 			cout << setprecision(16) << "shifterCheck: This event passes! Check: "
 					<< abs(eSumShifted - eSumOriginal) << " < " << COMPRELERR * eSumOriginal << "\n";
 		}
-
-
-		// Store new particle copies with shifted momenta.
-		/*for (int i = 0; i < nStored[9]; ++i)
-		{
-			int iNew = event.copy( allParticles.at(i).iPos, 99);
-			event[ iNew ].p( allParticles.at(i).p );
-		}*/
-
-		//auto end = std::chrono::system_clock::now();
-
-		//std::chrono::duration<double> elapsed_seconds = end-start;
-		//std::cout << "shifterCheck: elapsed time: " << elapsed_seconds.count() << " s" << "\n";
 
 		// Done.
 		return;
@@ -278,43 +264,15 @@ namespace shift_lib
 		vector< pair< double, double > > LHS, RHS, RHS_derivatives;
 		evaluate_shift_relation_at_pair( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
 
-		///*
+		/*
 		const double dqz = 0.001;	// GeV
 		for (double qzVal = 0.0; qzVal < 20.0 + 0.5*dqz; qzVal+=dqz)
 			cout << "Effective source: " << qzVal << "   "
 					<< evaluate_effective_source( pairs_sorted_by_abs_qz, qzVal ) << endl;
 
-		if (1) exit(8);//*/
+		if (1) exit(8);*/
 
 		compute_shifts( pairs_sorted_by_abs_qz, LHS, RHS, RHS_derivatives );
-
-		/*
-		// some output to check stuff
-		const int npairs = LHS.size();
-		cout << "sizes: "
-				<< LHS.size() << "   "
-				<< RHS.size() << "   "
-				<< pairs_sorted_by_abs_qz.size() << "   "
-				//<< pairShifts.size()
-				<< endl;
-		for (int i = 1; i < npairs; i++)
-		{
-			const auto & thisPair = pairs_sorted_by_abs_qz.at(i);
-			const double this_qz = thisPair.first;
-			const int this1 = thisPair.second.first;
-			const int this2 = thisPair.second.second;
-			const double thisPair_shift = pairShifts.at(i-1);
-
-			cout << setprecision(16) << "CHECK: "
-					<< LHS.at(i).first << "   "
-					<< LHS.at(i).second << "   "
-					<< RHS.at(i).second << "   "
-					<< thisPair_shift
-					<< endl;
-		}
-
-		if (1) exit (8);
-		*/
 
 		return;
 	}
@@ -444,23 +402,7 @@ namespace shift_lib
 			const double RHS_integral = evaluate_RHS( sorted_list_of_pairs, RHS, thisPair, thisPair.first, RHS_derivative );
 			RHS.push_back( std::make_pair( thisPair.first, RHS_integral ) );
 			RHS_derivatives.push_back( std::make_pair( thisPair.first, RHS_derivative ) );
-			//cout << "CHECK RHS: " << thisPair.first << "   " << RHS_integral << endl;
 		}
-
-
-	/*cout << "Symmetry check of RHS: " << endl;
-	const double delQ = 2.0*sorted_list_of_pairs.back().first / 1000.0;
-	double tmp = 0.0, tmp_d = 0.0;
-	for (int i = -500; i <= 500; i++)
-	{
-		tmp = delQ * i;
-		cout << "fineRHS: " << tmp << "   "
-				<< evaluate_RHS( sorted_list_of_pairs, RHS,
-									sorted_list_of_pairs.front(),
-									tmp, tmp_d ) << endl;
-	}
-	if (1) exit(8);*/
-
 
 		return;
 	}
@@ -475,7 +417,6 @@ namespace shift_lib
 		double lower_qz  = sorted_list_of_pairs.at(pairIndex-1).first;
 		double upper_qz  = sorted_list_of_pairs.at(pairIndex).first;
 
-		//const double qz = thisPair.first;
 
 		double qz = abs(qz_in);
 		if ( qz < 1e-20 ) return (0.0);
@@ -511,8 +452,6 @@ namespace shift_lib
 			const int i2 = iPair.second.second;
 
 			if ( i1<0 or i2<0 ) continue;
-			if ( this1 != i1 and this2 != i2 ) continue;
-			//if ( this1 != i1 or  this2 != i2 ) continue;
 
 			Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
 
@@ -535,44 +474,6 @@ namespace shift_lib
 		return (RHS_integral);
 	}
 
-
-
-	/*double shifter::Newtons_Method( const double a, const double b )
-	{
-		const double ACCURACY = 1.e-6;
-		const int MAXTRIES = 100;
-
-		const double guess1 = -1.0/b;
-		const double guess2 = 1.0/b;
-
-		const double f1 = guess1*b + sin(b*(a+guess1));
-		const double f2 = guess2*b + sin(b*(a+guess2));
-
-		//cout << f1 << "   " << f2 << endl;
-
-		// Solve equation given by x*b + sin((a+x)*b) == 0
-		const double initial_guess = ( f1*f1 < f2*f2 ) ? guess1 : guess2;
-
-		double x = initial_guess;
-		double f = x*b + sin(b*(a+x));
-
-		int ntries = 0;
-		while ( abs(f) > ACCURACY and ntries < MAXTRIES )
-		{
-			double fp = b*(1.0 + cos(b*(a+x)));
-			//cout << setprecision(24) << "ntries = " << ntries << ": " << x << "   " << f << "   " << fp << endl;
-			if ( abs(fp) < 1.e-100 ) break;
-			f = x*b + sin(b*(a+x));
-			x -= f / fp;
-			ntries++;
-		}
-
-
-		if ( ntries == MAXTRIES ) cout << "WARNING: maximum number of tries reached! a=" << a << ", b=" << b << "; root x = " << x << endl;
-
-
-		return (x);
-	}*/
 
 
 	double shifter::compute_shift(
@@ -653,16 +554,6 @@ namespace shift_lib
 
 		}
 
-	//cout << "Made it to line = " << __LINE__ << endl;
-	/*const int i1 = thisPair.second.first;
-	const int i2 = thisPair.second.second;
-	Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
-	const double Delta_z = xDiff.pz();
-	const double check_root = Newtons_Method(qz0, Delta_z);
-	cout << "Newton's method gives " << check_root << endl;*/
-
-	//cout << "Final root: " << thisPair.first << "   " << x << endl;
-
 		return (x);
 
 	}
@@ -724,7 +615,6 @@ namespace shift_lib
 			const double this_qz = abs( allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() );
 
 
-	//cout << "CHECK SIGNS: " << this_qz << "   " << allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() << endl;
 			constexpr bool rescale_pair_momenta = true;
 
 			const double net_qz_shift = pairShifts.at(pairIndex);
@@ -753,7 +643,6 @@ namespace shift_lib
 				// Use computed shift for compensation
 				number_of_pairs_not_shifted++;
 
-				//*/
 				//Vec4 pDiff = allParticles.at(i1).p - allParticles.at(i2).p;
 				allParticles.at(i1).pComp += pDiff;
 				allParticles.at(i2).pComp -= pDiff;
