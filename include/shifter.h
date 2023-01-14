@@ -17,7 +17,7 @@
 using namespace std;
 
 namespace shift_lib
-	{
+{
 
 	template <class T>
 	inline T
@@ -127,6 +127,8 @@ namespace shift_lib
 			double evaluate_effective_source(
 					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 					const double qz );
+
+	};
 
 }
 
