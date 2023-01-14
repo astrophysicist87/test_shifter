@@ -33,7 +33,7 @@ namespace shift_lib
 	void shifter::initialize_all( ParameterReader * paraRdr_in,
 		vector<ParticleRecord> & allParticles_in )
 	{
-		include_pair_density = false;
+		include_pair_density = true;
 
 		// Load parameters.
 		paraRdr			= paraRdr_in;
