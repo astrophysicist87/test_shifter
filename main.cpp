@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	{
 		generate_events(allParticles, paraRdr);
 		event.update_records( allParticles );
-		cerr << "Finished "1 << iLoop+1 << " events" << endl;
+		cerr << "Finished " << iLoop+1 << " events" << endl;
 	}
 	//*/
 
