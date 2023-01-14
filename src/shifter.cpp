@@ -349,7 +349,7 @@ namespace shift_lib
 		{
 			const double LHS_integral = evaluate_LHS( sorted_list_of_pairs, thisPair.first );
 			LHS.push_back( std::make_pair( thisPair.first, LHS_integral ) );
-			cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
+			//cout << "CHECK LHS: " << thisPair.first << "   " << LHS_integral << endl;
 		}
 
 		return;

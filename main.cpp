@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	// Create HBT_event_generator object from allEvents
 	shifter event( paraRdr, allParticles, cout, cerr );
 
-	///*
+	/*
 	// Loop over several events
 	const int nLoops = paraRdr->getVal("RNG_nLoops");
 	for (int iLoop = 1; iLoop < nLoops; ++iLoop)
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 		generate_events(allParticles, paraRdr);
 		event.update_records( allParticles );
 	}
-	//*/
+	*/
 
 	//for ( auto const particle: allParticles )
 	//	cout << particle;
