@@ -42,7 +42,11 @@ namespace shift_lib
 		allParticles	= allParticles_in;
 
 		// Perform shifts.
-		shiftEvent();
+		constexpr int shift_mode = 2;
+		if ( shift_mode == 1 )
+			shiftEvent();
+		else
+			shiftEvent_v2();
 
 		// Return shifted results.
 		allParticles_in	= allParticles;
@@ -582,7 +586,7 @@ namespace shift_lib
 		// (skip i=0 case, not physical pair).
 		for (int i = 1; i < npairs; i++)
 		{
-      cout << "Computing shift for pair #" << i << " of " << npairs << endl;
+      //cout << "Computing shift for pair #" << i << " of " << npairs << endl;
 
 			const auto & thisPair = sorted_list_of_pairs.at(i);
 			const double this_qz = thisPair.first;
@@ -615,7 +619,7 @@ namespace shift_lib
 			const double this_qz = abs( allParticles.at(i1).p.pz() - allParticles.at(i2).p.pz() );
 
 
-			constexpr bool rescale_pair_momenta = false;
+			constexpr bool rescale_pair_momenta = true;
 
 			const double net_qz_shift = pairShifts.at(pairIndex);
 			const double factor = 0.5 * net_qz_shift / this_qz;

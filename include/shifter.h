@@ -128,6 +128,30 @@ namespace shift_lib
 					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 					const double qz );
 
+
+
+			// ---------------------------------
+			// Functions defined in shifter_p2.cpp
+			void shiftEvent_v2();
+			void shiftPairs_mode2();
+			void evaluate_shift_relation_at_pair_mode2(
+						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+						vector< pair< double, double > > & LHS,
+						vector< pair< double, double > > & RHS,
+						vector< pair< double, double > > & RHS_derivatives );
+			void set_LHS_mode2(
+						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+						vector< pair< double, double > > & LHS );
+			void set_RHS_mode2(
+						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+						vector< pair< double, double > > & RHS,
+						vector< pair< double, double > > & RHS_derivatives );
+			double evaluate_RHS_mode2(
+						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
+						const pair< double, pair <int,int> > & thisPair,
+						const double qz_in, double & RHS_derivative );
+
+
 	};
 
 }

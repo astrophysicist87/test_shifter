@@ -31,6 +31,7 @@ endif
 MAINSRC		=	main.cpp
 
 SRC			=	$(SRCDIR)/shifter.cpp \
+				$(SRCDIR)/shifter_p2.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
 				$(SRCDIR)/ParticleRecord.cpp \
@@ -119,6 +120,10 @@ $(SRCDIR)/Arsenal.cpp:         $(INCDIR)/Arsenal.h
 $(SRCDIR)/ParameterReader.cpp: $(INCDIR)/ParameterReader.h \
                                $(INCDIR)/Arsenal.h
 $(SRCDIR)/shifter.cpp:         $(INCDIR)/shifter.h \
+                               $(INCDIR)/ParameterReader.h \
+                               $(INCDIR)/Arsenal.h \
+                               $(INCDIR)/ParticleRecord.h
+$(SRCDIR)/shifter_p2.cpp:      $(INCDIR)/shifter.h \
                                $(INCDIR)/ParameterReader.h \
                                $(INCDIR)/Arsenal.h \
                                $(INCDIR)/ParticleRecord.h
