@@ -326,7 +326,7 @@ namespace shift_lib
       {
 				denBar.push_back( 0.5 / ( sorted_list_of_pairs.at(iPair+1).first
 										- sorted_list_of_pairs.at(iPair).first ) );
-        cout << "denBar: " << iPair << "   " << denBar.back() << endl;
+        cout << "denBar: " << sorted_list_of_pairs.at(iPair).first << "   " << denBar.back() << endl;
       }
 if (1) exit(8);
 
