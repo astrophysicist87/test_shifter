@@ -34,7 +34,7 @@ namespace shift_lib
 
 			vector<ParticleRecord> allParticles;
 			vector<ParticleRecord> allParticles_Shifted;
-		
+
 			// miscellaneous
 			string path;
 			ostream & out;
@@ -80,87 +80,10 @@ namespace shift_lib
 
 			bool setSortedPairs( const vector<ParticleRecord> & particles_to_sort );
 
-			void shiftPairs_mode1();
-
-			void set_LHS(
-					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-					vector< pair< double, double > > & LHS );
-
-			double evaluate_LHS(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				double qz );
-
-			void set_RHS(
-					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-					vector< pair< double, double > > & RHS,
-					vector< pair< double, double > > & RHS_derivatives );
-
-			double evaluate_RHS(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & RHS,
-				const pair< double, pair <int,int> > & thisPair,
-				const double qz, double & RHS_derivative );
-
-			/*double evaluate_RHS_mode2(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & RHS,
-				const pair< double, pair <int,int> > & thisPair,
-				const double qz, double & RHS_derivative );*/
-
-			double compute_shift(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & LHS,
-				const vector< pair< double, double > > & RHS,
-				const vector< pair< double, double > > & RHS_derivatives,
-				int iPair );
-
-			void compute_shifts(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & LHS,
-				const vector< pair< double, double > > & RHS,
-				const vector< pair< double, double > > & RHS_derivatives
-				);
-
-			void evaluate_shift_relation_at_pair(
-					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-					vector< pair< double, double > > & LHS,
-					vector< pair< double, double > > & RHS,
-					vector< pair< double, double > > & RHS_derivatives
-					);
-
-			//double Newtons_Method( const double a, const double b );
-
-			void set_pair_density( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
-
 			double evaluate_effective_source(
 					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 					const double qz );
 
-
-
-
-
-
-			// ---------------------------------
-			// Functions defined in shift_p2.cpp
-			void shiftEvent_v2();
-			void shiftPairs_mode2();
-			void evaluate_shift_relation_at_pair_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						vector< pair< double, double > > & LHS,
-						vector< pair< double, double > > & RHS,
-						vector< pair< double, double > > & RHS_derivatives );
-			void set_LHS_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						vector< pair< double, double > > & LHS );
-			void set_RHS_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						vector< pair< double, double > > & RHS,
-						vector< pair< double, double > > & RHS_derivatives );
-			double evaluate_RHS_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						const pair< double, pair <int,int> > & thisPair,
-						const double qz_in, double & RHS_derivative );
 	};
 
 }
