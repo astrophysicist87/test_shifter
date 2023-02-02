@@ -80,6 +80,10 @@ namespace shift_lib
 
 			bool setSortedPairs( const vector<ParticleRecord> & particles_to_sort );
 
+			vector<double> get_pairs( const vector<ParticleRecord> & particles );
+
+			double get_probability( const double R, const vector<double> & pair_qzs );
+
 			double evaluate_effective_source(
 					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 					const double qz );

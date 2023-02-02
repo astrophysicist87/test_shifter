@@ -63,6 +63,13 @@ namespace shift_lib
 		return;
 	}
 
+	double shifter::get_probability( const double R, const vector<double> & pair_qzs )
+	{
+		double result = 1.0;
+		for (const auto & qz: pairs) result += exp(-qz*qz*R*R);
+		return result;
+	}
+
 	//--------------------------------------------------------------------------
 	// Perform Bose-Einstein corrections on an event.
 
@@ -81,15 +88,25 @@ namespace shift_lib
 
 		// burn in distribution?
 
-		for (auto & particle : allParticles)
+		const double R = 5.0 / HBARC;
+		const int number_of_particles = allParticles.size();
+		vector<double> allParticles_copy = allParticles;
+
+		for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
 		{
 			// generate a shifted momentum
-			double x = particle.p.pz();
+			double x = allParticles.at(iParticle).p.pz();
     	double y = x + uniform_delta(generator);
+			allParticles_copy.at(iParticle).p.pz(y);
 
 			// get probability of current configuration
+			vector<double> unshifted_pairs = get_pairs( allParticles );
+			double P1 = get_probability( R, unshifted_pairs );
+
 
 			// get probability of shifted configuration
+			vector<double> shifted_pairs = get_pairs( allParticles_copy );
+			double P2 = get_probability( R, shifted_pairs );
 
 			// choose new configuration (shifted or original)
 		}
@@ -97,6 +114,24 @@ namespace shift_lib
 		// Done.
 		return;
 
+	}
+
+	//--------------------------------
+	vector<double> shifter::get_pairs( const vector<ParticleRecord> & particles )
+	{
+		vector<double> result;
+
+		const int number_of_particles = particles.size();
+
+		// get all values in vector first
+		for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
+		for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
+		{
+			Vec4 q = particles.at(i1).p - particles.at(i2).p;
+			result.push_back( q.pz() );
+		}
+
+		return result;
 	}
 
 	//--------------------------------
