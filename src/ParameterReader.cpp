@@ -113,7 +113,7 @@ namespace shift_lib
 	  Read all strings in argv[]. Each string is processed by the phraseOneLine function.
 	*/
 	{
-	  for (long ii=start_from; ii<argc; ii++) 
+	  for (long ii=start_from; ii<argc; ii++)
 		{
 			cout << "--> Reading CMD-line arg.: " << argv[ii] << endl;
 			phraseOneLine(argv[ii], commentSymbol);

@@ -49,13 +49,10 @@ namespace shift_lib
 			vector<double> denBar;
 
 			// Various ways to sort pairs
-			vector< pair< double, pair <int,int> > > sortedPairs;	// sorted by Q^2
-			vector< pair< double, pair <int,int> > > pairs_sorted_by_qzPRF;
-			vector< pair< double, pair <int,int> > > pairs_sorted_by_abs_qzPRF;
 			vector< pair< double, pair <int,int> > > pairs_sorted_by_qz;
 			vector< pair< double, pair <int,int> > > pairs_sorted_by_abs_qz;
 
-
+			int number_of_shifted_events = 0;
 
 		public:
 
@@ -81,6 +78,8 @@ namespace shift_lib
 			bool setSortedPairs( const vector<ParticleRecord> & particles_to_sort );
 
 			vector<double> get_pairs( const vector<ParticleRecord> & particles );
+
+			double standard_deviation( const vector<double> & v );
 
 			double get_probability( const double R, const vector<double> & pair_qzs );
 
