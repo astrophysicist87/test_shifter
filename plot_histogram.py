@@ -14,23 +14,45 @@ def getC(data):
     return bin_centers, num/(den + 1e-10)
         
 
+logPlot = False
+
 data = np.loadtxt('pairs.out')
-data_V4a = np.loadtxt('pairs_V4a.out')
+#data2 = np.loadtxt('pairs_n10_wNorm_nL100.out')
+#data3 = np.loadtxt('pairs_n3_nL100.out')
+#data4 = np.loadtxt('pairs_n3FULL_nL100.out')
 
 CF = getC(data)
-CF_V4a = getC(data_V4a)
+#CF2 = getC(data2)
+#CF3 = getC(data3)
+#CF4 = getC(data4)
 
 print(CF[0].shape,CF[1].shape)
 
-plt.plot(CF[0], CF[1], 'r-')
-plt.plot(CF_V4a[0], CF_V4a[1], 'b-')
+if logPlot:
+    CF0 = (CF[0])[CF[0]>0], (CF[1])[CF[0]>0]
+    plt.semilogy(CF0[0]**2, CF0[1]-1.0, 'r-')
+    #plt.plot(CF_V4a[0], CF_V4a[1], 'b-')
 
-xpts = np.linspace(-5,5,1001)
-plt.plot(xpts, 1.0+2.75*np.exp(-0.5*xpts**2*(5.0/0.19733)**2), '-', color='black')
-plt.plot(xpts, 1.0+0.8*np.exp(-0.5*xpts**2*(5.0/0.19733)**2), '-', color='black')
-plt.plot(xpts, 1.0+0.4*np.exp(-0.5*xpts**2*(5.0/0.19733)**2), '-', color='black')
+    x2pts = np.linspace(0,5**2,1001)
+    plt.semilogy(x2pts, np.exp(-0.5*x2pts*(5.0/0.19733)**2), '-', color='black')
+    plt.semilogy(x2pts, 0.91*np.exp(-0.5*x2pts*(5.0/0.19733)**2), '--', color='black')
+    #plt.plot(xpts, 1.0+0.4*np.exp(-0.5*xpts**2*(5.0/0.19733)**2), ':', color='black')
 
-plt.xlim([-0.25, 0.25])
+    plt.xlim([0.0, 0.09**2])
+    plt.ylim([5e-2, 1.1])
+else:
+    plt.plot(CF[0], CF[1], 'r-')
+    #plt.plot(CF2[0], CF2[1], 'b-')
+    #plt.plot(CF3[0], CF3[1], 'g-')
+    #plt.plot(CF4[0], CF4[1], '-', color='purple')
+
+    xpts = np.linspace(-5,5,1001)
+    plt.plot(xpts, 1.0+np.exp(-0.5*xpts**2*(5.0/0.19733)**2), '-', color='black')
+    #plt.plot(xpts, 1.0+0.91*np.exp(-0.5*xpts**2*(5.0/0.19733)**2), '--', color='black')
+    #plt.plot(xpts, 1.0+0.4*np.exp(-0.5*xpts**2*(5.0/0.19733)**2), ':', color='black')
+
+    plt.xlim([-0.25, 0.25])
+    plt.ylim([0.9, 2.2])
 
 #plt.hist(data[:,0], bins=1000, histtype='step', color='blue')
 #plt.hist(data[:,1], bins=1000, histtype='step', color='red')

@@ -24,7 +24,8 @@ namespace shift_lib
 
 		double mass 	= paraRdr->getVal("mass");
 		double RNG_R 	= paraRdr->getVal("RNG_R");
-		double RNG_a 	= paraRdr->getVal("RNG_a");
+		// double RNG_a 	= paraRdr->getVal("RNG_a");
+		double RNG_p0 = paraRdr->getVal("RNG_p0");
 
 		int RNG_Nev 	= paraRdr->getVal("RNG_Nev");
 		int RNG_mult 	= paraRdr->getVal("RNG_mult");
@@ -39,7 +40,8 @@ namespace shift_lib
 		if ( RNG_seed )
 			generator = default_random_engine (seed);
 
-		normal_distribution<double> distribution(0.0, RNG_R);
+		// normal_distribution<double> distribution(0.0, RNG_R);
+		normal_distribution<double> distribution(0.0, 1.0);
 
 		//for (int iEvent = 0; iEvent < RNG_Nev; ++iEvent)
 		//{
@@ -47,15 +49,18 @@ namespace shift_lib
 		//
 			for (int iParticle = 0; iParticle < RNG_mult; ++iParticle)
 			{
-			
-				double tP = 0.0;	// cf. paper
-				double xP = RNG_xDir ? distribution(generator) : 0.0;
-				double yP = RNG_yDir ? distribution(generator) : 0.0;
-				double zP = RNG_zDir ? distribution(generator) : 0.0;
 
-				double px = RNG_xDir ? RNG_a * distribution(generator) : 0.0;
-				double py = RNG_yDir ? RNG_a * distribution(generator) : 0.0;
-				double pz = RNG_zDir ? RNG_a * distribution(generator) : 0.0;
+				double tP = 0.0;	// cf. paper
+				double xP = RNG_xDir ? RNG_R * distribution(generator) : 0.0;
+				double yP = RNG_yDir ? RNG_R * distribution(generator) : 0.0;
+				double zP = RNG_zDir ? RNG_R * distribution(generator) : 0.0;
+
+				// double px = RNG_xDir ? RNG_a * distribution(generator) : 0.0;
+				// double py = RNG_yDir ? RNG_a * distribution(generator) : 0.0;
+				// double pz = RNG_zDir ? RNG_a * distribution(generator) : 0.0;
+				double px = RNG_xDir ? RNG_p0 * distribution(generator) : 0.0;
+				double py = RNG_yDir ? RNG_p0 * distribution(generator) : 0.0;
+				double pz = RNG_zDir ? RNG_p0 * distribution(generator) : 0.0;
 				double Ep = sqrt( mass*mass + px*px + py*py + pz*pz );
 
 				ParticleRecord particle;
@@ -76,7 +81,7 @@ namespace shift_lib
 				//event.particles.push_back( particle );
 				allParticles.push_back( particle );
 
-			} 
+			}
 
 		//	allEvents.push_back( event );
 		//
