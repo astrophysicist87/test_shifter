@@ -1,9 +1,12 @@
 #!/bin/bash
 
+RESULTS_DIRECTORY=results-mult$1-Nev$2-norm$3-nL$4
+
 sbatch <<EOT
 #!/bin/bash
 #SBATCH -t 72:00:00
 #SBATCH --nodes=1
+#SBATCH --output="$RESULTS_DIRECTORY/job_%a.out"
 
 RESULTS_DIRECTORY=results-mult$1-Nev$2-norm$3-nL$4
 
