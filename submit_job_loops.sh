@@ -3,9 +3,9 @@
 
 #mult$1-Nev$2-norm$3-nL$4
 
-for nL in 10 30 100 300 1000
+for nL in 10 100 300 1000
 do
-  for mult in 3 4 5 7 10 15 20 25 30 40 50 75 100
+  for mult in 3 4 5 7 10 25 50 75 100
   do
     for Nev in 100000 250000 500000
     do
