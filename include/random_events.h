@@ -33,12 +33,16 @@ namespace shift_lib
 		int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
 		int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
 
-		bool RNG_seed	= (bool)paraRdr->getVal("RNG_seed");
+		int RNG_seed	= (int)paraRdr->getVal("RNG_seed");
 
 		unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 		default_random_engine generator;
-		if ( RNG_seed )
+		if ( RNG_seed < 0 )
 			generator = default_random_engine (seed);
+		else
+			generator = default_random_engine (RNG_seed);
+
+cout << "RNG_seed = " << RNG_seed << endl;
 
 		// normal_distribution<double> distribution(0.0, RNG_R);
 		normal_distribution<double> distribution(0.0, 1.0);

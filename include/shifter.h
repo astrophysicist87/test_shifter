@@ -73,7 +73,7 @@ namespace shift_lib
 
 			~shifter();
 
-			void shiftEvent();
+			// void shiftEvent();
 			void shiftEvent_efficient();
 
 			bool setSortedPairs( const vector<ParticleRecord> & particles_to_sort );
@@ -82,6 +82,8 @@ namespace shift_lib
 			vector<double> get_shifted_pairs( const vector<double> & pairs,
 			 																	const vector<ParticleRecord> & particles,
 																				const int shifted_particle_index );
+
+			void get_combinations(int N, int K, vector<vector<int>> & combinations);
 
 			double standard_deviation( const vector<double> & v );
 
