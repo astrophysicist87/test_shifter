@@ -8,6 +8,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "../include/shifter.h"
 #include "../include/ParameterReader.h"
@@ -18,7 +19,7 @@ using namespace std;
 
 namespace shift_lib
 {
-	constexpr const char * SHIFT_MODE = "TRIAL3";
+	constexpr const char * SHIFT_MODE = "TRIAL4b";
 
 	constexpr bool BE_VERBOSE = false;
 
@@ -90,7 +91,7 @@ namespace shift_lib
 		do
 		{
 			int ind = 0;
-			vector<int> combination(3);
+			vector<int> combination(K);
 
 	    for (int i = 0; i < N; ++i) // [0..N-1] integers
         if (bitmask[i]) combination[ind++] = i;
@@ -117,100 +118,9 @@ namespace shift_lib
 	}
 
 
-
-	// double shifter::get_probability( const double R, const vector<double> & pair_qzs )
-	// {
-	// 	// if (true) return 1.0;
-	// 	// double result = 1.0;
-	// 	// double normalization = paraRdr->getVal("shifter_norm");
-	// 	// for (const auto & qz: pair_qzs) result += normalization*exp(-0.5*qz*qz*R*R);
-	// 	// if (pair_qzs.size() == 3)
-	// 	// {
-	// 	// 	// extra term from Zajc's paper
-	// 	// 	result += 2.0*exp(-0.25*R*R*(pair_qzs[0]*pair_qzs[0]
-	// 	// 																+pair_qzs[1]*pair_qzs[1]
-	// 	// 																+pair_qzs[2]*pair_qzs[2]));
-	// 	// }
-	// 	// return result;
-	// 	//--------------------------------------------------------------------------
-	// 	// double result = 0.0;
-	// 	// double normalization = paraRdr->getVal("shifter_norm");
-	// 	// for (const auto & qz: pair_qzs) result += log( 1.0 + normalization*exp(-0.5*qz*qz*R*R) );
-	// 	// return exp(result);
-	// 	//--------------------------------------------------------------------------
-	// 	// FULL PRODUCT
-	// 	// double result = 1.0;
-	// 	// double normalization = paraRdr->getVal("shifter_norm");
-	// 	// for (const auto & qz: pair_qzs) result *= 1.0 + normalization*exp(-0.5*qz*qz*R*R);
-	// 	// return result;
-	// 	//--------------------------------------------------------------------------
-	// 	// PRODUCT TO SECOND ORDER
-	// 	// const int n = pair_qzs.size();
-	// 	// double result = 1.0;
-	// 	// double norm = paraRdr->getVal("shifter_norm");
-	// 	// for (const auto & qz: pair_qzs) result += exp(-0.5*qz*qz*R*R);
-	// 	// for (int ij = 0;    ij < n; ij++)
-	// 	// for (int kl = ij+1; kl < n; kl++)
-	// 	// 	result += norm*norm*exp(-0.5*(pair_qzs[ij]*pair_qzs[ij]+pair_qzs[kl]*pair_qzs[kl])*R*R);
-	// 	// return result;
-	// 	//--------------------------------------------------------------------------
-	// 	// CRAMER VON MISES STATISTIC
-	// 	const int n = pair_qzs.size();
-	// 	double T = 1.0/(12.0*n);
-	// 	for (int i = 0; i < n; i++)
-	// 	{
-	// 		double xi = (2.0*i+1.0)/(2.0*n);
-	// 		double Fi = 0.5*(1.0+erf(pair_qzs[i]*R/sqrt(2.0)));
-	// 		T += (xi-Fi)*(xi-Fi);
-	// 	}
-	// 	return 1.0/sqrt(T);
-	// }
-
-
 //------------------------------------------------------------------------------
-// THIS IS ONLY FOR COMPARING PURPOSES
 double shifter::get_probability( const double R, const vector<double> & pair_qzs )
 {
-	//----------------------------------------------------------------------------
-	// KOLMOGOROV-SMIRNOV STATISTIC
-	// const int n = pair_qzs.size();
-	// double KS_D = -1.0;
-	// for (int i = 1; i <= n; i++)
-	// {
-	// 	double Fi = 0.5*(1.0+erf(pair_qzs[i-1]*R/sqrt(2.0)));
-	// 	KS_D = std::max( KS_D, std::max( Fi - (i-1.0)/n, (i*1.0/n) - Fi ) );
-	// }
-	// if (KS_D < 0.0 || KS_D > 1.0)
-	// {
-	// 	cerr << "KS_D = " << KS_D << endl;
-	// 	abort();
-	// }
-	// //auto KS_n1 = [](double x) { return ( (x < 0.5) ? 0.0 : 2.0*x-1.0 ); };
-	// //return 2.0-KS_n1(KS_D);
-	// return 2.0-KScdf( n, KS_D );
-	//----------------------------------------------------------------------------
-	// MODULATE ONLY LARGEST DEVIATION FROM CDF
-	// const int n = pair_qzs.size();
-	// double max_deviation = -1.0;
-	// int max_i = -1;
-	// for (int i = 1; i <= n; i++)
-	// {
-	// 	double Fi = 0.5*(1.0+erf(pair_qzs[i-1]*R/sqrt(2.0)));
-	// 	double this_deviation = std::max( Fi - (i-1.0)/n, (i*1.0/n) - Fi );
-	// 	if ( this_deviation > max_deviation )
-	// 	{
-	// 		max_i = i;
-	// 		max_deviation = this_deviation;
-	// 	}
-	// }
-	// if (max_deviation < 0.0 || max_deviation > 1.0 || max_i < 1 || max_i > n)
-	// {
-	// 	cerr << "max_deviation = " << max_deviation << endl;
-	// 	cerr << "max_i = " << max_i << endl;
-	// 	abort();
-	// }
-	// double qz = pair_qzs[max_i-1];
-	// return 1.0+exp(-0.5*qz*qz*R*R);
 	//--------------------------------------------------------------------------
 	// CRAMER VON MISES STATISTIC
 	if ( SHIFT_MODE == "CramerVonMises" )
@@ -257,6 +167,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 			result *= 1.0 + normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
 		return result;
 	}
+	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL2" )
 	{
 		const int n = pair_qzs.size();
@@ -274,6 +185,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		}
 		return result;
 	}
+	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL3" )
 	{
 		const int n = pair_qzs.size();
@@ -294,6 +206,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		}
 		return factor*result/np;
 	}
+	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL4" )
 	{
 		const int n = pair_qzs.size();
@@ -320,109 +233,55 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		}
 		return (sum / combinations.size());
 	}
+	//--------------------------------------------------------------------------
+	else if ( SHIFT_MODE == "TRIAL4b" )
+	{
+// cout << "Entering here" << endl;
+
+		const int n = pair_qzs.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		double result = 1.0;
+		double normalization = paraRdr->getVal("shifter_norm");
+
+		// store all factors for each pair
+		vector<double> factors(n);
+		for (int i = 0; i < n; i++)
+			factors[i] = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+
+		double sum = 0.0;
+		double term_count = 0.0;
+		std::string bitmask(np-1, 1); // np-1 leading 1's
+		bitmask.resize(n, 0); // n-np+1 trailing 0's
+
+		// fill unordered set with permutations of bitmask
+		std::unordered_set<std::string> bitmasks;
+		while (bitmasks.size() <= 10*np)
+		{
+			std::random_shuffle(bitmask.begin(), bitmask.end());
+			bitmasks.insert( bitmask );
+		}
+
+		// now iterate over permuted bitmasks
+		for (const auto & bitmask_permutation: bitmasks)
+		{
+			double term = 1.0;
+			for (int i = 0; i < n; ++i) // [0..n-1] integers
+				if (bitmask_permutation[i]) term *= factors[i];
+			sum += term;
+			term_count++;
+		}
+
+// cout << "Exiting here" << endl;
+
+		return (sum / term_count);
+	}
+	//--------------------------------------------------------------------------
 	else
 	{
 		cerr << "This mode not supported!" << endl;
 		abort();
 	}
 }
-
-	//--------------------------------------------------------------------------
-	// Perform Bose-Einstein corrections on an event.
-	// void shifter::shiftEvent()
-	// {
-	// 	//auto start = std::chrono::system_clock::now();
-	//
-	// 	// set up distributions
-	// 	int RNG_seed	= (int)paraRdr->getVal("RNG_seed");
-	//
-	// 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-	// 	default_random_engine generator;
-	// 	if ( RNG_seed < 0 )
-	// 		generator = default_random_engine (seed);
-	// 	else
-	// 		generator = default_random_engine (RNG_seed);
-	//
-	//
-	//   // const int n_burn_in = 10000;
-	//   const double delta = 0.5;
-	//
-	//   std::uniform_real_distribution<double> uniform_delta(-delta, delta);
-	//   std::uniform_real_distribution<double> uniform(0.0, 1.0);
-	//   std::normal_distribution<double>       normal(0.0, 1.0);
-	//
-	// 	const double R = paraRdr->getVal("RNG_R") / HBARC;
-	// 	const double RNG_p0 = paraRdr->getVal("RNG_p0");
-	// 	const int number_of_particles = allParticles.size();
-	// 	vector<ParticleRecord> allParticles_Original = allParticles;
-	//
-	// 	constexpr bool check_number_of_shifted_particles = false;
-	// 	int iLoop = 0;
-	// 	int nLoops = paraRdr->getVal("shifter_nLoops");
-	// 	for (iLoop = 0; iLoop < nLoops; iLoop++)
-	// 	{
-	// 		int number_of_shifted_particles = 0;
-	// 		for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
-	// 		{
-	// 			vector<ParticleRecord> allParticles_copy = allParticles;
-	//
-	// 			// generate a shifted momentum
-	// 			// double x = allParticles.at(iParticle).p.pz();
-	// 			double x = allParticles[iParticle].p.pz();
-	// 			double y = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
-	// 			// allParticles_copy.at(iParticle).p.pz(y);
-	// 			allParticles_copy[iParticle].p.pz(y);
-	//
-	// 			// get probability of current configuration
-	// 			vector<double> unshifted_pairs = get_pairs( allParticles );
-	// 			double P1 = get_probability( R, unshifted_pairs );
-	//
-	//
-	// 			// get probability of shifted configuration
-	// 			vector<double> shifted_pairs = get_pairs( allParticles_copy );
-	// 			double P2 = get_probability( R, shifted_pairs );
-	//
-	// 			// choose new configuration (shifted or original)
-	// 	    double log_alpha = std::min(0.0, log(P2/P1) + 0.0*(y*y - x*x));
-	// 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
-	// 	    x = shift_this_particle ? y : x;
-	//
-	// 			if (shift_this_particle) number_of_shifted_particles++;
-	//
-	// 			// store (possibly new) x to appropriate particle
-	// 			// allParticles.at(iParticle).p.pz(x);
-	// 			allParticles[iParticle].p.pz(x);
-	// 		}
-	// 		if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
-	// 	}
-	//
-	// 	// cout << "--------------------------------------------------------------------------------" << endl;
-	// 	// for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
-	// 	// 	cout << "OUT: " << number_of_shifted_events << "   " << iParticle
-	// 	// 			<< "   " << allParticles_Original.at(iParticle).p.pz()
-	// 	// 			<< "   " << allParticles.at(iParticle).p.pz()
-	// 	// 			<< "   " << allParticles_Original.at(iParticle).p.pz()
-	// 	// 					- allParticles.at(iParticle).p.pz() << endl;
-	// 	vector<double> old_pairs = get_pairs( allParticles_Original );
-	// 	vector<double> new_pairs = get_pairs( allParticles );
-	//
-	// 	for (int iPair = 0; iPair < new_pairs.size(); iPair++)
-	// 		cout << "OUT: " << number_of_shifted_events << "   " << iPair
-	// 				<< "   " << old_pairs[iPair]
-	// 				<< "   " << new_pairs[iPair]
-	// 				<< "   " << new_pairs[iPair] - old_pairs[iPair] << "\n";
-	//
-	// 	cerr << "CHECK: " << standard_deviation( old_pairs )
-	// 				<< "   " << standard_deviation( new_pairs ) << "   "
-	// 				<< "   " << standard_deviation( new_pairs )
-	// 											- standard_deviation( old_pairs ) << "\n";
-	//
-	// 	cerr << "Finished shifting in " << iLoop << " of " << nLoops << " loops.\n";
-	//
-	// 	// Done.
-	// 	return;
-	//
-	// }
 
 //--------------------------------
 vector<double> shifter::get_pairs( const vector<ParticleRecord> & particles )

@@ -57,7 +57,7 @@ plotCF = True
 logPlot = False
 differential = False
 
-data = np.loadtxt('n5_TRIAL3_nL1000.out')
+data = np.loadtxt('n4_TRIAL4b_nL100.out')
 
 #data_all = np.loadtxt('pairs_n3_n15000000_allorder.out')
 #data2_all = np.loadtxt('pairs_n3_n15000000_allorder_run2.out')
@@ -126,7 +126,7 @@ if plotCF:
 
 
             plt.xlim([-0.2, 0.2])
-            plt.ylim([0.8, 2.2])
+            plt.ylim([0.95, 2.05])
 
 else:
     num = getnum(data, False)

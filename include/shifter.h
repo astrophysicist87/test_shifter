@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <random>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdlib>
@@ -54,6 +55,10 @@ namespace shift_lib
 
 			int number_of_shifted_events = 0;
 
+			// need these objects for finding combinations
+			std::mt19937 comb_gen;
+			vector<int> indices;
+
 		public:
 
 			// Constructors, destructors, and initializers
@@ -63,7 +68,8 @@ namespace shift_lib
 						ostream & err_stream = std::cerr )
 						:
 						out(out_stream),
-						err(err_stream)
+						err(err_stream),
+						comb_gen(std::mt19937{std::random_device{}()})
 						{ initialize_all( paraRdr_in, allParticles_in ); };
 
 
@@ -92,6 +98,18 @@ namespace shift_lib
 			double evaluate_effective_source(
 					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 					const double qz );
+
+			// long long BinomialCoefficient(const long long n, const long long k)
+			// {
+			//   std::vector<long long> aSolutions(k);
+			//   aSolutions[0] = n - k + 1;
+			//
+			//   for (long long i = 1; i < k; ++i)
+			//     aSolutions[i] = aSolutions[i - 1] * (n - k + 1 + i) / (i + 1);
+			//
+			//   return aSolutions[k - 1];
+			// }
+
 
 	};
 
