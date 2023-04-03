@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	ParameterReader * paraRdr = new ParameterReader;
 	paraRdr->readFromFile("./parameters.dat");
 
-	string results_directory = std::string(argv[1]);
+	string results_directory = std::string(argv[1]) + "/";
 
 	// Read-in command-line arguments (skip one to require results directory path)
 	paraRdr->readFromArguments(argc, argv, 2);
