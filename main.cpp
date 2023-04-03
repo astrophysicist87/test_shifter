@@ -29,8 +29,10 @@ int main(int argc, char *argv[])
 	ParameterReader * paraRdr = new ParameterReader;
 	paraRdr->readFromFile("./parameters.dat");
 
-	// Read-in command-line arguments
-	paraRdr->readFromArguments(argc, argv);
+	string results_directory = std::string(argv[1]);
+
+	// Read-in command-line arguments (skip one to require results directory path)
+	paraRdr->readFromArguments(argc, argv, 2);
 	paraRdr->echo();
 
 	// Vector to hold all event information
@@ -47,7 +49,7 @@ int main(int argc, char *argv[])
 	shifter event( paraRdr, allParticles, cout, cerr );
 
 	for (auto i: allParticles) v1.push_back(i.p.pz());
-	event.print( 0, allParticles, "events.dat" );
+	event.print( 0, allParticles, results_directory + "events.dat" );
 
 
 	// Loop over several events
@@ -58,7 +60,7 @@ int main(int argc, char *argv[])
 		for (auto i: allParticles) v0.push_back(i.p.pz());
 		event.update_records( allParticles );
 		for (auto i: allParticles) v1.push_back(i.p.pz());
-		event.print( iLoop, allParticles, "events.dat" );
+		event.print( iLoop, allParticles, results_directory + "events.dat" );
 		cerr << "Finished " << iLoop+1 << " events" << endl;
 	}
 
