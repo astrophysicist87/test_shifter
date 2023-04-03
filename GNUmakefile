@@ -2,16 +2,16 @@
 #  Makefile                             Christopher J. Plumberg
 # =============================================================
 ##
-##  Environments :	MAIN	= 	main sourcefile	
+##  Environments :	MAIN	= 	main sourcefile
 ##
-##  Usage : 	(g)make	[all]		compile the whole project		
+##  Usage : 	(g)make	[all]		compile the whole project
 ##			install	make all and copy binary to $INSTPATH
-##			clean		remove objectfiles in obj_$TYPE 
+##			clean		remove objectfiles in obj_$TYPE
 ##			distclean	remove all objectsfiles and binaries
-##  
+##
 
 CC := g++
-CFLAGS= -O3 -std=c++11 -g
+CFLAGS= -O3 -std=c++17 -g
 
 RM				=	rm -f
 O               =	.o
@@ -31,7 +31,6 @@ endif
 MAINSRC		=	main.cpp
 
 SRC			=	$(SRCDIR)/shifter.cpp \
-				$(SRCDIR)/shifter_p2.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
 				$(SRCDIR)/ParticleRecord.cpp \
@@ -72,9 +71,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 $(SRCDIR)/%.cpp:
 	if [ -f $@ ] ; then touch $@ ; else false ; fi
 
-$(TARGET):	$(OBJECTS)	
+$(TARGET):	$(OBJECTS)
 	-@mkdir -p $(LIBDIR)
-		$(CC) $(OBJECTS) -o $(TARGET) $(LDFLAGS) 
+		$(CC) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
 
 $(TARGET_LIBRARY): $(OBJECTS)
 	-@mkdir -p $(LIBDIR)
@@ -99,14 +98,14 @@ lib:		mkdirs $(TARGET_LIBRARY) $(TARGET_DYN_LIBRARY)
 help:
 	@grep '^##' GNUmakefile
 
-mkdirs:	
+mkdirs:
 	-@mkdir -p $(OBJDIR)
 	-@mkdir -p $(LIBDIR)
 
-clean:		
+clean:
 	-rm -f $(OBJECTS)
 
-distclean:	
+distclean:
 	-rm -f $(TARGET)
 	-rm -f $(TARGET_LIBRARY)
 	-rm -f $(TARGET_DYN_LIBRARY)
@@ -126,4 +125,3 @@ $(SRCDIR)/shifter.cpp:         $(INCDIR)/shifter.h \
 ./main.cpp:                    $(INCDIR)/shifter.h \
                                $(INCDIR)/ParameterReader.h \
                                $(INCDIR)/ParticleRecord.h
-

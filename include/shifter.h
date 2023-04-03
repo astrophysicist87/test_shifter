@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <random>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdlib>
@@ -34,7 +35,7 @@ namespace shift_lib
 
 			vector<ParticleRecord> allParticles;
 			vector<ParticleRecord> allParticles_Shifted;
-		
+
 			// miscellaneous
 			string path;
 			ostream & out;
@@ -49,13 +50,14 @@ namespace shift_lib
 			vector<double> denBar;
 
 			// Various ways to sort pairs
-			vector< pair< double, pair <int,int> > > sortedPairs;	// sorted by Q^2
-			vector< pair< double, pair <int,int> > > pairs_sorted_by_qzPRF;
-			vector< pair< double, pair <int,int> > > pairs_sorted_by_abs_qzPRF;
 			vector< pair< double, pair <int,int> > > pairs_sorted_by_qz;
 			vector< pair< double, pair <int,int> > > pairs_sorted_by_abs_qz;
 
+			int number_of_shifted_events = 0;
 
+			// need these objects for finding combinations
+			std::mt19937 comb_gen;
+			vector<int> indices;
 
 		public:
 
@@ -66,7 +68,8 @@ namespace shift_lib
 						ostream & err_stream = std::cerr )
 						:
 						out(out_stream),
-						err(err_stream)
+						err(err_stream),
+						comb_gen(std::mt19937{std::random_device{}()})
 						{ initialize_all( paraRdr_in, allParticles_in ); };
 
 
@@ -74,93 +77,47 @@ namespace shift_lib
 
 			void update_records( vector<ParticleRecord> & allParticles_in );
 
+			void process_event( vector<ParticleRecord> & allParticles_in );
+
+			void print(int eventID, vector<ParticleRecord> & allParticles_in, const string & filename);
+
 			~shifter();
 
-			void shiftEvent();
+			// void shiftEvent();
+			void shiftEvent_efficient();
 
 			bool setSortedPairs( const vector<ParticleRecord> & particles_to_sort );
 
-			void shiftPairs_mode1();
+			vector<double> get_pairs( const vector<ParticleRecord> & particles );
+			vector<double> get_shifted_pairs( const vector<double> & pairs,
+			 																	const vector<ParticleRecord> & particles,
+																				const int shifted_particle_index );
 
-			void set_LHS(
-					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-					vector< pair< double, double > > & LHS );
+			void get_combinations(int N, int K, vector<vector<int>> & combinations);
 
-			double evaluate_LHS(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				double qz );
+			double standard_deviation( const vector<double> & v );
 
-			void set_RHS(
-					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-					vector< pair< double, double > > & RHS,
-					vector< pair< double, double > > & RHS_derivatives );
-
-			double evaluate_RHS(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & RHS,
-				const pair< double, pair <int,int> > & thisPair,
-				const double qz, double & RHS_derivative );
-
-			/*double evaluate_RHS_mode2(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & RHS,
-				const pair< double, pair <int,int> > & thisPair,
-				const double qz, double & RHS_derivative );*/
-
-			double compute_shift(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & LHS,
-				const vector< pair< double, double > > & RHS,
-				const vector< pair< double, double > > & RHS_derivatives,
-				int iPair );
-
-			void compute_shifts(
-				const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-				const vector< pair< double, double > > & LHS,
-				const vector< pair< double, double > > & RHS,
-				const vector< pair< double, double > > & RHS_derivatives
-				);
-
-			void evaluate_shift_relation_at_pair(
-					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-					vector< pair< double, double > > & LHS,
-					vector< pair< double, double > > & RHS,
-					vector< pair< double, double > > & RHS_derivatives
-					);
-
-			//double Newtons_Method( const double a, const double b );
-
-			void set_pair_density( const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs );
+			double get_probability( const double R, const vector<double> & pair_qzs );
 
 			double evaluate_effective_source(
 					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 					const double qz );
 
+			double get_RMSscale( const vector<ParticleRecord> & particles );
 
 
+			// long long BinomialCoefficient(const long long n, const long long k)
+			// {
+			//   std::vector<long long> aSolutions(k);
+			//   aSolutions[0] = n - k + 1;
+			//
+			//   for (long long i = 1; i < k; ++i)
+			//     aSolutions[i] = aSolutions[i - 1] * (n - k + 1 + i) / (i + 1);
+			//
+			//   return aSolutions[k - 1];
+			// }
 
 
-
-			// ---------------------------------
-			// Functions defined in shift_p2.cpp
-			void shiftEvent_v2();
-			void shiftPairs_mode2();
-			void evaluate_shift_relation_at_pair_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						vector< pair< double, double > > & LHS,
-						vector< pair< double, double > > & RHS,
-						vector< pair< double, double > > & RHS_derivatives );
-			void set_LHS_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						vector< pair< double, double > > & LHS );
-			void set_RHS_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						vector< pair< double, double > > & RHS,
-						vector< pair< double, double > > & RHS_derivatives );
-			double evaluate_RHS_mode2(
-						const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-						const pair< double, pair <int,int> > & thisPair,
-						const double qz_in, double & RHS_derivative );
 	};
 
 }
