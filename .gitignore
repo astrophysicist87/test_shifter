@@ -1,0 +1,6 @@
+*.out
+*.o
+*.e
+*.zip
+check_pairs.dat
+events.dat
