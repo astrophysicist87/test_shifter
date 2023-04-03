@@ -57,7 +57,7 @@ plotCF = True
 logPlot = False
 differential = False
 
-data = np.loadtxt('n4_TRIAL4b_nL100.out')
+data = np.loadtxt('n10_TRIAL3_nL1000.out')
 
 #data_all = np.loadtxt('pairs_n3_n15000000_allorder.out')
 #data2_all = np.loadtxt('pairs_n3_n15000000_allorder_run2.out')
@@ -105,7 +105,7 @@ if plotCF:
             #print(getavg(CF2[0], CF2[1], 0.15, 0.5))
             #print(getavg(CF3[0], CF3[1], 0.15, 0.5))
             #print(getavg(CF4[0], CF4[1], 0.15, 0.5))
-            plt.plot(CF[0], CF[1]/getavg(CF[0], CF[1], 0.2, 0.5), 'r-')
+            plt.plot(CF[0], CF[1]/getavg(CF[0], CF[1], 0.2, 0.25), 'r-')
             #plt.plot(CF2[0], CF2[1]/getavg(CF2[0], CF2[1], 0.2, 0.5), 'b-')
             #plt.plot(CF3[0], CF3[1]/getavg(CF3[0], CF3[1], 0.2, 0.5), 'go-')
             #plt.plot(CF4[0], CF4[1]/getavg(CF4[0], CF4[1], 0.2, 0.5), 'o-', color='purple')
@@ -125,19 +125,22 @@ if plotCF:
             plt.plot(xpts, np.exp(-0.5*xpts**2*0.25**2), ':', color='black') #n=10
 
 
-            plt.xlim([-0.2, 0.2])
-            plt.ylim([0.95, 2.05])
+            plt.xlim([-2.0, 2.0])
+            plt.ylim([0.5, 2.05])
 
 else:
     num = getnum(data, False)
     den = getden(data, False)
-    num2 = getnum(data2, False)
-    den2 = getden(data2, False)
+    #num2 = getnum(data2, False)
+    #den2 = getden(data2, False)
+    
+    print(np.sum(num[1]))
+    print(num[0][len(num[0])//2],num[1][len(num[1])//2])
 
-    #plt.plot(num[0], num[1], 'r-')
-    #plt.plot(den[0], den[1], 'b-')
-    plt.plot(num2[0], num2[1], 'g-')
-    plt.plot(den2[0], den2[1], '-', color='purple')
+    plt.plot(num[0], num[1], 'r-')
+    plt.plot(den[0], den[1], 'b-')
+    #plt.plot(num2[0], num2[1], 'g-')
+    #plt.plot(den2[0], den2[1], '-', color='purple')
 
     xpts = np.linspace(-5,5,nBins)
     norm, width, norm2 = 110, 0.15, 615

@@ -77,6 +77,10 @@ namespace shift_lib
 
 			void update_records( vector<ParticleRecord> & allParticles_in );
 
+			void process_event( vector<ParticleRecord> & allParticles_in );
+
+			void print(int eventID, vector<ParticleRecord> & allParticles_in, const string & filename);
+
 			~shifter();
 
 			// void shiftEvent();
@@ -98,6 +102,9 @@ namespace shift_lib
 			double evaluate_effective_source(
 					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
 					const double qz );
+
+			double get_RMSscale( const vector<ParticleRecord> & particles );
+
 
 			// long long BinomialCoefficient(const long long n, const long long k)
 			// {

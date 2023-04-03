@@ -2,3 +2,5 @@
 *.e
 *.out
 *.zip
+check_pairs.dat
+events.dat

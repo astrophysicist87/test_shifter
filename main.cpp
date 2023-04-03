@@ -47,6 +47,8 @@ int main(int argc, char *argv[])
 	shifter event( paraRdr, allParticles, cout, cerr );
 
 	for (auto i: allParticles) v1.push_back(i.p.pz());
+	event.print( 0, allParticles, "events.dat" );
+
 
 	// Loop over several events
 	const int nLoops = paraRdr->getVal("RNG_nLoops");
@@ -56,6 +58,7 @@ int main(int argc, char *argv[])
 		for (auto i: allParticles) v0.push_back(i.p.pz());
 		event.update_records( allParticles );
 		for (auto i: allParticles) v1.push_back(i.p.pz());
+		event.print( iLoop, allParticles, "events.dat" );
 		cerr << "Finished " << iLoop+1 << " events" << endl;
 	}
 
