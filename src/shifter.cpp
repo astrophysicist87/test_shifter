@@ -427,18 +427,18 @@ void shifter::shiftEvent_efficient()
 	vector<double> old_pairs = get_pairs( allParticles_Original );
 	vector<double> new_pairs = get_pairs( allParticles );
 
-	for (int iPair = 0; iPair < new_pairs.size(); iPair++)
-		cout << "OUT: " << number_of_shifted_events << "   " << iPair
-				<< "   " << old_pairs[iPair]
-				<< "   " << new_pairs[iPair]
-				<< "   " << new_pairs[iPair] - old_pairs[iPair] << "\n";
-
-	cerr << "CHECK: " << standard_deviation( old_pairs )
-				<< "   " << standard_deviation( new_pairs ) << "   "
-				<< "   " << standard_deviation( new_pairs )
-											- standard_deviation( old_pairs ) << "\n";
-
-	cerr << "Finished shifting in " << iLoop << " of " << nLoops << " loops.\n";
+	// for (int iPair = 0; iPair < new_pairs.size(); iPair++)
+	// 	cout << "OUT: " << number_of_shifted_events << "   " << iPair
+	// 			<< "   " << old_pairs[iPair]
+	// 			<< "   " << new_pairs[iPair]
+	// 			<< "   " << new_pairs[iPair] - old_pairs[iPair] << "\n";
+	//
+	// cerr << "CHECK: " << standard_deviation( old_pairs )
+	// 			<< "   " << standard_deviation( new_pairs ) << "   "
+	// 			<< "   " << standard_deviation( new_pairs )
+	// 										- standard_deviation( old_pairs ) << "\n";
+	//
+	// cerr << "Finished shifting in " << iLoop << " of " << nLoops << " loops.\n";
 
 	// Done.
 	return;
