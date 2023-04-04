@@ -40,6 +40,8 @@ namespace shift_lib
 		// Load parameters.
 		paraRdr			= paraRdr_in;
 
+		cout << "SHIFT_MODE = " << SHIFT_MODE << endl;
+
 		// process (i.e., shift and output) this event
 		process_event( allParticles_in );
 
