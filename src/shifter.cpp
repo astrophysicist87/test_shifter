@@ -19,7 +19,7 @@ using namespace std;
 
 namespace shift_lib
 {
-	constexpr const char * SHIFT_MODE = "RMSscale";
+	constexpr const char * SHIFT_MODE = "TRIAL3";
 
 	constexpr bool BE_VERBOSE = false;
 
