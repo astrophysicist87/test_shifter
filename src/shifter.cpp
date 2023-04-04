@@ -40,7 +40,7 @@ namespace shift_lib
 		// Load parameters.
 		paraRdr			= paraRdr_in;
 
-		cout << "SHIFT_MODE = " << SHIFT_MODE << endl;
+		// cout << "SHIFT_MODE = " << SHIFT_MODE << endl;
 
 		// process (i.e., shift and output) this event
 		process_event( allParticles_in );
@@ -502,54 +502,22 @@ void shifter::shiftEvent_efficient()
 		return (true);
 	}
 
-
-
-	// current effective source is 1 + < cos(qz Delta_z) >
-	double shifter::evaluate_effective_source(
-					const vector< pair< double, pair <int,int> > > & pairs,
-					const double qz )
+	//--------------------------------
+	double shifter::get_RMSscale( const vector<ParticleRecord> & particles )
 	{
-		int npairs_in_average = 0;
-		double effective_source = 0.0;
+		double result = 0.0;
+		const int number_of_particles = particles.size();
+		const int number_of_pairs = number_of_particles*(number_of_particles-1)/2;
 
-		// the BE enhancement piece
-		for (const auto & iPair : pairs)
+		for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
+		for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
 		{
-			const int i1 = iPair.second.first;
-			const int i2 = iPair.second.second;
-
-			if ( i1<0 or i2<0 ) continue;
-			//if ( this1 != i1 and this2 != i2 ) continue;
-			//if ( this1 != i1 or  this2 != i2 ) continue;
-
-			// Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
-			Vec4 xDiff = ( allParticles[i1].x - allParticles[i2].x ) / HBARC;
-			const double Delta_z = xDiff.pz();
-
-			effective_source += cos(qz*Delta_z);
-
-			npairs_in_average++;
+			const double dz = particles[i1].x.pz() - particles[i2].x.pz();
+			result += dz*dz;
 		}
 
-		return ( 1.0 + effective_source / npairs_in_average );
+		return sqrt(0.5*result/number_of_pairs);
 	}
-
-		//--------------------------------
-		double shifter::get_RMSscale( const vector<ParticleRecord> & particles )
-		{
-			double result = 0.0;
-			const int number_of_particles = particles.size();
-			const int number_of_pairs = number_of_particles*(number_of_particles-1)/2;
-
-			for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
-			for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
-			{
-				const double dz = particles[i1].x.pz() - particles[i2].x.pz();
-				result += dz*dz;
-			}
-
-			return sqrt(0.5*result/number_of_pairs);
-		}
 
 }	//End of namespace
 

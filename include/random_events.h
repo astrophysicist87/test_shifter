@@ -42,7 +42,7 @@ namespace shift_lib
 		else
 			generator = default_random_engine (RNG_seed);
 
-cout << "RNG_seed = " << RNG_seed << endl;
+// cout << "RNG_seed = " << RNG_seed << endl;
 
 		// normal_distribution<double> distribution(0.0, RNG_R);
 		normal_distribution<double> distribution(0.0, 1.0);

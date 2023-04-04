@@ -99,10 +99,6 @@ namespace shift_lib
 
 			double get_probability( const double R, const vector<double> & pair_qzs );
 
-			double evaluate_effective_source(
-					const vector< pair< double, pair <int,int> > > & sorted_list_of_pairs,
-					const double qz );
-
 			double get_RMSscale( const vector<ParticleRecord> & particles );
 
 
