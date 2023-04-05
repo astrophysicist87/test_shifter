@@ -300,7 +300,7 @@ else if ( SHIFT_MODE == "TRIAL5" )
 	const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 	double total = 0.0;
 	double normalization = paraRdr->getVal("shifter_norm");
-	int maxsep = n/2;
+	int maxsep = np/2;
 	for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
 	{
 		int i = -1;
