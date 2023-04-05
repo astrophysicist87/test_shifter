@@ -298,28 +298,35 @@ else if ( SHIFT_MODE == "TRIAL5" )
 	// use adjacent particle pairs and next-to-neighbor pairs
 	const int n = pair_qzs.size();
 	const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-	double result1 = 1.0, result2 = 1.0;
+	double total = 0.0;
 	double normalization = paraRdr->getVal("shifter_norm");
-	int i = -1;
-	for (int i1 = 0; i1 < np - 1; ++i1)
-	for (int i2 = i1 + 1; i2 < np; ++i2)
+	int maxsep = n/2;
+	for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
 	{
-		i++;
-		bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
-		if (!include_this_pair) continue;
-		result1 *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+		int i = -1;
+		double result = 1.0;
+		for (int i1 = 0; i1 < np - 1; ++i1)
+		for (int i2 = i1 + 1; i2 < np; ++i2)
+		{
+			i++;
+			int di = std::abs(i2-i1);
+			bool include_this_pair = (std::min(di, np-di) == step);
+			if (!include_this_pair) continue;
+			result *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+		}
+		total += result;
 	}
-	i = -1;
-	for (int i1 = 0; i1 < np - 1; ++i1)
-	for (int i2 = i1 + 1; i2 < np; ++i2)
-	{
-		i++;
-		bool include_this_pair = (i2 == i1+2) || (i1 == 1 && i2 == np-1)
-                             || (i1 == 0 && i2 == np-2);
-		if (!include_this_pair) continue;
-		result2 *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-	}
-	return 0.5*(result1+result2);
+	// i = -1;
+	// for (int i1 = 0; i1 < np - 1; ++i1)
+	// for (int i2 = i1 + 1; i2 < np; ++i2)
+	// {
+	// 	i++;
+	// 	bool include_this_pair = (i2 == i1+2) || (i1 == 1 && i2 == np-1)
+  //                            || (i1 == 0 && i2 == np-2);
+	// 	if (!include_this_pair) continue;
+	// 	result2 *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+	// }
+	return total/maxsep);
 }
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
