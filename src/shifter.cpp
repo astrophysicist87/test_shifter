@@ -297,7 +297,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	//--------------------------------------------------------------------------
 	else
 	{
-		cerr << "This mode not supported!" << endl;
+		cerr << "This mode (" << SHIFT_MODE << ") not supported!" << endl;
 		abort();
 	}
 }
