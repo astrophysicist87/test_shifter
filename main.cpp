@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 	ParameterReader * paraRdr = new ParameterReader;
 	paraRdr->readFromFile("./parameters.dat");
 
-	string results_directory = std::string(argv[1]) + "/";
-	string shift_mode = std::string(argv[2]) + "/";
+	string results_directory = std::string(argv[1]);
+	string shift_mode = std::string(argv[2]);
 
 	// Read-in command-line arguments (skip one to require results directory path)
 	paraRdr->readFromArguments(argc, argv, (string)("#"), 3);
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
 		#pragma omp critical
 		{
-			event.print( number_of_completed_events, allParticles, results_directory + "events.dat" );
+			event.print( number_of_completed_events, allParticles, results_directory + "/events.dat" );
 			cerr << "Finished " << number_of_completed_events++ << " events" << endl;
 		}
 	}
