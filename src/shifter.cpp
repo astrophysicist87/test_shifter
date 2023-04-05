@@ -319,7 +319,7 @@ else if ( SHIFT_MODE == "TRIAL5" )
 		if (!include_this_pair) continue;
 		result2 *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
 	}
-	return sqrt(result1*result2);
+	return 0.5*(result1+result2);
 }
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
