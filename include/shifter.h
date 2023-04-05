@@ -31,6 +31,8 @@ namespace shift_lib
 	{
 		private:
 
+			const string SHIFT_MODE;
+
 			ParameterReader * paraRdr;
 
 			vector<ParticleRecord> allParticles;
@@ -64,9 +66,11 @@ namespace shift_lib
 			// Constructors, destructors, and initializers
 			shifter( ParameterReader * paraRdr_in,
 						vector<ParticleRecord> & allParticles_in,
+						std::string & shift_mode,
 						ostream & out_stream = std::cout,
 						ostream & err_stream = std::cerr )
 						:
+						SHIFT_MODE(shift_mode),
 						out(out_stream),
 						err(err_stream),
 						comb_gen(std::mt19937{std::random_device{}()})

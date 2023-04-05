@@ -13,13 +13,11 @@
 #include "../include/shifter.h"
 #include "../include/ParameterReader.h"
 
-#include "KolmogorovSmirnovDist.c"
-
 using namespace std;
 
 namespace shift_lib
 {
-	constexpr const char * SHIFT_MODE = "TRIAL3";
+	// constexpr const char * SHIFT_MODE = "TRIAL3";
 
 	constexpr bool BE_VERBOSE = false;
 
@@ -133,22 +131,8 @@ namespace shift_lib
 double shifter::get_probability( const double R, const vector<double> & pair_qzs )
 {
 	//--------------------------------------------------------------------------
-	// CRAMER VON MISES STATISTIC
-	if ( SHIFT_MODE == "CramerVonMises" )
-	{
-		const int n = pair_qzs.size();
-		double T = 1.0/(12.0*n);
-		for (int i = 0; i < n; i++)
-		{
-			double xi = (2.0*i+1.0)/(2.0*n);
-			double Fi = 0.5*(1.0+erf(pair_qzs[i]*R/sqrt(2.0)));
-			T += (xi-Fi)*(xi-Fi);
-		}
-		return 1.0/sqrt(T);
-	}
-	//--------------------------------------------------------------------------
 	// FULL PRODUCT
-	else if ( SHIFT_MODE == "FullProduct" )
+	if ( SHIFT_MODE == "FullProduct" )
 	{
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
@@ -170,6 +154,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	// EXPERIMENTAL
 	else if ( SHIFT_MODE == "TRIAL" )
 	{
+		// use only np-1 independent pairs: first np-1 pairs in list
 		const int n = pair_qzs.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
@@ -181,6 +166,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL2" )
 	{
+		// use only np-1 independent pairs: 0:1, 1:2, 2:3, ..., np-2:np-1
 		const int n = pair_qzs.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
@@ -199,6 +185,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL3" )
 	{
+		// use only np-1 independent pairs, and cycle over which gets omitted
 		const int n = pair_qzs.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
@@ -220,6 +207,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL4" )
 	{
+		// use only np-1 independent pairs, and cycle over all possible combinations
 		const int n = pair_qzs.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
@@ -247,8 +235,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL4b" )
 	{
-// cout << "Entering here" << endl;
-
+		// use only np-1 independent pairs, and cycle over random sample of all possible combinations
 		const int n = pair_qzs.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;

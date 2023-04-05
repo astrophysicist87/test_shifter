@@ -32,9 +32,10 @@ int main(int argc, char *argv[])
 	paraRdr->readFromFile("./parameters.dat");
 
 	string results_directory = std::string(argv[1]) + "/";
+	string shift_mode = std::string(argv[2]) + "/";
 
 	// Read-in command-line arguments (skip one to require results directory path)
-	paraRdr->readFromArguments(argc, argv, (string)("#"), 2);
+	paraRdr->readFromArguments(argc, argv, (string)("#"), 3);
 	paraRdr->echo();
 
 	// Loop over several events
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 		generate_events(allParticles, paraRdr);
 
 		// Create shifter object for each event
-		shifter event( paraRdr, allParticles, cout, cerr );
+		shifter event( paraRdr, allParticles, shift_mode, cout, cerr );
 
 		#pragma omp critical
 		{
