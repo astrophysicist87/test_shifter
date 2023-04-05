@@ -298,20 +298,28 @@ else if ( SHIFT_MODE == "TRIAL5" )
 	// use adjacent particle pairs and next-to-neighbor pairs
 	const int n = pair_qzs.size();
 	const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-	double result = 1.0;
+	double result1 = 1.0, result2 = 1.0;
 	double normalization = paraRdr->getVal("shifter_norm");
 	int i = -1;
 	for (int i1 = 0; i1 < np - 1; ++i1)
 	for (int i2 = i1 + 1; i2 < np; ++i2)
 	{
 		i++;
-		bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1)
-                             || (i2 == i1+2) || (i1 == 1 && i2 == np-1)
+		bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
+		if (!include_this_pair) continue;
+		result1 *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+	}
+	i = -1;
+	for (int i1 = 0; i1 < np - 1; ++i1)
+	for (int i2 = i1 + 1; i2 < np; ++i2)
+	{
+		i++;
+		bool include_this_pair = (i2 == i1+2) || (i1 == 1 && i2 == np-1)
                              || (i1 == 0 && i2 == np-2);
 		if (!include_this_pair) continue;
-		result *= 1.0 + 0.25*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+		result2 *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
 	}
-	return result;
+	return sqrt(result1*result2);
 }
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
