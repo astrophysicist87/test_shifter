@@ -344,7 +344,11 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 			}
 			totals.push_back(factor*result/np);
 		}
-		return *max_element(totals.begin(), totals.end());;
+		auto rms = [](const vector<double> & v)
+                 { double sum = 0.0;
+                   for (const auto & e: v) sum += e*e;
+                   return sqrt(sum/v.size()); };
+		return rms(totals);
 	}
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
