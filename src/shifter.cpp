@@ -338,17 +338,21 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				int di = std::abs(i2-i1);
 				bool include_this_pair = (std::min(di, np-di) == step);
 				if (!include_this_pair) continue;
-				double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+				double term = 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
 				result *= term;
 				factor += 1.0/term;
 			}
 			totals.push_back(factor*result/np);
 		}
-		auto rms = [](const vector<double> & v)
-                 { double sum = 0.0;
-                   for (const auto & e: v) sum += e*e;
-                   return sqrt(sum/v.size()); };
-		return rms(totals);
+		// auto rms = [](const vector<double> & v)
+    //              { double sum = 0.0;
+    //                for (const auto & e: v) sum += e*e;
+    //                return sqrt(sum/v.size()); };
+		auto mean = [](const vector<double> & v)
+                  { double sum = 0.0;
+                    for (const auto & e: v) sum += e;
+                    return sqrt(sum/v.size()); };
+		return mean(totals);
 	}
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
