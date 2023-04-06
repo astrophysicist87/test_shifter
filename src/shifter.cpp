@@ -324,7 +324,6 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		// use adjacent particle pairs and next-to-neighbor pairs
 		const int n = pair_qzs.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double total = 0.0;
 		double normalization = paraRdr->getVal("shifter_norm");
 		int maxsep = np/2;
 		vector<double> totals;
@@ -343,8 +342,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				result *= term;
 				factor += 1.0/term;
 			}
-			// total += factor*result/np;
-			totals.push_back(total);
+			totals.push_back(factor*result/np);
 		}
 		return *max_element(totals.begin(), totals.end());;
 	}
