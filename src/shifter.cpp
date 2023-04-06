@@ -327,6 +327,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		double total = 0.0;
 		double normalization = paraRdr->getVal("shifter_norm");
 		int maxsep = np/2;
+		vector<double> totals;
 		for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
 		{
 			int i = -1;
@@ -342,9 +343,10 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				result *= term;
 				factor += 1.0/term;
 			}
-			total += factor*result/np;
+			// total += factor*result/np;
+			totals.push_back(total);
 		}
-		return total/maxsep;
+		return *max_element(totals.begin(), totals.end());;
 	}
 	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
