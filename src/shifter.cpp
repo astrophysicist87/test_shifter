@@ -320,6 +320,32 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		// return std::pow(total,1.0/maxsep);
 	}
 	//--------------------------------------------------------------------------
+	else if ( SHIFT_MODE == "TRIAL5b" )
+	{
+		// use adjacent particle pairs and next-to-neighbor pairs
+		const int n = pair_qzs.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		double total = 1.0;
+		double normalization = paraRdr->getVal("shifter_norm");
+		int maxsep = np/2;
+		for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
+		{
+			int i = -1;
+			double result = 1.0;
+			for (int i1 = 0; i1 < np - 1; ++i1)
+			for (int i2 = i1 + 1; i2 < np; ++i2)
+			{
+				i++;
+				int di = std::abs(i2-i1);
+				bool include_this_pair = (std::min(di, np-di) == step);
+				if (!include_this_pair) continue;
+				result *= 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+			}
+			total *= result;
+		}
+		return std::pow(total,1.0/maxsep);
+	}
+	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
 	{
 		const int n = pair_qzs.size();
