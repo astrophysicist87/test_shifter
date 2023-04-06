@@ -330,7 +330,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
 		{
 			int i = -1;
-			double result = 1.0;
+			double result = 1.0, factor = 0.0;
 			for (int i1 = 0; i1 < np - 1; ++i1)
 			for (int i2 = i1 + 1; i2 < np; ++i2)
 			{
@@ -338,9 +338,11 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				int di = std::abs(i2-i1);
 				bool include_this_pair = (std::min(di, np-di) == step);
 				if (!include_this_pair) continue;
-				result *= 1.0 + 0.5*sqrt(np*(np-1.0))*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+				double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+				result *= term;
+				factor += 1.0/term;
 			}
-			total += result;
+			total += factor*result/np;
 		}
 		return total/maxsep;
 	}
