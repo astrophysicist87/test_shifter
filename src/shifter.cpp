@@ -247,7 +247,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 			factor += 1.0/term;
 			terms.push_back(1.0/term);
 		}
-		for (auto & term: terms) term *= factor;
+		for (auto & term: terms) term *= result;
 		return *max_element(terms.begin(), terms.end());
 	}
 	//--------------------------------------------------------------------------
