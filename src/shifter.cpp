@@ -224,6 +224,33 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		return factor*result/np;
 	}
 	//--------------------------------------------------------------------------
+	else if ( SHIFT_MODE == "TRIAL3b" )
+	{
+		// use only np-1 independent pairs, and cycle over which gets omitted
+		const int n = pair_qzs.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		double result = 1.0;
+		double normalization = paraRdr->getVal("shifter_norm");
+		int i = -1;
+		double factor = 0.0;
+		vector<double> terms;
+		for (int i1 = 0; i1 < np - 1; ++i1)
+		for (int i2 = i1 + 1; i2 < np; ++i2)
+		{
+			i++;
+			// bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
+			int di = std::abs(i2-i1);
+			bool include_this_pair = (std::min(di, np-di) == step);
+			if (!include_this_pair) continue;
+			double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+			result *= term;
+			factor += 1.0/term;
+			terms.push_back(1.0/term);
+		}
+		for (auto & term: terms) term *= factor;
+		return *max_element(terms.begin(), terms.end());
+	}
+	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL4" )
 	{
 		// use only np-1 independent pairs, and cycle over all possible combinations
@@ -338,7 +365,7 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				int di = std::abs(i2-i1);
 				bool include_this_pair = (std::min(di, np-di) == step);
 				if (!include_this_pair) continue;
-				double term = 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+				double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
 				result *= term;
 				factor += 1.0/term;
 			}
@@ -495,18 +522,18 @@ void shifter::shiftEvent_efficient()
 	vector<double> old_pairs = get_pairs( allParticles_Original );
 	vector<double> new_pairs = get_pairs( allParticles );
 
-	// for (int iPair = 0; iPair < new_pairs.size(); iPair++)
-	// 	cout << "OUT: " << number_of_shifted_events << "   " << iPair
-	// 			<< "   " << old_pairs[iPair]
-	// 			<< "   " << new_pairs[iPair]
-	// 			<< "   " << new_pairs[iPair] - old_pairs[iPair] << "\n";
-	//
-	// cerr << "CHECK: " << standard_deviation( old_pairs )
-	// 			<< "   " << standard_deviation( new_pairs ) << "   "
-	// 			<< "   " << standard_deviation( new_pairs )
-	// 										- standard_deviation( old_pairs ) << "\n";
-	//
-	// cerr << "Finished shifting in " << iLoop << " of " << nLoops << " loops.\n";
+	for (int iPair = 0; iPair < new_pairs.size(); iPair++)
+		cout << "OUT: " << number_of_shifted_events << "   " << iPair
+				<< "   " << old_pairs[iPair]
+				<< "   " << new_pairs[iPair]
+				<< "   " << new_pairs[iPair] - old_pairs[iPair] << "\n";
+
+	cerr << "CHECK: " << standard_deviation( old_pairs )
+				<< "   " << standard_deviation( new_pairs ) << "   "
+				<< "   " << standard_deviation( new_pairs )
+											- standard_deviation( old_pairs ) << "\n";
+
+	cerr << "Finished shifting in " << iLoop << " of " << nLoops << " loops.\n";
 
 	// Done.
 	return;

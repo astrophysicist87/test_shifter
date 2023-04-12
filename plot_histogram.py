@@ -57,7 +57,7 @@ plotCF = True
 logPlot = False
 differential = False
 
-data = np.loadtxt('n10_TRIAL3_nL1000.out')
+data = np.loadtxt('tmp.out')
 
 #data_all = np.loadtxt('pairs_n3_n15000000_allorder.out')
 #data2_all = np.loadtxt('pairs_n3_n15000000_allorder_run2.out')
@@ -125,8 +125,8 @@ if plotCF:
             plt.plot(xpts, np.exp(-0.5*xpts**2*0.25**2), ':', color='black') #n=10
 
 
-            plt.xlim([-2.0, 2.0])
-            plt.ylim([0.5, 2.05])
+            plt.xlim([-0.25, 0.25])
+            plt.ylim([0.95, 2.05])
 
 else:
     num = getnum(data, False)

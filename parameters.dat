@@ -8,7 +8,7 @@ RNG_R      = 5.0     #fm
 #RNG_a      = 0.2     #GeV/fm
 RNG_p0      = 1.0     #GeV
 RNG_Nev    = 1
-RNG_mult   = 10
+RNG_mult   = 2
 RNG_xDir   = 0
 RNG_yDir   = 0
 RNG_zDir   = 1
@@ -18,6 +18,6 @@ RNG_nLoops = 1000000
 #===========
 # shifter settings
 shifter_norm   = 1.0  # dimensionless
-shifter_nLoops = 1000
+shifter_nLoops = 100
 
 # End of file
