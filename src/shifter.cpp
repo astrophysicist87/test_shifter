@@ -130,9 +130,25 @@ namespace shift_lib
 //------------------------------------------------------------------------------
 double shifter::get_probability( const double R, const vector<double> & pair_qzs )
 {
+	if ( SHIFT_MODE == "Exact" )
+	{
+		if (pair_qzs.size() != 3)
+		{
+			cerr << "Cannot run Exact mode with " << pair_qzs.size() << " pairs\n";
+			terminate();
+		}
+		double result = 1.0;
+		for (const auto & qz: pair_qzs) result += exp(-0.5*qz*qz*R*R);
+
+		// extra term from Zajc's paper
+		result += 2.0*exp(-0.25*R*R*(pair_qzs[0]*pair_qzs[0]
+																	+pair_qzs[1]*pair_qzs[1]
+																	+pair_qzs[2]*pair_qzs[2]));
+		return result;
+	}
 	//--------------------------------------------------------------------------
 	// FULL PRODUCT
-	if ( SHIFT_MODE == "FullProduct" )
+	else if ( SHIFT_MODE == "FullProduct" )
 	{
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
@@ -238,9 +254,8 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 		for (int i2 = i1 + 1; i2 < np; ++i2)
 		{
 			i++;
-			bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
-			// int di = std::abs(i2-i1);
-			// bool include_this_pair = (std::min(di, np-di) == 1);
+			int di = std::abs(i2-i1);
+			bool include_this_pair = (std::min(di, np-di) == 1);
 			if (!include_this_pair) continue;
 			double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
 			result *= term;
