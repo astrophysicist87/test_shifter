@@ -485,6 +485,7 @@ void shifter::shiftEvent_efficient()
                          const ParticleRecord & p2)
                         { return p1.p.pz() < p2.p.pz(); };
 
+	double proposal_weight = paraRdr->getVal("proposal_weight");
 	constexpr bool check_number_of_shifted_particles = false;
 	int iLoop = 0;
 	int nLoops = paraRdr->getVal("shifter_nLoops");
