@@ -512,7 +512,7 @@ void shifter::shiftEvent_efficient()
 									get_probability( R, shifted_pairs );
 
 			// choose new configuration (shifted or original)
-			double log_alpha = std::min(0.0, log(P2/P1) - 2.5*(y*y - x*x));
+			double log_alpha = std::min(0.0, log(P2/P1) + 2.5*(y*y - x*x));
 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
 
 			if ( SHIFT_MODE == "CramerVonMises" )
