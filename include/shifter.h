@@ -1,16 +1,16 @@
 #ifndef SHIFT_LIB_SHIFTER_H
 #define SHIFT_LIB_SHIFTER_H
 
-#include <omp.h>
-#include <iostream>
 #include <cmath>
-#include <iomanip>
-#include <vector>
-#include <random>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstdlib>
 #include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <vector>
+
+#include <omp.h>
 
 #include "ParameterReader.h"
 #include "ParticleRecord.h"
@@ -117,6 +117,26 @@ namespace shift_lib
 			//   return aSolutions[k - 1];
 			// }
 
+		inline vector<long> dec2binarr(long n, long dim)
+		{
+		    // note: res[dim] will save the sum res[0]+...+res[dim-1]
+		    // long* res = (long*)calloc(dim + 1, sizeof(long));
+		    vector<long> res(dim+1);
+		    long pos = dim - 1;
+
+		    // note: this will crash if dim < log_2(n)...
+		    while (n > 0)
+		    {
+		        res[pos] = n % 2;
+		        res[dim] += res[pos];
+		        n = n / 2; // integer division
+		        pos--;
+		    }
+
+		    return res;
+		}
+
+		double permanent(const vector<double> & A, long n);
 
 	};
 

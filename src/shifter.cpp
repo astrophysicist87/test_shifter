@@ -29,6 +29,8 @@ namespace shift_lib
 	constexpr double COMPFACMAX = 1000.;
 	constexpr int    NCOMPSTEP  = 10;
 
+	constexpr double TINY       = 1e-6;
+
 
 	void shifter::initialize_all( ParameterReader * paraRdr_in,
 		vector<ParticleRecord> & allParticles_in )
@@ -126,25 +128,100 @@ namespace shift_lib
 		return sqrt(variance);
 	}
 
+double shifter::permanent(const vector<double> & A, long n) // expects n by n matrix encoded as vector
+{
+    double sum = 0.0;
+    double rowsumprod = 0.0, rowsum = 0.0;
+    vector<long> chi(n + 1);
+    double C = (double)pow((double)2, n);
+
+    // loop all 2^n submatrices of A
+    for (long k = 1; k < C; k++)
+    {
+        rowsumprod = 1.0;
+        chi = dec2binarr(k, n); // characteristic vector
+
+        // loop columns of submatrix #k
+        for (long m = 0; m < n; m++)
+        {
+            rowsum = 0.0;
+
+            // loop rows and compute rowsum
+            for (long p = 0; p < n; p++)
+                rowsum += chi[p] * A[m * n + p];
+
+            // update product of rowsums
+            rowsumprod *= rowsum;
+
+            // (optional -- use for sparse matrices)
+            if (rowsumprod < TINY) break;
+        }
+
+        sum += (double)pow((double)-1, n - chi[n]) * rowsumprod;
+    }
+
+    return sum;
+}
+
 
 //------------------------------------------------------------------------------
 double shifter::get_probability( const double R, const vector<double> & pair_qzs )
 {
 	if ( SHIFT_MODE == "Exact" )
 	{
-		if (pair_qzs.size() != 3)
+		// if (pair_qzs.size() != 3)
+		// {
+		// 	cerr << "Cannot run Exact mode with " << pair_qzs.size() << " pairs\n";
+		// 	terminate();
+		// }
+		// double result = 1.0;
+		// for (const auto & qz: pair_qzs) result += exp(-0.5*qz*qz*R*R);
+		//
+		// // extra term from Zajc's paper
+		// result += 2.0*exp(-0.25*R*R*(pair_qzs[0]*pair_qzs[0]
+		// 															+pair_qzs[1]*pair_qzs[1]
+		// 															+pair_qzs[2]*pair_qzs[2]));
+		// return result;
+		const int n = pair_qzs.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		vector<double> A(np*np);
 		{
-			cerr << "Cannot run Exact mode with " << pair_qzs.size() << " pairs\n";
-			terminate();
+			int index = 0;
+			for (int i = 0; i < np; i++)
+			{
+				A[i*np+i] = 1.0;
+				for (int j = i+1; j < np; j++)
+				{
+					double tmp = exp(-0.25*pair_qzs[index]*pair_qzs[index]*R*R);
+					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
+					A[i*np+j] = tmp;
+					A[j*np+i] = tmp; // matrix is symmetric
+					index++;
+				}
+			}
 		}
-		double result = 1.0;
-		for (const auto & qz: pair_qzs) result += exp(-0.5*qz*qz*R*R);
+		// if (true)
+		// {
+		// 	for (int i = 0; i < np; i++)
+		// 	{
+		// 		for (int j = 0; j < np; j++)
+		// 			cout << A[i*np+j] << "   ";
+		// 		cout << endl;
+		// 	}
+		//
+		// 	double result = 1.0;
+		// 	for (const auto & qz: pair_qzs) result += exp(-0.5*qz*qz*R*R);
+		//
+		// 	// extra term from Zajc's paper
+		// 	result += 2.0*exp(-0.25*R*R*(pair_qzs[0]*pair_qzs[0]
+		// 																+pair_qzs[1]*pair_qzs[1]
+		// 																+pair_qzs[2]*pair_qzs[2]));
+		// 	std::cout << setprecision(10) << "Hard coded: " << result << std::endl;
+		// 	std::cout << "Function: " << permanent(A, np) << std::endl;
+		// 	std::terminate();
+		// }
 
-		// extra term from Zajc's paper
-		result += 2.0*exp(-0.25*R*R*(pair_qzs[0]*pair_qzs[0]
-																	+pair_qzs[1]*pair_qzs[1]
-																	+pair_qzs[2]*pair_qzs[2]));
-		return result;
+		return permanent(A, np);
 	}
 	//--------------------------------------------------------------------------
 	// FULL PRODUCT

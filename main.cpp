@@ -31,6 +31,14 @@ int main(int argc, char *argv[])
 	ParameterReader * paraRdr = new ParameterReader;
 	paraRdr->readFromFile("./parameters.dat");
 
+	if (argc < 3)
+	{
+		std::cerr << "--------------------------------------------------------------------------------" << std::endl;
+		std::cerr << "Cannot run with missing arguments!" << std::endl;
+		std::cerr << "--------------------------------------------------------------------------------" << std::endl;
+		std::terminate();
+	}
+
 	string results_directory = std::string(argv[1]);
 	string shift_mode = std::string(argv[2]);
 
