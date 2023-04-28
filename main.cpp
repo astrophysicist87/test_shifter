@@ -59,11 +59,14 @@ int main(int argc, char *argv[])
 		// Read in the files
 		generate_events(allParticles, paraRdr);
 
+		vector<ParticleRecord> allParticles_unshifted = allParticles;
+
 		// Create shifter object for each event
 		shifter event( paraRdr, allParticles, shift_mode, cout, cerr );
 
 		#pragma omp critical
 		{
+			event.print( number_of_completed_events, allParticles0, results_directory + "/events_unshifted.dat" );
 			event.print( number_of_completed_events, allParticles, results_directory + "/events.dat" );
 			cerr << "Finished " << number_of_completed_events++ << " events" << endl;
 		}
