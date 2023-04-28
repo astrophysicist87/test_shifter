@@ -169,19 +169,6 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 {
 	if ( SHIFT_MODE == "Exact" )
 	{
-		// if (pair_qzs.size() != 3)
-		// {
-		// 	cerr << "Cannot run Exact mode with " << pair_qzs.size() << " pairs\n";
-		// 	terminate();
-		// }
-		// double result = 1.0;
-		// for (const auto & qz: pair_qzs) result += exp(-0.5*qz*qz*R*R);
-		//
-		// // extra term from Zajc's paper
-		// result += 2.0*exp(-0.25*R*R*(pair_qzs[0]*pair_qzs[0]
-		// 															+pair_qzs[1]*pair_qzs[1]
-		// 															+pair_qzs[2]*pair_qzs[2]));
-		// return result;
 		const int n = pair_qzs.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		vector<double> A(np*np);
@@ -558,9 +545,17 @@ void shifter::shiftEvent_efficient()
 	vector<double> current_pairs = get_pairs(allParticles);
 
 	// need comparator for sorting particles by momentum
-	auto particleSort = [](const ParticleRecord & p1,
-                         const ParticleRecord & p2)
+	auto particleSort = []( const ParticleRecord & p1,
+                          const ParticleRecord & p2 )
                         { return p1.p.pz() < p2.p.pz(); };
+
+	// sort by pz
+	std::sort(allParticles.begin(), allParticles.end(), particleSort);
+
+	// get probability of current configuration
+	double P1 = (SHIFT_MODE == "RMSscale") ?
+							get_probability( RMSscale, current_pairs ) :
+							get_probability( R, current_pairs );
 
 	double proposal_weight = paraRdr->getVal("proposal_weight");
 	constexpr bool check_number_of_shifted_particles = false;
@@ -569,22 +564,21 @@ void shifter::shiftEvent_efficient()
 	for (iLoop = 0; iLoop < nLoops; iLoop++)
 	{
 		int number_of_shifted_particles = 0;
+
+		// loop over particles, re-sample one at a time
 		for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
 		{
 			// generate a shifted momentum
 			double x = allParticles[iParticle].p.pz();
 			double y = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
 
-			// get probability of current configuration
-			double P1 = (SHIFT_MODE == "RMSscale") ?
-									get_probability( RMSscale, current_pairs ) :
-									get_probability( R, current_pairs );
-
-			// get probability of shifted configuration
+			// compute shifted configuration
 			vector<ParticleRecord> allParticles_with_shift = allParticles;
 			allParticles_with_shift[iParticle].p.pz(y);
 			vector<double> shifted_pairs = get_shifted_pairs( current_pairs,
 																			allParticles_with_shift, iParticle );
+
+			// get probability of shifted configuration
 			double P2 = (SHIFT_MODE == "RMSscale") ?
 									get_probability( RMSscale, shifted_pairs ) :
 									get_probability( R, shifted_pairs );
@@ -593,28 +587,25 @@ void shifter::shiftEvent_efficient()
 			double log_alpha = std::min(0.0, log(P2/P1) + proposal_weight*(y*y - x*x));
 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
 
-			if ( SHIFT_MODE == "CramerVonMises" )
-				shift_this_particle = bool( P2 > P1 );
-
-			x = shift_this_particle ? y : x;
-
-// cout << "ratio = " << P2/P1 << ";   " << x << endl;
-
+			// re-set shifted quantities
 			if (shift_this_particle)
 			{
-				current_pairs = shifted_pairs;
+				x = y;													// re-set momentum of particle
+				current_pairs = shifted_pairs;	// re-set current configuration
+				P1 = P2;												// re-set probability of current configuration
 				number_of_shifted_particles++;
-			}
+				allParticles[iParticle].p.pz(x);
 
-			// store (possibly new) x to appropriate particle
-			allParticles[iParticle].p.pz(x);
+				// sort by pz
+				// std::sort(allParticles.begin(), allParticles.end(), particleSort);
+			}
 		}
 		if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
 	}
 
-	vector<double> old_pairs = get_pairs( allParticles_Original );
-	vector<double> new_pairs = get_pairs( allParticles );
-
+	// vector<double> old_pairs = get_pairs( allParticles_Original );
+	// vector<double> new_pairs = get_pairs( allParticles );
+	//
 	// for (int iPair = 0; iPair < new_pairs.size(); iPair++)
 	// 	cout << "OUT: " << number_of_shifted_events << "   " << iPair
 	// 			<< "   " << old_pairs[iPair]
@@ -654,41 +645,6 @@ void shifter::shiftEvent_efficient()
 
 			return result;
 		}
-
-
-
-	//--------------------------------
-	bool shifter::setSortedPairs( const vector<ParticleRecord> & particles_to_sort )
-	{
-		// Reset.
-		pairs_sorted_by_qz.clear();
-		pairs_sorted_by_abs_qz.clear();
-
-		const int number_of_particles = particles_to_sort.size();
-
-		// get all values in vector first
-		for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
-		for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
-		{
-			// Vec4 q = particles_to_sort.at(i1).p - particles_to_sort.at(i2).p;
-			Vec4 q = particles_to_sort[i1].p - particles_to_sort[i2].p;
-			pairs_sorted_by_qz.push_back( std::make_pair( q.pz(), std::make_pair(i1, i2) ) );
-			pairs_sorted_by_abs_qz.push_back( std::make_pair( abs(q.pz()), std::make_pair(i1, i2) ) );
-		}
-
-		// check if there are enough pairs of this species to do shift
-		if (pairs_sorted_by_qz.size() < 2)
-		{
-			//cout << "Not enough sorted pairs of species with pid=" << idNow << endl;
-			return false;
-		}
-
-		// THEN sort them (sorts on first column in ascending order automatically)
-		sort( pairs_sorted_by_qz.begin(), pairs_sorted_by_qz.end() );
-		sort( pairs_sorted_by_abs_qz.begin(), pairs_sorted_by_abs_qz.end() );
-
-		return (true);
-	}
 
 	//--------------------------------
 	double shifter::get_RMSscale( const vector<ParticleRecord> & particles )
