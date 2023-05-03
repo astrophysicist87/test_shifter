@@ -280,9 +280,9 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 }
 
 //--------------------------------
-vector<double> shifter::get_pairs( const vector<ParticleRecord> & particles )
+vector<vector<double>> shifter::get_pairs( const vector<ParticleRecord> & particles )
 {
-	vector<double> result;
+	vector<vector<double>> result;
 
 	const int number_of_particles = particles.size();
 
@@ -292,7 +292,7 @@ vector<double> shifter::get_pairs( const vector<ParticleRecord> & particles )
 	{
 		// Vec4 q = particles.at(i1).p - particles.at(i2).p;
 		Vec4 q = particles[i1].p - particles[i2].p;
-		result.push_back( {q.px(), q.py(), q.pz()} );
+		result.push_back( vector<double>({q.px(), q.py(), q.pz()}) );
 	}
 
 	return result;
@@ -407,7 +407,7 @@ void shifter::shiftEvent_efficient()
 		 																					 const vector<ParticleRecord> & particles,
 																							 const int shifted_particle_index )
 		{
-			vector<double> result = pairs;
+			vector<vector<double>> result = pairs;
 			// auto indexer = [nCols](size_t i, size_t j) { return i*nCols+j; };
 
 			const int number_of_particles = particles.size();
