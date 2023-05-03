@@ -344,7 +344,10 @@ void shifter::shiftEvent_efficient()
 							get_probability( RMSscale, current_pairs ) :
 							get_probability( R, current_pairs );
 
-	double proposal_weight = paraRdr->getVal("proposal_weight");
+	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
+	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
+	int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
+
 	constexpr bool check_number_of_shifted_particles = false;
 	int iLoop = 0;
 	int nLoops = paraRdr->getVal("shifter_nLoops");
@@ -359,9 +362,9 @@ void shifter::shiftEvent_efficient()
 			double x1 = allParticles[iParticle].p.px();
 			double y1 = allParticles[iParticle].p.py();
 			double z1 = allParticles[iParticle].p.pz();
-			double x2 = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
-			double y2 = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
-			double z2 = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
+			double x2 = RNG_xDir ? RNG_p0 * normal(generator) : 0.0;	// corresponds to choice of parameters in random_events.h
+			double y2 = RNG_yDir ? RNG_p0 * normal(generator) : 0.0;	// corresponds to choice of parameters in random_events.h
+			double z2 = RNG_zDir ? RNG_p0 * normal(generator) : 0.0;	// corresponds to choice of parameters in random_events.h
 
 			// compute shifted configuration
 			vector<ParticleRecord> allParticles_with_shift = allParticles;
