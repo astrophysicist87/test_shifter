@@ -87,31 +87,12 @@ namespace shift_lib
 	{
 		ofstream out(filename.c_str(), ios::app);
 		out << eventID << "   " << allParticles_in.size() << "\n";
-		for (const auto & particle: allParticles_in) out << particle.p.pz() << "\n";
+		for (const auto & particle: allParticles_in)
+			out << particle.p.px() << "   " << particle.p.py() << "   " << particle.p.pz() << "\n";
 		out.close();
 		return;
 	}
 
-
-	void shifter::get_combinations(int N, int K, vector<vector<int>> & combinations)
-	{
-		std::string bitmask(K, 1); // K leading 1's
-		bitmask.resize(N, 0); // N-K trailing 0's
-
-		// store integers and permute bitmask
-		do
-		{
-			int ind = 0;
-			vector<int> combination(K);
-
-	    for (int i = 0; i < N; ++i) // [0..N-1] integers
-        if (bitmask[i]) combination[ind++] = i;
-
-			combinations.push_back( combination );
-		} while (std::prev_permutation(bitmask.begin(), bitmask.end()));
-
-		return;
-	}
 
 	double shifter::standard_deviation( const vector<double> & v )
 	{
@@ -165,11 +146,11 @@ double shifter::permanent(const vector<double> & A, long n) // expects n by n ma
 
 
 //------------------------------------------------------------------------------
-double shifter::get_probability( const double R, const vector<double> & pair_qzs )
+double shifter::get_probability( const double R, const vector<vector<double>> & qVec )
 {
 	if ( SHIFT_MODE == "Exact" )
 	{
-		const int n = pair_qzs.size();
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		vector<double> A(np*np);
 		{
@@ -179,7 +160,11 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				A[i*np+i] = 1.0;
 				for (int j = i+1; j < np; j++)
 				{
-					double tmp = exp(-0.25*pair_qzs[index]*pair_qzs[index]*R*R);
+					auto q = qVec[index];
+					double q2 = inner_product(q.cbegin(), q.cend(),
+																		q.cbegin(),
+																		0.0);
+					double tmp = exp(-0.25*q2*R*R);
 					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
 					A[i*np+j] = tmp;
 					A[j*np+i] = tmp; // matrix is symmetric
@@ -187,27 +172,6 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				}
 			}
 		}
-		// if (true)
-		// {
-		// 	for (int i = 0; i < np; i++)
-		// 	{
-		// 		for (int j = 0; j < np; j++)
-		// 			cout << A[i*np+j] << "   ";
-		// 		cout << endl;
-		// 	}
-		//
-		// 	double result = 1.0;
-		// 	for (const auto & qz: pair_qzs) result += exp(-0.5*qz*qz*R*R);
-		//
-		// 	// extra term from Zajc's paper
-		// 	result += 2.0*exp(-0.25*R*R*(pair_qzs[0]*pair_qzs[0]
-		// 																+pair_qzs[1]*pair_qzs[1]
-		// 																+pair_qzs[2]*pair_qzs[2]));
-		// 	std::cout << setprecision(10) << "Hard coded: " << result << std::endl;
-		// 	std::cout << "Function: " << permanent(A, np) << std::endl;
-		// 	std::terminate();
-		// }
-
 		return permanent(A, np);
 	}
 	//--------------------------------------------------------------------------
@@ -216,76 +180,21 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	{
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
-		for (const auto & qz: pair_qzs) result *= 1.0 + normalization*exp(-0.5*qz*qz*R*R);
+		for (const auto & q: qVec)
+		{
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			result *= 1.0 + normalization*exp(-0.5*q2*R*R);
+		}
 		return result;
-	}
-	//--------------------------------------------------------------------------
-	// FULL PRODUCT RAISED TO A POWER
-	else if ( SHIFT_MODE == "FullProductPower" )
-	{
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		for (const auto & qz: pair_qzs) result *= 1.0 + 0.5*np*normalization*exp(-0.5*qz*qz*R*R);
-		return std::pow(result, 2.0/np);
 	}
 	//--------------------------------------------------------------------------
 	// EXPERIMENTAL
-	else if ( SHIFT_MODE == "TRIAL" )
-	{
-		// use only np-1 independent pairs: first np-1 pairs in list
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		for (int i = 0; i < np-1; i++)
-			result *= 1.0 + normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-		return result;
-	}
-	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL2" )
-	{
-		// use only np-1 independent pairs: 0:1, 1:2, 2:3, ..., np-2:np-1
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		int i = -1;
-		for (int i1 = 0; i1 < np - 1; ++i1)
-		for (int i2 = i1 + 1; i2 < np; ++i2)
-		{
-			i++;
-			bool include_this_pair = (i2 == i1+1) /*|| (i1 == 0 && i2 == np-1)*/;
-			if (!include_this_pair) continue;
-			result *= 1.0 + (0.5*np/**(np-1.)/np*/)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-		}
-		return result;
-	}
-	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL2b" )
-	{
-		// use np (np-1 independent) pairs: 0:1, 1:2, 2:3, ..., np-1:np
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		int i = -1;
-		for (int i1 = 0; i1 < np - 1; ++i1)
-		for (int i2 = i1 + 1; i2 < np; ++i2)
-		{
-			i++;
-			bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
-			if (!include_this_pair) continue;
-			result *= 1.0 + 0.5*(np-1.)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-		}
-		return result;
-	}
-	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL3" )
 	{
 		// use only np-1 independent pairs, and cycle over which gets omitted
-		const int n = pair_qzs.size();
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
@@ -297,112 +206,21 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 			i++;
 			bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
 			if (!include_this_pair) continue;
-			double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+			auto q = qVec[i];
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			double term = 1.0 + 0.5*np*normalization*exp(-0.5*q2*R*R);
 			result *= term;
 			factor += 1.0/term;
 		}
 		return factor*result/np;
 	}
 	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL3b" )
-	{
-		// use only np-1 independent pairs, and cycle over which gets omitted
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		int i = -1;
-		double factor = 0.0;
-		vector<double> terms;
-		for (int i1 = 0; i1 < np - 1; ++i1)
-		for (int i2 = i1 + 1; i2 < np; ++i2)
-		{
-			i++;
-			int di = std::abs(i2-i1);
-			bool include_this_pair = (std::min(di, np-di) == 1);
-			if (!include_this_pair) continue;
-			double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-			result *= term;
-			factor += 1.0/term;
-			terms.push_back(1.0/term);
-		}
-		for (auto & term: terms) term *= result;
-		return *max_element(terms.begin(), terms.end());
-	}
-	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL4" )
-	{
-		// use only np-1 independent pairs, and cycle over all possible combinations
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-
-		// compute all n-choose-(np-1) combinations of pairs
-		vector<vector<int>> combinations;
-		get_combinations(n, np-1, combinations);
-
-		// store all factors for each pair
-		vector<double> factors(n);
-		for (int i = 0; i < n; i++)
-			factors[i] = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-
-		// sum all products of terms and return average
-		double sum = 0.0;
-		for ( const auto & c : combinations )
-		{
-			double term = 1.0;
-			for ( const int & i : c ) term *= factors[i];
-			sum += term;
-		}
-		return (sum / combinations.size());
-	}
-	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL4b" )
-	{
-		// use only np-1 independent pairs, and cycle over random sample of all possible combinations
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-
-		// store all factors for each pair
-		vector<double> factors(n);
-		for (int i = 0; i < n; i++)
-			factors[i] = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-
-		double sum = 0.0;
-		double term_count = 0.0;
-		std::string bitmask(np-1, 1); // np-1 leading 1's
-		bitmask.resize(n, 0); // n-np+1 trailing 0's
-
-		// fill unordered set with permutations of bitmask
-		std::unordered_set<std::string> bitmasks;
-		while (bitmasks.size() <= 10*np)
-		{
-			std::random_shuffle(bitmask.begin(), bitmask.end());
-			bitmasks.insert( bitmask );
-		}
-
-		// now iterate over permuted bitmasks
-		for (const auto & bitmask_permutation: bitmasks)
-		{
-			double term = 1.0;
-			for (int i = 0; i < n; ++i) // [0..n-1] integers
-				if (bitmask_permutation[i]) term *= factors[i];
-			sum += term;
-			term_count++;
-		}
-
-// cout << "Exiting here" << endl;
-
-		return (sum / term_count);
-	}
-	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL5" )
 	{
 		// use adjacent particle pairs and next-to-neighbor pairs
-		const int n = pair_qzs.size();
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double total = 0.0;
 		double normalization = paraRdr->getVal("shifter_norm");
@@ -418,52 +236,20 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 				int di = std::abs(i2-i1);
 				bool include_this_pair = (std::min(di, np-di) == step);
 				if (!include_this_pair) continue;
-				result *= 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+				auto q = qVec[i];
+				double q2 = inner_product(q.cbegin(), q.cend(),
+																	q.cbegin(),
+																	0.0);
+				result *= 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*q2*R*R);
 			}
 			total += result;
 		}
 		return total/maxsep;
 	}
 	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL5b" )
-	{
-		// use adjacent particle pairs and next-to-neighbor pairs
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double normalization = paraRdr->getVal("shifter_norm");
-		int maxsep = np/2;
-		vector<double> totals;
-		for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
-		{
-			int i = -1;
-			double result = 1.0, factor = 0.0;
-			for (int i1 = 0; i1 < np - 1; ++i1)
-			for (int i2 = i1 + 1; i2 < np; ++i2)
-			{
-				i++;
-				int di = std::abs(i2-i1);
-				bool include_this_pair = (std::min(di, np-di) == step);
-				if (!include_this_pair) continue;
-				double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-				result *= term;
-				factor += 1.0/term;
-			}
-			totals.push_back(factor*result/np);
-		}
-		// auto rms = [](const vector<double> & v)
-    //              { double sum = 0.0;
-    //                for (const auto & e: v) sum += e*e;
-    //                return sqrt(sum/v.size()); };
-		auto mean = [](const vector<double> & v)
-                  { double sum = 0.0;
-                    for (const auto & e: v) sum += e;
-                    return sqrt(sum/v.size()); };
-		return mean(totals);
-	}
-	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "RMSscale" )
 	{
-		const int n = pair_qzs.size();
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
@@ -475,7 +261,11 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 			i++;
 			bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
 			if (!include_this_pair) continue;
-			double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+			auto q = qVec[i];
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			double term = 1.0 + 0.5*np*normalization*exp(-0.5*q2*R*R);
 			result *= term;
 			factor += 1.0/term;
 		}
@@ -502,7 +292,7 @@ vector<double> shifter::get_pairs( const vector<ParticleRecord> & particles )
 	{
 		// Vec4 q = particles.at(i1).p - particles.at(i2).p;
 		Vec4 q = particles[i1].p - particles[i2].p;
-		result.push_back( q.pz() );
+		result.push_back( {q.px(), q.py(), q.pz()} );
 	}
 
 	return result;
@@ -532,22 +322,19 @@ void shifter::shiftEvent_efficient()
 
 	const double R = paraRdr->getVal("RNG_R") / HBARC;
 	const double RMSscale = get_RMSscale(allParticles) / HBARC;
-// if (true)
-// {
-// 	cout << "R = " << R << endl;
-// 	cout << "RMSscale = " << RMSscale << endl;
-// 	terminate();
-// }
+
 	const double RNG_p0 = paraRdr->getVal("RNG_p0");
 	const int number_of_particles = allParticles.size();
 	vector<ParticleRecord> allParticles_Original = allParticles;
 
-	vector<double> current_pairs = get_pairs(allParticles);
+	vector<vector<double>> current_pairs = get_pairs(allParticles);
 
 	// need comparator for sorting particles by momentum
 	auto particleSort = []( const ParticleRecord & p1,
                           const ParticleRecord & p2 )
-                        { return p1.p.pz() < p2.p.pz(); };
+                        { return (p1.p.px() < p2.p.px())
+															&& (p1.p.py() < p2.p.py())
+															&& (p1.p.pz() < p2.p.pz()); };
 
 	// sort by pz
 	std::sort(allParticles.begin(), allParticles.end(), particleSort);
@@ -569,13 +356,19 @@ void shifter::shiftEvent_efficient()
 		for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
 		{
 			// generate a shifted momentum
-			double x = allParticles[iParticle].p.pz();
-			double y = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
+			double x1 = allParticles[iParticle].p.px();
+			double y1 = allParticles[iParticle].p.py();
+			double z1 = allParticles[iParticle].p.pz();
+			double x2 = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
+			double y2 = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
+			double z2 = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
 
 			// compute shifted configuration
 			vector<ParticleRecord> allParticles_with_shift = allParticles;
-			allParticles_with_shift[iParticle].p.pz(y);
-			vector<double> shifted_pairs = get_shifted_pairs( current_pairs,
+			allParticles_with_shift[iParticle].p.px(x2);
+			allParticles_with_shift[iParticle].p.py(y2);
+			allParticles_with_shift[iParticle].p.pz(z2);
+			vector<vector<double>> shifted_pairs = get_shifted_pairs( current_pairs,
 																			allParticles_with_shift, iParticle );
 
 			// get probability of shifted configuration
@@ -584,17 +377,18 @@ void shifter::shiftEvent_efficient()
 									get_probability( R, shifted_pairs );
 
 			// choose new configuration (shifted or original)
-			double log_alpha = std::min(0.0, log(P2/P1) + proposal_weight*(y*y - x*x));
+			double log_alpha = std::min(0.0, log(P2/P1));
 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
 
 			// re-set shifted quantities
 			if (shift_this_particle)
 			{
-				x = y;													// re-set momentum of particle
-				current_pairs = shifted_pairs;	// re-set current configuration
-				P1 = P2;												// re-set probability of current configuration
+				current_pairs = shifted_pairs;		// re-set current configuration
+				P1 = P2;													// re-set probability of current configuration
 				number_of_shifted_particles++;
-				allParticles[iParticle].p.pz(x);
+				allParticles[iParticle].p.px(x2);	// re-set momentum of particle
+				allParticles[iParticle].p.py(y2);	// re-set momentum of particle
+				allParticles[iParticle].p.pz(z2);	// re-set momentum of particle
 
 				// sort by pz
 				// std::sort(allParticles.begin(), allParticles.end(), particleSort);
@@ -603,29 +397,13 @@ void shifter::shiftEvent_efficient()
 		if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
 	}
 
-	// vector<double> old_pairs = get_pairs( allParticles_Original );
-	// vector<double> new_pairs = get_pairs( allParticles );
-	//
-	// for (int iPair = 0; iPair < new_pairs.size(); iPair++)
-	// 	cout << "OUT: " << number_of_shifted_events << "   " << iPair
-	// 			<< "   " << old_pairs[iPair]
-	// 			<< "   " << new_pairs[iPair]
-	// 			<< "   " << new_pairs[iPair] - old_pairs[iPair] << "\n";
-	//
-	// cerr << "CHECK: " << standard_deviation( old_pairs )
-	// 			<< "   " << standard_deviation( new_pairs ) << "   "
-	// 			<< "   " << standard_deviation( new_pairs )
-	// 										- standard_deviation( old_pairs ) << "\n";
-	//
-	// cerr << "Finished shifting in " << iLoop << " of " << nLoops << " loops.\n";
-
 	// Done.
 	return;
 
 }
 
 		//--------------------------------
-		vector<double> shifter::get_shifted_pairs( const vector<double> & pairs,
+		vector<vector<double>> shifter::get_shifted_pairs( const vector<vector<double>> & pairs,
 		 																					 const vector<ParticleRecord> & particles,
 																							 const int shifted_particle_index )
 		{
@@ -639,7 +417,10 @@ void shifter::shiftEvent_efficient()
 			for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
 			{
 				if (i1==shifted_particle_index || i2==shifted_particle_index)
-					result[iPair] = particles[i1].p.pz() - particles[i2].p.pz();
+					result[iPair] = vector<double>({
+														particles[i1].p.px() - particles[i2].p.px(),
+														particles[i1].p.py() - particles[i2].p.py(),
+														particles[i1].p.pz() - particles[i2].p.pz()});
 				iPair++;
 			}
 

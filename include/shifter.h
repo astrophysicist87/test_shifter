@@ -97,46 +97,32 @@ namespace shift_lib
 			 																	const vector<ParticleRecord> & particles,
 																				const int shifted_particle_index );
 
-			void get_combinations(int N, int K, vector<vector<int>> & combinations);
-
 			double standard_deviation( const vector<double> & v );
 
-			double get_probability( const double R, const vector<double> & pair_qzs );
+			double get_probability( const double R, const vector<vector<double>> & qVec );
 
 			double get_RMSscale( const vector<ParticleRecord> & particles );
 
+			inline vector<long> dec2binarr(long n, long dim)
+			{
+			    // note: res[dim] will save the sum res[0]+...+res[dim-1]
+			    // long* res = (long*)calloc(dim + 1, sizeof(long));
+			    vector<long> res(dim+1);
+			    long pos = dim - 1;
 
-			// long long BinomialCoefficient(const long long n, const long long k)
-			// {
-			//   std::vector<long long> aSolutions(k);
-			//   aSolutions[0] = n - k + 1;
-			//
-			//   for (long long i = 1; i < k; ++i)
-			//     aSolutions[i] = aSolutions[i - 1] * (n - k + 1 + i) / (i + 1);
-			//
-			//   return aSolutions[k - 1];
-			// }
+			    // note: this will crash if dim < log_2(n)...
+			    while (n > 0)
+			    {
+			        res[pos] = n % 2;
+			        res[dim] += res[pos];
+			        n = n / 2; // integer division
+			        pos--;
+			    }
 
-		inline vector<long> dec2binarr(long n, long dim)
-		{
-		    // note: res[dim] will save the sum res[0]+...+res[dim-1]
-		    // long* res = (long*)calloc(dim + 1, sizeof(long));
-		    vector<long> res(dim+1);
-		    long pos = dim - 1;
+			    return res;
+			}
 
-		    // note: this will crash if dim < log_2(n)...
-		    while (n > 0)
-		    {
-		        res[pos] = n % 2;
-		        res[dim] += res[pos];
-		        n = n / 2; // integer division
-		        pos--;
-		    }
-
-		    return res;
-		}
-
-		double permanent(const vector<double> & A, long n);
+			double permanent(const vector<double> & A, long n);
 
 	};
 
