@@ -320,6 +320,9 @@ void shifter::shiftEvent_efficient()
 	// this RNG is for shuffling particle momenta
 	auto rng = std::default_random_engine { std::random_device{}() };
 
+	// avoid replicating previously generated values (cycle through twice to be safe)
+	for (const auto & p: allParticles) {normal(generator); normal(generator);}
+
 	const double R = paraRdr->getVal("RNG_R") / HBARC;
 	const double RMSscale = get_RMSscale(allParticles) / HBARC;
 
@@ -379,10 +382,14 @@ void shifter::shiftEvent_efficient()
 									get_probability( RMSscale, shifted_pairs ) :
 									get_probability( R, shifted_pairs );
 
-			std::cout << "CHECK: "
+			std::cout << "CHECK: " << SHIFT_MODE << "   "
 								<< x1 << "   " << y1 << "   " << z1 << "   "
 								<< x2 << "   " << y2 << "   " << z2 << "   "
-								<< P1 << "   " << P2 << std::endl;
+								<< P2/P1 << std::endl;
+			// for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
+			// std::cout << std::endl;
+			// for (const auto & p: allParticles_with_shift) std::cout << p.p.pz() << "   ";
+			// std::cout << std::endl;
 
 			// choose new configuration (shifted or original)
 			double log_alpha = std::min(0.0, log(P2/P1));
@@ -403,6 +410,11 @@ void shifter::shiftEvent_efficient()
 			}
 		}
 		if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
+		std::cout << std::endl << "Before: ";
+		for (const auto & p: allParticles_Original) std::cout << p.p.pz() << "   ";
+		std::cout << std::endl << "After: ";
+		for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
+		std::cout << std::endl;
 		if (true) std::terminate();
 	}
 

@@ -1,17 +1,15 @@
 #!/bin/bash
 
-RESULTS_DIRECTORY=results-mult$1-Nev$2-norm$3-nL$4
+SHIFT_MODE=$1
+MULTIPLICITY=$2
+NUMBER_OF_EVENTS=$3
+NUMBER_OF_LOOPS=$4
+
+RESULTS_DIRECTORY=results-shiftmode_$SHIFT_MODE-mult$MULTIPLICITY-Nev$NUMBER_OF_EVENTS-nL$NUMBER_OF_LOOPS
 mkdir -p $RESULTS_DIRECTORY
 
-sbatch <<EOT
-#!/bin/bash
-#SBATCH -t 72:00:00
-#SBATCH --nodes=1
-#SBATCH --output="$RESULTS_DIRECTORY/job_%a.out"
+export OMP_NUM_THREADS=1
 
-./shifter.e RNG_mult=$1 RNG_nLoops=$2 shifter_norm=$3 shifter_nLoops=$4 \
-            2> /dev/null | grep ^OUT | awk '{print \$4, \$5}' \
-            1> $RESULTS_DIRECTORY/pairs.out
-
-exit 0
-EOT
+./shifter.e $RESULTS_DIRECTORY $SHIFT_MODE RNG_mult=$MULTIPLICITY RNG_seed=1 \
+            RNG_xDir=0 RNG_yDir=0 RNG_nLoops=$NUMBER_OF_EVENTS \
+            shifter_nLoops=$NUMBER_OF_LOOPS
