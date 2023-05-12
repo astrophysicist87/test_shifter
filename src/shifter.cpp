@@ -379,6 +379,11 @@ void shifter::shiftEvent_efficient()
 									get_probability( RMSscale, shifted_pairs ) :
 									get_probability( R, shifted_pairs );
 
+			std::cout << "CHECK: "
+								<< x1 << "   " << y1 << "   " << z1 << "   "
+								<< x2 << "   " << y2 << "   " << z2 << "   "
+								<< P1 << "   " << P2 << std::endl;
+
 			// choose new configuration (shifted or original)
 			double log_alpha = std::min(0.0, log(P2/P1));
 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
@@ -398,6 +403,7 @@ void shifter::shiftEvent_efficient()
 			}
 		}
 		if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
+		if (true) std::terminate();
 	}
 
 	// Done.
