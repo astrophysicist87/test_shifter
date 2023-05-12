@@ -365,9 +365,9 @@ void shifter::shiftEvent_efficient()
 			double x1 = allParticles[iParticle].p.px();
 			double y1 = allParticles[iParticle].p.py();
 			double z1 = allParticles[iParticle].p.pz();
-			double x2 = RNG_xDir ? RNG_p0 * normal(generator) : 0.0;	// corresponds to choice of parameters in random_events.h
-			double y2 = RNG_yDir ? RNG_p0 * normal(generator) : 0.0;	// corresponds to choice of parameters in random_events.h
-			double z2 = RNG_zDir ? RNG_p0 * normal(generator) : 0.0;	// corresponds to choice of parameters in random_events.h
+			double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;	// corresponds to choice of parameters in random_events.h
+			double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;	// corresponds to choice of parameters in random_events.h
+			double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;	// corresponds to choice of parameters in random_events.h
 
 			// compute shifted configuration
 			vector<ParticleRecord> allParticles_with_shift = allParticles;
@@ -382,10 +382,10 @@ void shifter::shiftEvent_efficient()
 									get_probability( RMSscale, shifted_pairs ) :
 									get_probability( R, shifted_pairs );
 
-			std::cout << "CHECK: " << SHIFT_MODE << "   "
-								<< x1 << "   " << y1 << "   " << z1 << "   "
-								<< x2 << "   " << y2 << "   " << z2 << "   "
-								<< P2/P1 << std::endl;
+			// std::cout << "CHECK: " << SHIFT_MODE << "   "
+			// 					<< x1 << "   " << y1 << "   " << z1 << "   "
+			// 					<< x2 << "   " << y2 << "   " << z2 << "   "
+			// 					<< P2/P1 << std::endl;
 			// for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
 			// std::cout << std::endl;
 			// for (const auto & p: allParticles_with_shift) std::cout << p.p.pz() << "   ";
@@ -404,18 +404,15 @@ void shifter::shiftEvent_efficient()
 				allParticles[iParticle].p.px(x2);	// re-set momentum of particle
 				allParticles[iParticle].p.py(y2);	// re-set momentum of particle
 				allParticles[iParticle].p.pz(z2);	// re-set momentum of particle
-
-				// sort by pz
-				// std::sort(allParticles.begin(), allParticles.end(), particleSort);
 			}
 		}
-		if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
-		std::cout << std::endl << "Before: ";
-		for (const auto & p: allParticles_Original) std::cout << p.p.pz() << "   ";
-		std::cout << std::endl << "After: ";
-		for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
-		std::cout << std::endl;
-		if (true) std::terminate();
+		// if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
+		// std::cout << std::endl << "Before: ";
+		// for (const auto & p: allParticles_Original) std::cout << p.p.pz() << "   ";
+		// std::cout << std::endl << "After: ";
+		// for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
+		// std::cout << std::endl;
+		// if (true) std::terminate();
 	}
 
 	// Done.

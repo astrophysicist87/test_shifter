@@ -47,6 +47,9 @@ namespace shift_lib
 															{"do_y", (bool)RNG_yDir},
 															{"do_z", (bool)RNG_zDir} } );
 		distribution_3D dist3D( "Gaussian", seed_to_use, parameters );
+		// param_list parameters ( { {"scale", 0.3},
+		// 													{"width", 0.015} } );
+		// distribution_3D dist3D( "Shell", seed_to_use, parameters );
 
 		//for (int iEvent = 0; iEvent < RNG_Nev; ++iEvent)
 		//{
@@ -65,8 +68,9 @@ namespace shift_lib
 				// double pz = RNG_zDir ? RNG_p0 * distribution(generator) : 0.0;
 				// std::tie(px,py,pz)
 				auto [px,py,pz] = dist3D.generate_sample();
-cout << "px,py,pz = " << px << "   " << py << "   " << pz << endl;
-if (1) std::terminate();
+// cout << "px,py,pz = " << px << "   " << py << "   " << pz << endl;
+// cout << "check: " << sqrt(px*px+py*py+pz*pz) << endl;
+// if (1) std::terminate();
 				double Ep = sqrt( mass*mass + px*px + py*py + pz*pz );
 
 				ParticleRecord particle;

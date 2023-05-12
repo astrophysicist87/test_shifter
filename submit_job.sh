@@ -10,6 +10,6 @@ mkdir -p $RESULTS_DIRECTORY
 
 export OMP_NUM_THREADS=1
 
-./shifter.e $RESULTS_DIRECTORY $SHIFT_MODE RNG_mult=$MULTIPLICITY RNG_seed=1 \
+./shifter.e $RESULTS_DIRECTORY $SHIFT_MODE RNG_mult=$MULTIPLICITY \
             RNG_xDir=0 RNG_yDir=0 RNG_nLoops=$NUMBER_OF_EVENTS \
             shifter_nLoops=$NUMBER_OF_LOOPS
