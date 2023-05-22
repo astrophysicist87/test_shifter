@@ -1,6 +1,9 @@
 *.out
 *.o
 *.e
+*.txt
 *.zip
 check_pairs.dat
 events.dat
+results*/*
+test/*

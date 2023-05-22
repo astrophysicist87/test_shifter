@@ -61,6 +61,8 @@ namespace shift_lib
 			std::mt19937 comb_gen;
 			vector<int> indices;
 
+			vector<vector<double>> current_pairs, shifted_pairs;
+
 		public:
 
 			// Constructors, destructors, and initializers
@@ -100,9 +102,18 @@ namespace shift_lib
 				const vector<ParticleRecord> & particles,
 				const int shifted_particle_index );
 
+			void get_shifted_pairs_FAST(
+				vector<vector<double>> & pairs,
+				vector<double> & BE_distances,
+			  const vector<ParticleRecord> & particles,
+		    const int shifted_particle_index,
+        const double R );
+
 			double standard_deviation( const vector<double> & v );
 
-			double get_probability( const double R, const vector<vector<double>> & qVec );
+			double get_probability( const double R, const vector<vector<double>> & qVec, const vector<double> & BE_distances );
+			double get_probability( const double R, const vector<vector<double>> & qVec, const string & CHOSEN_SHIFT_MODE );
+
 
 			double get_RMSscale( const vector<ParticleRecord> & particles );
 

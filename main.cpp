@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 		{
 			event.print( number_of_completed_events, allParticles_unshifted, results_directory + "/events_unshifted.dat" );
 			event.print( number_of_completed_events, allParticles, results_directory + "/events.dat" );
-			cerr << "Finished " << number_of_completed_events++ << " events" << endl;
+			cerr << "Finished " << ++number_of_completed_events << " events" << endl;
 		}
 	}
 

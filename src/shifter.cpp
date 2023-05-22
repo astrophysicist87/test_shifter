@@ -7,10 +7,12 @@
 #include <iostream>
 #include <random>
 #include <string>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
+#include "../include/permanent.h"
 #include "../include/shifter.h"
+#include "../include/stopwatch.h"
 #include "../include/ParameterReader.h"
 
 using namespace std;
@@ -109,8 +111,17 @@ namespace shift_lib
 		return sqrt(variance);
 	}
 
-double shifter::permanent(const vector<double> & A, long n) // expects n by n matrix encoded as vector
-{
+	double shifter::permanent(const vector<double> & A, long n) // expects n by n matrix encoded as vector
+	{
+		// std::cout << "\nA(exact) =\n" << fixed << setprecision(6);
+		// for (int i = 0; i < n; ++i)
+		// {
+		// 	for (int j = 0; j < n; ++j)
+		// 		std::cout << "  " << A[i*n+j];
+		// 	cout << "\n";
+		// }
+		// cout << "\n";
+
     double sum = 0.0;
     double rowsumprod = 0.0, rowsum = 0.0;
     vector<long> chi(n + 1);
@@ -144,11 +155,19 @@ double shifter::permanent(const vector<double> & A, long n) // expects n by n ma
     return sum;
 }
 
-
 //------------------------------------------------------------------------------
-double shifter::get_probability( const double R, const vector<vector<double>> & qVec )
+double shifter::get_probability( const double R, const vector<vector<double>> & qVec,
+                                 const vector<double> & BE_distances )
 {
-	if ( SHIFT_MODE == "Exact" )
+	if ( SHIFT_MODE == "HYBRID" )
+	{
+		double result = get_probability( R, qVec, "FullProduct" );
+		double hybrid_cutoff = paraRdr->getVal("hybrid_cutoff");
+		if (result > hybrid_cutoff)
+			result = get_probability( R, qVec, "Exact" );
+		return result;
+	}
+	else if ( SHIFT_MODE == "Exact" )
 	{
 		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
@@ -165,6 +184,7 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 																		q.cbegin(),
 																		0.0);
 					double tmp = exp(-0.25*q2*R*R);
+// cout << "Check q: " << q[0] << "  " << q[1] << "  " << q[2] << "  " << q2 << "  " << tmp << "\n";
 					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
 					A[i*np+j] = tmp;
 					A[j*np+i] = tmp; // matrix is symmetric
@@ -217,6 +237,41 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 		return factor*result/np;
 	}
 	//--------------------------------------------------------------------------
+	// EXPERIMENTAL
+	else if ( SHIFT_MODE == "TRIAL3Fast" )
+	{
+		// use only np-1 independent pairs, and cycle over which gets omitted
+		const int n = qVec.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		double normalization = paraRdr->getVal("shifter_norm");
+
+		auto square = [](double x){return x*x;};
+		auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
+		// auto get_q2 = [](const vector<double> & q)
+		// 							{ return inner_product( q.cbegin(), q.cend(), q.cbegin(), 0.0 ); };
+		// auto get_q2 = [](const vector<double> & q)
+		// 							{ return q[0]*q[0] + q[1]*q[1] + q[2]*q[2]; };
+
+		// initialize with first pair
+		// double init = 1.0 + 0.5*np*normalization
+		// 										*exp(-0.5*get_q2( qVec[UTindexer(0, np-1, np)] )*R*R);
+		double init = 1.0 + 0.5 * np * normalization
+                        * square( BE_distances[ UTindexer(0, np-1, np) ] );
+		double result = init;
+		double factor = 1.0/init;
+
+		// update with other pairs
+		for (int i1 = 0; i1 < np - 1; ++i1)
+		{
+			auto i = UTindexer(i1, i1+1, np);
+			double term = 1.0 + 0.5 * np * normalization * square( BE_distances[i] );
+			result *= term;
+			factor += 1.0/term;
+		}
+
+		return factor*result/np;
+	}
+	//--------------------------------------------------------------------------
 	else if ( SHIFT_MODE == "TRIAL5" )
 	{
 		// use adjacent particle pairs and next-to-neighbor pairs
@@ -247,8 +302,64 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 		return total/maxsep;
 	}
 	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "RMSscale" )
+	else
 	{
+		cerr << "This mode (" << SHIFT_MODE << ") not supported!" << endl;
+		abort();
+	}
+}
+
+
+
+//------------------------------------------------------------------------------
+double shifter::get_probability( const double R, const vector<vector<double>> & qVec, const string & CHOSEN_SHIFT_MODE )
+{
+	if ( CHOSEN_SHIFT_MODE == "Exact" )
+	{
+		const int n = qVec.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		vector<double> A(np*np);
+		{
+			int index = 0;
+			for (int i = 0; i < np; i++)
+			{
+				A[i*np+i] = 1.0;
+				for (int j = i+1; j < np; j++)
+				{
+					auto q = qVec[index];
+					double q2 = inner_product(q.cbegin(), q.cend(),
+																		q.cbegin(),
+																		0.0);
+					double tmp = exp(-0.25*q2*R*R);
+					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
+					A[i*np+j] = tmp;
+					A[j*np+i] = tmp; // matrix is symmetric
+					index++;
+				}
+			}
+		}
+		return permanent(A, np);
+	}
+	//--------------------------------------------------------------------------
+	// FULL PRODUCT
+	else if ( CHOSEN_SHIFT_MODE == "FullProduct" )
+	{
+		double result = 1.0;
+		double normalization = paraRdr->getVal("shifter_norm");
+		for (const auto & q: qVec)
+		{
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			result *= 1.0 + normalization*exp(-0.5*q2*R*R);
+		}
+		return result;
+	}
+	//--------------------------------------------------------------------------
+	// EXPERIMENTAL
+	else if ( CHOSEN_SHIFT_MODE == "TRIAL3" )
+	{
+		// use only np-1 independent pairs, and cycle over which gets omitted
 		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
@@ -272,9 +383,39 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 		return factor*result/np;
 	}
 	//--------------------------------------------------------------------------
+	else if ( CHOSEN_SHIFT_MODE == "TRIAL5" )
+	{
+		// use adjacent particle pairs and next-to-neighbor pairs
+		const int n = qVec.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		double total = 0.0;
+		double normalization = paraRdr->getVal("shifter_norm");
+		int maxsep = np/2;
+		for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
+		{
+			int i = -1;
+			double result = 1.0;
+			for (int i1 = 0; i1 < np - 1; ++i1)
+			for (int i2 = i1 + 1; i2 < np; ++i2)
+			{
+				i++;
+				int di = std::abs(i2-i1);
+				bool include_this_pair = (std::min(di, np-di) == step);
+				if (!include_this_pair) continue;
+				auto q = qVec[i];
+				double q2 = inner_product(q.cbegin(), q.cend(),
+																	q.cbegin(),
+																	0.0);
+				result *= 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*q2*R*R);
+			}
+			total += result;
+		}
+		return total/maxsep;
+	}
+	//--------------------------------------------------------------------------
 	else
 	{
-		cerr << "This mode (" << SHIFT_MODE << ") not supported!" << endl;
+		cerr << "This mode (" << CHOSEN_SHIFT_MODE << ") not supported!" << endl;
 		abort();
 	}
 }
@@ -297,7 +438,6 @@ vector<vector<double>> shifter::get_pairs( const vector<ParticleRecord> & partic
 
 	return result;
 }
-
 
 //--------------------------------------------------------------------------
 // Perform Bose-Einstein corrections on an event.
@@ -324,13 +464,22 @@ void shifter::shiftEvent_efficient()
 	for (const auto & p: allParticles) {normal(generator); normal(generator);}
 
 	const double R = paraRdr->getVal("RNG_R") / HBARC;
-	const double RMSscale = get_RMSscale(allParticles) / HBARC;
-
 	const double RNG_p0 = paraRdr->getVal("RNG_p0");
+
 	const int number_of_particles = allParticles.size();
 	vector<ParticleRecord> allParticles_Original = allParticles;
 
-	vector<vector<double>> current_pairs = get_pairs(allParticles);
+	// vector<vector<double>> current_pairs = get_pairs(allParticles);
+	current_pairs = get_pairs(allParticles);
+	vector<double> current_BE_distances(current_pairs.size(), 0.0);
+	auto get_BE_distance = [R](const vector<double> & q)
+	                       { return exp(-0.25 * R * R
+                                       * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2])); };
+	std::transform( current_pairs.begin(), current_pairs.end(),
+                  current_BE_distances.begin(), get_BE_distance );
+
+	shifted_pairs = current_pairs;
+	vector<double> shifted_BE_distances = current_BE_distances;
 
 	// need comparator for sorting particles by momentum
 	auto particleSort = []( const ParticleRecord & p1,
@@ -339,13 +488,23 @@ void shifter::shiftEvent_efficient()
 															&& (p1.p.py() < p2.p.py())
 															&& (p1.p.pz() < p2.p.pz()); };
 
-	// sort by pz
-	std::sort(allParticles.begin(), allParticles.end(), particleSort);
+	// sort by p
+	// std::sort(allParticles.begin(), allParticles.end(), particleSort);
 
 	// get probability of current configuration
-	double P1 = (SHIFT_MODE == "RMSscale") ?
-							get_probability( RMSscale, current_pairs ) :
-							get_probability( R, current_pairs );
+	// Stopwatch sw;
+	// sw.Start();
+	MatrixPermanent mp(allParticles.size(), 1e-12, false);
+	cerr << "Started:" << "\n";
+	double P1 = (SHIFT_MODE == "AlmostExact") ?
+              mp.evaluate(allParticles, current_BE_distances) :
+              get_probability( R, current_pairs, current_BE_distances );
+	// sw.Stop();
+	cerr << "Completed " << "\n";
+// if (true) std::terminate();
+
+// 	cout << endl << "allParticles(init): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+// cout << endl;
 
 	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
 	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
@@ -356,11 +515,18 @@ void shifter::shiftEvent_efficient()
 	int nLoops = paraRdr->getVal("shifter_nLoops");
 	for (iLoop = 0; iLoop < nLoops; iLoop++)
 	{
+		Stopwatch swTotal;
+		swTotal.Reset();
+		swTotal.Start();
+cerr << "Loop #" << iLoop << ":\n";
 		int number_of_shifted_particles = 0;
 
 		// loop over particles, re-sample one at a time
 		for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
 		{
+// cerr << "  Particle #" << iParticle << "\n";
+			// sw.Reset();
+			// sw.Start();
 			// generate a shifted momentum
 			double x1 = allParticles[iParticle].p.px();
 			double y1 = allParticles[iParticle].p.py();
@@ -368,19 +534,103 @@ void shifter::shiftEvent_efficient()
 			double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;	// corresponds to choice of parameters in random_events.h
 			double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;	// corresponds to choice of parameters in random_events.h
 			double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;	// corresponds to choice of parameters in random_events.h
+			// sw.Stop();
+			// cerr << "\tRandom number generation took " << sw.printTime() << " s." << "\n";
 
+			// sw.Reset();
+			// sw.Start();
 			// compute shifted configuration
 			vector<ParticleRecord> allParticles_with_shift = allParticles;
 			allParticles_with_shift[iParticle].p.px(x2);
 			allParticles_with_shift[iParticle].p.py(y2);
 			allParticles_with_shift[iParticle].p.pz(z2);
-			vector<vector<double>> shifted_pairs = get_shifted_pairs( current_pairs,
-																			allParticles_with_shift, iParticle );
+
+	// cout << endl << __LINE__;
+	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
+	// cout << endl;
+
+// std::cout << "\nshifted_pairs =\n" << fixed << setprecision(6);
+// {
+// int index = 0;
+// for (int i = 0; i < allParticles_with_shift.size(); ++i)
+// {
+// 	for (int j = i+1; j < allParticles_with_shift.size(); ++j)
+// 		std::cout << "  " << shifted_pairs.at(index++)[2];
+// 	cout << "\n";
+// }
+// cout << "\n";
+// }
+
+
+
+			get_shifted_pairs_FAST( shifted_pairs, shifted_BE_distances,
+															allParticles_with_shift, iParticle, R );
+
+	// cout << endl << __LINE__;
+	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
+	// cout << endl;
+			// sw.Stop();
+			// cerr << "\tGetting shifted pairs took " << sw.printTime() << " s." << "\n";
+
+// std::cout << "\nshifted_pairs =\n" << fixed << setprecision(6);
+// {
+// int index = 0;
+// for (int i = 0; i < allParticles_with_shift.size(); ++i)
+// {
+// 	for (int j = i+1; j < allParticles_with_shift.size(); ++j)
+// 		std::cout << "  " << shifted_pairs.at(index++)[2];
+// 	cout << "\n";
+// }
+// cout << "\n";
+// }
+
+// std::cout << "------------------------------------------------------------------------------------\n";
 
 			// get probability of shifted configuration
-			double P2 = (SHIFT_MODE == "RMSscale") ?
-									get_probability( RMSscale, shifted_pairs ) :
-									get_probability( R, shifted_pairs );
+			// sw.Reset();
+			// sw.Start();
+			// cerr << "Started:" << "\n";
+			double P2 = (SHIFT_MODE == "AlmostExact") ?
+		              mp.evaluate(allParticles_with_shift, shifted_BE_distances) :
+		              get_probability( R, shifted_pairs, shifted_BE_distances );
+			// sw.Stop();
+			// cerr << "\tGetting probability to shift took " << sw.printTime() << " s." << "\n";
+
+	// cout << endl << __LINE__;
+	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
+	// cout << endl;
+
+
+if (SHIFT_MODE == "Exact")
+{
+	#pragma omp critical
+	{
+		cout << "  Compare unshifted: " << P1 << "  " << mp.evaluate(allParticles, current_BE_distances) << "\n";
+
+	// cout << endl << __LINE__;
+	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
+	// cout << endl;
+
+
+		cout << "  Compare shifted: " << P2 << "  " << mp.evaluate(allParticles_with_shift, shifted_BE_distances) << "\n";
+		// cout << "Seed = " << seed << endl;
+
+	// cout << endl << __LINE__;
+	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
+	// cout << endl;
+
+	}
+	// std::terminate();
+}
+
+// std::cout << "Iteration/particle = " << iLoop << " / " << iParticle << ": " << P2/P1 << "\n";
+// std::cout << "------------------------------------------------------------------------------------\n";
+
 
 			// std::cout << "CHECK: " << SHIFT_MODE << "   "
 			// 					<< x1 << "   " << y1 << "   " << z1 << "   "
@@ -390,7 +640,16 @@ void shifter::shiftEvent_efficient()
 			// std::cout << std::endl;
 			// for (const auto & p: allParticles_with_shift) std::cout << p.p.pz() << "   ";
 			// std::cout << std::endl;
+			// std::cout << "Iteration/particle = " << iLoop << " / " << iParticle << ": "
+			// 					<< get_probability( R, current_pairs, "Exact" ) << "   "
+			// 					<< get_probability( R, shifted_pairs, "Exact" ) << "   "
+			// 					<< get_probability( R, current_pairs, "FullProduct" ) << "   "
+			// 					<< get_probability( R, shifted_pairs, "FullProduct" ) << "   "
+			// 					<< get_probability( R, current_pairs, "TRIAL3" ) << "   "
+			// 					<< get_probability( R, shifted_pairs, "TRIAL3" ) << "   " << std::endl;
 
+			// sw.Reset();
+			// sw.Start();
 			// choose new configuration (shifted or original)
 			double log_alpha = std::min(0.0, log(P2/P1));
 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
@@ -398,13 +657,35 @@ void shifter::shiftEvent_efficient()
 			// re-set shifted quantities
 			if (shift_this_particle)
 			{
-				current_pairs = shifted_pairs;		// re-set current configuration
+	// cout << endl << __LINE__;
+	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
+	// cout << endl;
+
+				// current_pairs = shifted_pairs;		// re-set current configuration
+				get_shifted_pairs_FAST( current_pairs, current_BE_distances,
+																allParticles_with_shift, iParticle, R );
+
+	// cout << endl << __LINE__;
+	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
+	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
+	// cout << endl;
+
 				P1 = P2;													// re-set probability of current configuration
 				number_of_shifted_particles++;
 				allParticles[iParticle].p.px(x2);	// re-set momentum of particle
 				allParticles[iParticle].p.py(y2);	// re-set momentum of particle
 				allParticles[iParticle].p.pz(z2);	// re-set momentum of particle
 			}
+			else	// overwrite shifted pairs with current (unshifted)
+				get_shifted_pairs_FAST( shifted_pairs, shifted_BE_distances,
+																allParticles, iParticle, R );
+
+			// sw.Stop();
+			// cerr << "\tDeciding whether to shift took " << sw.printTime() << " s." << "\n\n";
+
+			// swTotal.Stop();
+			// cerr << "\tThe whole loop took " << swTotal.printTime() << " s." << "\n\n";
 		}
 		// if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
 		// std::cout << std::endl << "Before: ";
@@ -412,7 +693,9 @@ void shifter::shiftEvent_efficient()
 		// std::cout << std::endl << "After: ";
 		// for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
 		// std::cout << std::endl;
-		// if (true) std::terminate();
+		swTotal.Stop();
+		cout << "finished in " << swTotal.printTime() << " s.\n";
+		// if (iLoop >= 5) std::terminate();
 	}
 
 	// Done.
@@ -445,22 +728,42 @@ void shifter::shiftEvent_efficient()
 			return result;
 		}
 
-	//--------------------------------
-	double shifter::get_RMSscale( const vector<ParticleRecord> & particles )
-	{
-		double result = 0.0;
-		const int number_of_particles = particles.size();
-		const int number_of_pairs = number_of_particles*(number_of_particles-1)/2;
-
-		for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
-		for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
+		//--------------------------------
+		void shifter::get_shifted_pairs_FAST( vector<vector<double>> & pairs,
+																					vector<double> & BE_distances,
+																				  const vector<ParticleRecord> & particles,
+																			    const int shifted_particle_index,
+                                          const double R )
 		{
-			const double dz = particles[i1].x.pz() - particles[i2].x.pz();
-			result += dz*dz;
-		}
+			const int np = particles.size();
+			auto & spi = shifted_particle_index;
 
-		return sqrt(0.5*result/number_of_pairs);
-	}
+			// indexes upper-triangular list of pairs given indices (i,j)
+			auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
+			auto get_q2 = [](std::initializer_list<double> q)
+										{ return inner_product( q.begin(), q.end(), q.begin(), 0.0 ); };
+
+			for (int i1 = 0; i1 < spi; ++i1)
+			{
+				int iPair = UTindexer(i1, spi, np);
+				auto q = { particles[i1].p.px() - particles[spi].p.px(),
+									 particles[i1].p.py() - particles[spi].p.py(),
+									 particles[i1].p.pz() - particles[spi].p.pz() };
+				BE_distances[iPair] = exp(-0.25 * R * R * get_q2(q));
+				pairs[iPair].assign(q);
+			}
+
+			for (int i1 = spi+1; i1 < np; ++i1)
+			{
+				int iPair = UTindexer(spi, i1, np);
+				auto q = { particles[spi].p.px() - particles[i1].p.px(),
+									 particles[spi].p.py() - particles[i1].p.py(),
+									 particles[spi].p.pz() - particles[i1].p.pz() };
+				BE_distances[iPair] = exp(-0.25 * R * R * get_q2(q));
+				pairs[iPair].assign(q);
+			}
+			return;
+		}
 
 }	//End of namespace
 
