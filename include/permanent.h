@@ -67,12 +67,12 @@ class MatrixPermanent
 
 
     //--------------------------------------------------------------------------
-    // inline void dec2binarr(long n, long dim, vector<long> & res)
-    inline vector<long> dec2binarr(long n, long dim)
+    // inline vector<long> dec2binarr(long n, long dim)
+    inline void dec2binarr(long n, long dim, vector<long> & res)
     {
         // note: res[dim] will save the sum res[0]+...+res[dim-1]
         // long* res = (long*)calloc(dim + 1, sizeof(long));
-        vector<long> res(dim+1);
+        // vector<long> res(dim+1);
         long pos = dim - 1;
 
         // note: this will crash if dim < log_2(n)...
@@ -84,7 +84,7 @@ class MatrixPermanent
             pos--;
         }
 
-        return res;
+        return;
     }
 
     //--------------------------------------------------------------------------
@@ -106,15 +106,16 @@ class MatrixPermanent
       double sum = 0.0;
       double rowsumprod = 0.0, rowsum = 0.0;
       vector<long> chi(n + 1);
-      double C = (double)pow((double)2, n);
-      // double C = Cvec[n];
+      // double C = (double)pow((double)2, n);
+      double C = Cvec[n];
 
       // loop all 2^n submatrices of A
       for (long k = 1; k < C; k++)
       {
           rowsumprod = 1.0;
-          chi = dec2binarr(k, n); // characteristic vector
-          // dec2binarr(k, n, chi); // characteristic vector
+          // chi = dec2binarr(k, n); // characteristic vector
+          std::fill( chi.begin(), chi.end(), 0 );
+          dec2binarr(k, n, chi); // characteristic vector
 
           // loop columns of submatrix #k
           for (long m = 0; m < n; m++)
@@ -127,6 +128,8 @@ class MatrixPermanent
 
               // update product of rowsums
               rowsumprod *= rowsum;
+              // rowsumprod *= inner_product( chi.cbegin(), chi.cbegin() + n,
+              //                              A.cbegin() + m*n, 0.0);
 
               // (optional -- use for sparse matrices)
               if (ASSUME_SPARSE && rowsumprod < TINY) break;
@@ -192,21 +195,21 @@ class MatrixPermanent
       {
         int iCluster = 0;
         vector<int> indices;
-        for (auto & cluster: clusters)  // loop over all clusters
+        for (const auto & cluster: clusters)  // loop over all clusters
         {
           // check if particle is close to any node (particle) in this cluster
           for (const auto & node: cluster)
           {
-            if ( get_BE_distance(particle, node) > TINY )
-            // if ( BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
-            //                             particle.particleID,
-            //                             number_of_particles )] > TINY )
+            // if ( get_BE_distance(particle, node) > TINY )
+            if ( BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
+                                        particle.particleID,
+                                        number_of_particles )] > TINY )
             {
               indices.push_back(iCluster);
               break;  // no need to check other nodes in this cluster
             }
           }
-          iCluster++;
+          ++iCluster;
         }
 
         if (indices.empty())          // add particle to new cluster
@@ -233,6 +236,7 @@ class MatrixPermanent
 
       return clusters;
     }
+
 
     //--------------------------------------------------------------------------
     double compute_permanent_from_cluster(

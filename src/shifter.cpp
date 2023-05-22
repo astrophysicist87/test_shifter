@@ -356,7 +356,6 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 		return result;
 	}
 	//--------------------------------------------------------------------------
-	// EXPERIMENTAL
 	else if ( CHOSEN_SHIFT_MODE == "TRIAL3" )
 	{
 		// use only np-1 independent pairs, and cycle over which gets omitted
@@ -458,7 +457,7 @@ void shifter::shiftEvent_efficient()
 	std::normal_distribution<double>       normal(0.0, 1.0);
 
 	// this RNG is for shuffling particle momenta
-	auto rng = std::default_random_engine { std::random_device{}() };
+	// auto rng = std::default_random_engine { std::random_device{}() };
 
 	// avoid replicating previously generated values (cycle through twice to be safe)
 	for (const auto & p: allParticles) {normal(generator); normal(generator);}
@@ -481,52 +480,27 @@ void shifter::shiftEvent_efficient()
 	shifted_pairs = current_pairs;
 	vector<double> shifted_BE_distances = current_BE_distances;
 
-	// need comparator for sorting particles by momentum
-	auto particleSort = []( const ParticleRecord & p1,
-                          const ParticleRecord & p2 )
-                        { return (p1.p.px() < p2.p.px())
-															&& (p1.p.py() < p2.p.py())
-															&& (p1.p.pz() < p2.p.pz()); };
-
-	// sort by p
-	// std::sort(allParticles.begin(), allParticles.end(), particleSort);
-
-	// get probability of current configuration
-	// Stopwatch sw;
-	// sw.Start();
-	MatrixPermanent mp(allParticles.size(), 1e-12, false);
-	cerr << "Started:" << "\n";
+	// get probability of initial configuration
+	MatrixPermanent mp(allParticles.size(), 1e-2, true);
 	double P1 = (SHIFT_MODE == "AlmostExact") ?
               mp.evaluate(allParticles, current_BE_distances) :
               get_probability( R, current_pairs, current_BE_distances );
-	// sw.Stop();
-	cerr << "Completed " << "\n";
-// if (true) std::terminate();
-
-// 	cout << endl << "allParticles(init): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-// cout << endl;
 
 	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
 	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
 	int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
 
-	constexpr bool check_number_of_shifted_particles = false;
+	Stopwatch swTotal;
+
 	int iLoop = 0;
 	int nLoops = paraRdr->getVal("shifter_nLoops");
-	for (iLoop = 0; iLoop < nLoops; iLoop++)
+	for (iLoop = 0; iLoop < nLoops; iLoop++)	// loop over all particles fixed number of times
 	{
-		Stopwatch swTotal;
-		swTotal.Reset();
-		swTotal.Start();
-cerr << "Loop #" << iLoop << ":\n";
-		int number_of_shifted_particles = 0;
-
-		// loop over particles, re-sample one at a time
-		for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
+		// swTotal.Reset();
+		// swTotal.Start();
+		// cerr << "Loop #" << iLoop << ": ";
+		for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 		{
-// cerr << "  Particle #" << iParticle << "\n";
-			// sw.Reset();
-			// sw.Start();
 			// generate a shifted momentum
 			double x1 = allParticles[iParticle].p.px();
 			double y1 = allParticles[iParticle].p.py();
@@ -534,103 +508,38 @@ cerr << "Loop #" << iLoop << ":\n";
 			double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;	// corresponds to choice of parameters in random_events.h
 			double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;	// corresponds to choice of parameters in random_events.h
 			double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;	// corresponds to choice of parameters in random_events.h
-			// sw.Stop();
-			// cerr << "\tRandom number generation took " << sw.printTime() << " s." << "\n";
 
-			// sw.Reset();
-			// sw.Start();
 			// compute shifted configuration
 			vector<ParticleRecord> allParticles_with_shift = allParticles;
 			allParticles_with_shift[iParticle].p.px(x2);
 			allParticles_with_shift[iParticle].p.py(y2);
 			allParticles_with_shift[iParticle].p.pz(z2);
 
-	// cout << endl << __LINE__;
-	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
-	// cout << endl;
-
-// std::cout << "\nshifted_pairs =\n" << fixed << setprecision(6);
-// {
-// int index = 0;
-// for (int i = 0; i < allParticles_with_shift.size(); ++i)
-// {
-// 	for (int j = i+1; j < allParticles_with_shift.size(); ++j)
-// 		std::cout << "  " << shifted_pairs.at(index++)[2];
-// 	cout << "\n";
-// }
-// cout << "\n";
-// }
-
-
-
 			get_shifted_pairs_FAST( shifted_pairs, shifted_BE_distances,
 															allParticles_with_shift, iParticle, R );
 
-	// cout << endl << __LINE__;
-	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
-	// cout << endl;
-			// sw.Stop();
-			// cerr << "\tGetting shifted pairs took " << sw.printTime() << " s." << "\n";
-
-// std::cout << "\nshifted_pairs =\n" << fixed << setprecision(6);
-// {
-// int index = 0;
-// for (int i = 0; i < allParticles_with_shift.size(); ++i)
-// {
-// 	for (int j = i+1; j < allParticles_with_shift.size(); ++j)
-// 		std::cout << "  " << shifted_pairs.at(index++)[2];
-// 	cout << "\n";
-// }
-// cout << "\n";
-// }
-
-// std::cout << "------------------------------------------------------------------------------------\n";
-
 			// get probability of shifted configuration
-			// sw.Reset();
-			// sw.Start();
-			// cerr << "Started:" << "\n";
 			double P2 = (SHIFT_MODE == "AlmostExact") ?
 		              mp.evaluate(allParticles_with_shift, shifted_BE_distances) :
 		              get_probability( R, shifted_pairs, shifted_BE_distances );
-			// sw.Stop();
-			// cerr << "\tGetting probability to shift took " << sw.printTime() << " s." << "\n";
 
-	// cout << endl << __LINE__;
-	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
-	// cout << endl;
-
-
-if (SHIFT_MODE == "Exact")
-{
-	#pragma omp critical
-	{
-		cout << "  Compare unshifted: " << P1 << "  " << mp.evaluate(allParticles, current_BE_distances) << "\n";
-
-	// cout << endl << __LINE__;
-	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
-	// cout << endl;
-
-
-		cout << "  Compare shifted: " << P2 << "  " << mp.evaluate(allParticles_with_shift, shifted_BE_distances) << "\n";
-		// cout << "Seed = " << seed << endl;
-
-	// cout << endl << __LINE__;
-	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
-	// cout << endl;
-
-	}
-	// std::terminate();
-}
-
-// std::cout << "Iteration/particle = " << iLoop << " / " << iParticle << ": " << P2/P1 << "\n";
-// std::cout << "------------------------------------------------------------------------------------\n";
-
+			// for debugging purposes, remove eventually
+			if (false && SHIFT_MODE == "Exact")
+			{
+				#pragma omp critical
+				{
+					cout << "  Compare unshifted: " << P1
+								<< "  " << mp.evaluate(allParticles, current_BE_distances)
+								<< "  " << get_probability( R, current_pairs, "Exact" )
+								<< "  " << get_probability( R, current_pairs, "FullProduct" ) << "\n";
+					cout << "  Compare shifted: " << P2
+								<< "  " << mp.evaluate(allParticles_with_shift, shifted_BE_distances)
+								<< "  " << get_probability( R, shifted_pairs, "Exact" )
+								<< "  " << get_probability( R, shifted_pairs, "FullProduct" ) << "\n";
+					// cout << "Seed = " << seed << endl;
+				}
+				// std::terminate();
+			}
 
 			// std::cout << "CHECK: " << SHIFT_MODE << "   "
 			// 					<< x1 << "   " << y1 << "   " << z1 << "   "
@@ -648,8 +557,6 @@ if (SHIFT_MODE == "Exact")
 			// 					<< get_probability( R, current_pairs, "TRIAL3" ) << "   "
 			// 					<< get_probability( R, shifted_pairs, "TRIAL3" ) << "   " << std::endl;
 
-			// sw.Reset();
-			// sw.Start();
 			// choose new configuration (shifted or original)
 			double log_alpha = std::min(0.0, log(P2/P1));
 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
@@ -657,22 +564,10 @@ if (SHIFT_MODE == "Exact")
 			// re-set shifted quantities
 			if (shift_this_particle)
 			{
-	// cout << endl << __LINE__;
-	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
-	// cout << endl;
-
 				// current_pairs = shifted_pairs;		// re-set current configuration
 				get_shifted_pairs_FAST( current_pairs, current_BE_distances,
 																allParticles_with_shift, iParticle, R );
-
-	// cout << endl << __LINE__;
-	// cout << endl << "allParticles(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles) cout << "  " << p.p.pz();
-	// cout << endl << "allParticles_with_shift(" << iParticle << "," << iLoop << "): "; for (auto & p: allParticles_with_shift) cout << "  " << p.p.pz();
-	// cout << endl;
-
 				P1 = P2;													// re-set probability of current configuration
-				number_of_shifted_particles++;
 				allParticles[iParticle].p.px(x2);	// re-set momentum of particle
 				allParticles[iParticle].p.py(y2);	// re-set momentum of particle
 				allParticles[iParticle].p.pz(z2);	// re-set momentum of particle
@@ -681,26 +576,13 @@ if (SHIFT_MODE == "Exact")
 				get_shifted_pairs_FAST( shifted_pairs, shifted_BE_distances,
 																allParticles, iParticle, R );
 
-			// sw.Stop();
-			// cerr << "\tDeciding whether to shift took " << sw.printTime() << " s." << "\n\n";
-
-			// swTotal.Stop();
-			// cerr << "\tThe whole loop took " << swTotal.printTime() << " s." << "\n\n";
 		}
-		// if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
-		// std::cout << std::endl << "Before: ";
-		// for (const auto & p: allParticles_Original) std::cout << p.p.pz() << "   ";
-		// std::cout << std::endl << "After: ";
-		// for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
-		// std::cout << std::endl;
-		swTotal.Stop();
-		cout << "finished in " << swTotal.printTime() << " s.\n";
-		// if (iLoop >= 5) std::terminate();
+		// swTotal.Stop();
+		// cout << "finished in " << swTotal.printTime() << " s.\n";
 	}
 
 	// Done.
 	return;
-
 }
 
 		//--------------------------------
