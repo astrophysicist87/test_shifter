@@ -272,36 +272,6 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 		return factor*result/np;
 	}
 	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL5" )
-	{
-		// use adjacent particle pairs and next-to-neighbor pairs
-		const int n = qVec.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double total = 0.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		int maxsep = np/2;
-		for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
-		{
-			int i = -1;
-			double result = 1.0;
-			for (int i1 = 0; i1 < np - 1; ++i1)
-			for (int i2 = i1 + 1; i2 < np; ++i2)
-			{
-				i++;
-				int di = std::abs(i2-i1);
-				bool include_this_pair = (std::min(di, np-di) == step);
-				if (!include_this_pair) continue;
-				auto q = qVec[i];
-				double q2 = inner_product(q.cbegin(), q.cend(),
-																	q.cbegin(),
-																	0.0);
-				result *= 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*q2*R*R);
-			}
-			total += result;
-		}
-		return total/maxsep;
-	}
-	//--------------------------------------------------------------------------
 	else
 	{
 		cerr << "This mode (" << SHIFT_MODE << ") not supported!" << endl;
@@ -380,36 +350,6 @@ double shifter::get_probability( const double R, const vector<vector<double>> & 
 			factor += 1.0/term;
 		}
 		return factor*result/np;
-	}
-	//--------------------------------------------------------------------------
-	else if ( CHOSEN_SHIFT_MODE == "TRIAL5" )
-	{
-		// use adjacent particle pairs and next-to-neighbor pairs
-		const int n = qVec.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double total = 0.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		int maxsep = np/2;
-		for (int step = 1; step <= maxsep; step++) // sum over independent pairs (modulo step)
-		{
-			int i = -1;
-			double result = 1.0;
-			for (int i1 = 0; i1 < np - 1; ++i1)
-			for (int i2 = i1 + 1; i2 < np; ++i2)
-			{
-				i++;
-				int di = std::abs(i2-i1);
-				bool include_this_pair = (std::min(di, np-di) == step);
-				if (!include_this_pair) continue;
-				auto q = qVec[i];
-				double q2 = inner_product(q.cbegin(), q.cend(),
-																	q.cbegin(),
-																	0.0);
-				result *= 1.0 + 0.5*(np-1.0)*normalization*exp(-0.5*q2*R*R);
-			}
-			total += result;
-		}
-		return total/maxsep;
 	}
 	//--------------------------------------------------------------------------
 	else
@@ -498,7 +438,7 @@ void shifter::shiftEvent_efficient()
 	{
 		// swTotal.Reset();
 		// swTotal.Start();
-		// cerr << "Loop #" << iLoop << ": ";
+		cerr << "Loop #" << iLoop << "\n";
 		for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 		{
 			// generate a shifted momentum

@@ -11,9 +11,9 @@
 #include <unordered_map>
 #include <variant>
 
-using namespace std;
+#include "param_list.h"
 
-typedef std::unordered_map<std::string,std::variant<bool, double>> param_list;
+using namespace std;
 
 class distribution_3D
 {
@@ -21,7 +21,7 @@ class distribution_3D
 private:
 
 	bool do_x = false, do_y = false, do_z = false;
-	double scale = 0.0, width = 0.0;
+	double mean = 0.0, scale = 0.0, width = 0.0;
 
 	default_random_engine generator;
 	normal_distribution<double> normal_dist;
@@ -65,11 +65,12 @@ public:
 				{
 					if (mode == "Gaussian")
 					{
+						mean  = std::get<double>(parameters.at("mean"));
 						scale = std::get<double>(parameters.at("scale"));
 						do_x  = std::get<bool>(parameters.at("do_x"));
 						do_y  = std::get<bool>(parameters.at("do_y"));
 						do_z  = std::get<bool>(parameters.at("do_z"));
-						normal_dist = normal_distribution<double>(0.0, scale);
+						normal_dist = normal_distribution<double>(mean, scale);
 						generate_sample = [this]{ return generate_sample_Gaussian(); };
 					}
 					else if (mode == "Shell")

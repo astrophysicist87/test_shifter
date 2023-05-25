@@ -42,7 +42,8 @@ namespace shift_lib
 		normal_distribution<double> distribution(0.0, 1.0);
 
 		// use the 3D distribution here
-		param_list parameters ( { {"scale", RNG_p0},
+		param_list parameters ( { {"mean", 0.0},
+															{"scale", RNG_p0},
 															{"do_x", (bool)RNG_xDir},
 															{"do_y", (bool)RNG_yDir},
 															{"do_z", (bool)RNG_zDir} } );
