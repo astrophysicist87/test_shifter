@@ -7,19 +7,19 @@
 #include <iostream>
 #include <random>
 #include <string>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
+#include "../include/permanent.h"
 #include "../include/shifter.h"
+#include "../include/stopwatch.h"
 #include "../include/ParameterReader.h"
-
-#include "KolmogorovSmirnovDist.c"
 
 using namespace std;
 
 namespace shift_lib
 {
-	constexpr const char * SHIFT_MODE = "TRIAL3";
+	// constexpr const char * SHIFT_MODE = "TRIAL3";
 
 	constexpr bool BE_VERBOSE = false;
 
@@ -31,6 +31,8 @@ namespace shift_lib
 	constexpr double COMPFACMAX = 1000.;
 	constexpr int    NCOMPSTEP  = 10;
 
+	constexpr double TINY       = 1e-6;
+
 
 	void shifter::initialize_all( ParameterReader * paraRdr_in,
 		vector<ParticleRecord> & allParticles_in )
@@ -40,7 +42,7 @@ namespace shift_lib
 		// Load parameters.
 		paraRdr			= paraRdr_in;
 
-		cout << "SHIFT_MODE = " << SHIFT_MODE << endl;
+		// cout << "SHIFT_MODE = " << SHIFT_MODE << endl;
 
 		// process (i.e., shift and output) this event
 		process_event( allParticles_in );
@@ -87,31 +89,12 @@ namespace shift_lib
 	{
 		ofstream out(filename.c_str(), ios::app);
 		out << eventID << "   " << allParticles_in.size() << "\n";
-		for (const auto & particle: allParticles_in) out << particle.p.pz() << "\n";
+		for (const auto & particle: allParticles_in)
+			out << particle.p.px() << "   " << particle.p.py() << "   " << particle.p.pz() << "\n";
 		out.close();
 		return;
 	}
 
-
-	void shifter::get_combinations(int N, int K, vector<vector<int>> & combinations)
-	{
-		std::string bitmask(K, 1); // K leading 1's
-		bitmask.resize(N, 0); // N-K trailing 0's
-
-		// store integers and permute bitmask
-		do
-		{
-			int ind = 0;
-			vector<int> combination(K);
-
-	    for (int i = 0; i < N; ++i) // [0..N-1] integers
-        if (bitmask[i]) combination[ind++] = i;
-
-			combinations.push_back( combination );
-		} while (std::prev_permutation(bitmask.begin(), bitmask.end()));
-
-		return;
-	}
 
 	double shifter::standard_deviation( const vector<double> & v )
 	{
@@ -128,23 +111,88 @@ namespace shift_lib
 		return sqrt(variance);
 	}
 
+	double shifter::permanent(const vector<double> & A, long n) // expects n by n matrix encoded as vector
+	{
+		// std::cout << "\nA(exact) =\n" << fixed << setprecision(6);
+		// for (int i = 0; i < n; ++i)
+		// {
+		// 	for (int j = 0; j < n; ++j)
+		// 		std::cout << "  " << A[i*n+j];
+		// 	cout << "\n";
+		// }
+		// cout << "\n";
+
+    double sum = 0.0;
+    double rowsumprod = 0.0, rowsum = 0.0;
+    vector<long> chi(n + 1);
+    double C = (double)pow((double)2, n);
+
+    // loop all 2^n submatrices of A
+    for (long k = 1; k < C; k++)
+    {
+        rowsumprod = 1.0;
+        chi = dec2binarr(k, n); // characteristic vector
+
+        // loop columns of submatrix #k
+        for (long m = 0; m < n; m++)
+        {
+            rowsum = 0.0;
+
+            // loop rows and compute rowsum
+            for (long p = 0; p < n; p++)
+                rowsum += chi[p] * A[m * n + p];
+
+            // update product of rowsums
+            rowsumprod *= rowsum;
+
+            // (optional -- use for sparse matrices)
+            if (rowsumprod < TINY) break;
+        }
+
+        sum += (double)pow((double)-1, n - chi[n]) * rowsumprod;
+    }
+
+    return sum;
+}
 
 //------------------------------------------------------------------------------
-double shifter::get_probability( const double R, const vector<double> & pair_qzs )
+double shifter::get_probability( const double R, const vector<vector<double>> & qVec,
+                                 const vector<double> & BE_distances )
 {
-	//--------------------------------------------------------------------------
-	// CRAMER VON MISES STATISTIC
-	if ( SHIFT_MODE == "CramerVonMises" )
+	if ( SHIFT_MODE == "HYBRID" )
 	{
-		const int n = pair_qzs.size();
-		double T = 1.0/(12.0*n);
-		for (int i = 0; i < n; i++)
+		double result = get_probability( R, qVec, "FullProduct" );
+		double hybrid_cutoff = paraRdr->getVal("hybrid_cutoff");
+		if (result > hybrid_cutoff)
+			result = get_probability( R, qVec, "Exact" );
+		return result;
+	}
+	else if ( SHIFT_MODE == "Exact" )
+	{
+		const int n = qVec.size();
+		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		vector<double> A(np*np);
 		{
-			double xi = (2.0*i+1.0)/(2.0*n);
-			double Fi = 0.5*(1.0+erf(pair_qzs[i]*R/sqrt(2.0)));
-			T += (xi-Fi)*(xi-Fi);
+			int index = 0;
+			for (int i = 0; i < np; i++)
+			{
+				A[i*np+i] = 1.0;
+				for (int j = i+1; j < np; j++)
+				{
+					auto q = qVec[index];
+					double q2 = inner_product(q.cbegin(), q.cend(),
+																		q.cbegin(),
+																		0.0);
+					double tmp = exp(-0.25*q2*R*R);
+// cout << "Check q: " << q[0] << "  " << q[1] << "  " << q[2] << "  " << q2 << "  " << tmp << "\n";
+					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
+					A[i*np+j] = tmp;
+					A[j*np+i] = tmp; // matrix is symmetric
+					index++;
+				}
+			}
 		}
-		return 1.0/sqrt(T);
+		return permanent(A, np);
 	}
 	//--------------------------------------------------------------------------
 	// FULL PRODUCT
@@ -152,54 +200,21 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	{
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
-		for (const auto & qz: pair_qzs) result *= 1.0 + normalization*exp(-0.5*qz*qz*R*R);
-		return result;
-	}
-	//--------------------------------------------------------------------------
-	// FULL PRODUCT RAISED TO A POWER
-	else if ( SHIFT_MODE == "FullProductPower" )
-	{
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		for (const auto & qz: pair_qzs) result *= 1.0 + 0.5*np*normalization*exp(-0.5*qz*qz*R*R);
-		return std::pow(result, 2.0/np);
-	}
-	//--------------------------------------------------------------------------
-	// EXPERIMENTAL
-	else if ( SHIFT_MODE == "TRIAL" )
-	{
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		for (int i = 0; i < np-1; i++)
-			result *= 1.0 + normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-		return result;
-	}
-	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL2" )
-	{
-		const int n = pair_qzs.size();
-		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
-		double normalization = paraRdr->getVal("shifter_norm");
-		int i = -1;
-		for (int i1 = 0; i1 < np - 1; ++i1)
-		for (int i2 = i1 + 1; i2 < np; ++i2)
+		for (const auto & q: qVec)
 		{
-			i++;
-			bool include_this_pair = (i2 == i1+1) /*|| (i1 == 0 && i2 == np-1)*/;
-			if (!include_this_pair) continue;
-			result *= 1.0 + (0.5*np/**(np-1.)/np*/)*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			result *= 1.0 + normalization*exp(-0.5*q2*R*R);
 		}
 		return result;
 	}
 	//--------------------------------------------------------------------------
+	// EXPERIMENTAL
 	else if ( SHIFT_MODE == "TRIAL3" )
 	{
-		const int n = pair_qzs.size();
+		// use only np-1 independent pairs, and cycle over which gets omitted
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
@@ -211,85 +226,110 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 			i++;
 			bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
 			if (!include_this_pair) continue;
-			double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+			auto q = qVec[i];
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			double term = 1.0 + 0.5*np*normalization*exp(-0.5*q2*R*R);
 			result *= term;
 			factor += 1.0/term;
 		}
 		return factor*result/np;
 	}
 	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL4" )
+	// EXPERIMENTAL
+	else if ( SHIFT_MODE == "TRIAL3Fast" )
 	{
-		const int n = pair_qzs.size();
+		// use only np-1 independent pairs, and cycle over which gets omitted
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
 
-		// compute all n-choose-(np-1) combinations of pairs
-		vector<vector<int>> combinations;
-		get_combinations(n, np-1, combinations);
+		auto square = [](double x){return x*x;};
+		auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
+		// auto get_q2 = [](const vector<double> & q)
+		// 							{ return inner_product( q.cbegin(), q.cend(), q.cbegin(), 0.0 ); };
+		// auto get_q2 = [](const vector<double> & q)
+		// 							{ return q[0]*q[0] + q[1]*q[1] + q[2]*q[2]; };
 
-		// store all factors for each pair
-		vector<double> factors(n);
-		for (int i = 0; i < n; i++)
-			factors[i] = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+		// initialize with first pair
+		// double init = 1.0 + 0.5*np*normalization
+		// 										*exp(-0.5*get_q2( qVec[UTindexer(0, np-1, np)] )*R*R);
+		double init = 1.0 + 0.5 * np * normalization
+                        * square( BE_distances[ UTindexer(0, np-1, np) ] );
+		double result = init;
+		double factor = 1.0/init;
 
-		// sum all products of terms and return average
-		double sum = 0.0;
-		for ( const auto & c : combinations )
+		// update with other pairs
+		for (int i1 = 0; i1 < np - 1; ++i1)
 		{
-			double term = 1.0;
-			for ( const int & i : c ) term *= factors[i];
-			sum += term;
+			auto i = UTindexer(i1, i1+1, np);
+			double term = 1.0 + 0.5 * np * normalization * square( BE_distances[i] );
+			result *= term;
+			factor += 1.0/term;
 		}
-		return (sum / combinations.size());
+
+		return factor*result/np;
 	}
 	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "TRIAL4b" )
+	else
 	{
-// cout << "Entering here" << endl;
+		cerr << "This mode (" << SHIFT_MODE << ") not supported!" << endl;
+		abort();
+	}
+}
 
-		const int n = pair_qzs.size();
+
+
+//------------------------------------------------------------------------------
+double shifter::get_probability( const double R, const vector<vector<double>> & qVec, const string & CHOSEN_SHIFT_MODE )
+{
+	if ( CHOSEN_SHIFT_MODE == "Exact" )
+	{
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
+		vector<double> A(np*np);
+		{
+			int index = 0;
+			for (int i = 0; i < np; i++)
+			{
+				A[i*np+i] = 1.0;
+				for (int j = i+1; j < np; j++)
+				{
+					auto q = qVec[index];
+					double q2 = inner_product(q.cbegin(), q.cend(),
+																		q.cbegin(),
+																		0.0);
+					double tmp = exp(-0.25*q2*R*R);
+					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
+					A[i*np+j] = tmp;
+					A[j*np+i] = tmp; // matrix is symmetric
+					index++;
+				}
+			}
+		}
+		return permanent(A, np);
+	}
+	//--------------------------------------------------------------------------
+	// FULL PRODUCT
+	else if ( CHOSEN_SHIFT_MODE == "FullProduct" )
+	{
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
-
-		// store all factors for each pair
-		vector<double> factors(n);
-		for (int i = 0; i < n; i++)
-			factors[i] = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
-
-		double sum = 0.0;
-		double term_count = 0.0;
-		std::string bitmask(np-1, 1); // np-1 leading 1's
-		bitmask.resize(n, 0); // n-np+1 trailing 0's
-
-		// fill unordered set with permutations of bitmask
-		std::unordered_set<std::string> bitmasks;
-		while (bitmasks.size() <= 10*np)
+		for (const auto & q: qVec)
 		{
-			std::random_shuffle(bitmask.begin(), bitmask.end());
-			bitmasks.insert( bitmask );
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			result *= 1.0 + normalization*exp(-0.5*q2*R*R);
 		}
-
-		// now iterate over permuted bitmasks
-		for (const auto & bitmask_permutation: bitmasks)
-		{
-			double term = 1.0;
-			for (int i = 0; i < n; ++i) // [0..n-1] integers
-				if (bitmask_permutation[i]) term *= factors[i];
-			sum += term;
-			term_count++;
-		}
-
-// cout << "Exiting here" << endl;
-
-		return (sum / term_count);
+		return result;
 	}
 	//--------------------------------------------------------------------------
-	else if ( SHIFT_MODE == "RMSscale" )
+	else if ( CHOSEN_SHIFT_MODE == "TRIAL3" )
 	{
-		const int n = pair_qzs.size();
+		// use only np-1 independent pairs, and cycle over which gets omitted
+		const int n = qVec.size();
 		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
 		double result = 1.0;
 		double normalization = paraRdr->getVal("shifter_norm");
@@ -301,7 +341,11 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 			i++;
 			bool include_this_pair = (i2 == i1+1) || (i1 == 0 && i2 == np-1);
 			if (!include_this_pair) continue;
-			double term = 1.0 + 0.5*np*normalization*exp(-0.5*pair_qzs[i]*pair_qzs[i]*R*R);
+			auto q = qVec[i];
+			double q2 = inner_product(q.cbegin(), q.cend(),
+																q.cbegin(),
+																0.0);
+			double term = 1.0 + 0.5*np*normalization*exp(-0.5*q2*R*R);
 			result *= term;
 			factor += 1.0/term;
 		}
@@ -310,15 +354,15 @@ double shifter::get_probability( const double R, const vector<double> & pair_qzs
 	//--------------------------------------------------------------------------
 	else
 	{
-		cerr << "This mode not supported!" << endl;
+		cerr << "This mode (" << CHOSEN_SHIFT_MODE << ") not supported!" << endl;
 		abort();
 	}
 }
 
 //--------------------------------
-vector<double> shifter::get_pairs( const vector<ParticleRecord> & particles )
+vector<vector<double>> shifter::get_pairs( const vector<ParticleRecord> & particles )
 {
-	vector<double> result;
+	vector<vector<double>> result;
 
 	const int number_of_particles = particles.size();
 
@@ -328,12 +372,11 @@ vector<double> shifter::get_pairs( const vector<ParticleRecord> & particles )
 	{
 		// Vec4 q = particles.at(i1).p - particles.at(i2).p;
 		Vec4 q = particles[i1].p - particles[i2].p;
-		result.push_back( q.pz() );
+		result.push_back( vector<double>({q.px(), q.py(), q.pz()}) );
 	}
 
 	return result;
 }
-
 
 //--------------------------------------------------------------------------
 // Perform Bose-Einstein corrections on an event.
@@ -354,103 +397,140 @@ void shifter::shiftEvent_efficient()
 	std::normal_distribution<double>       normal(0.0, 1.0);
 
 	// this RNG is for shuffling particle momenta
-	auto rng = std::default_random_engine { std::random_device{}() };
+	// auto rng = std::default_random_engine { std::random_device{}() };
+
+	// avoid replicating previously generated values (cycle through twice to be safe)
+	for (const auto & p: allParticles) {normal(generator); normal(generator);}
 
 	const double R = paraRdr->getVal("RNG_R") / HBARC;
-	const double RMSscale = get_RMSscale(allParticles) / HBARC;
-// if (true)
-// {
-// 	cout << "R = " << R << endl;
-// 	cout << "RMSscale = " << RMSscale << endl;
-// 	terminate();
-// }
 	const double RNG_p0 = paraRdr->getVal("RNG_p0");
+
 	const int number_of_particles = allParticles.size();
 	vector<ParticleRecord> allParticles_Original = allParticles;
 
-	vector<double> current_pairs = get_pairs(allParticles);
+	// vector<vector<double>> current_pairs = get_pairs(allParticles);
+	current_pairs = get_pairs(allParticles);
+	vector<double> current_BE_distances(current_pairs.size(), 0.0);
+	auto get_BE_distance = [R](const vector<double> & q)
+	                       { return exp(-0.25 * R * R
+                                       * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2])); };
+	std::transform( current_pairs.begin(), current_pairs.end(),
+                  current_BE_distances.begin(), get_BE_distance );
 
-	// need comparator for sorting particles by momentum
-	auto particleSort = [](const ParticleRecord & p1,
-                         const ParticleRecord & p2)
-                        { return p1.p.pz() < p2.p.pz(); };
+	shifted_pairs = current_pairs;
+	vector<double> shifted_BE_distances = current_BE_distances;
 
-	constexpr bool check_number_of_shifted_particles = false;
+	// get probability of initial configuration
+	MatrixPermanent mp(allParticles.size(), 1e-2, true);
+	double P1 = (SHIFT_MODE == "AlmostExact") ?
+              mp.evaluate(allParticles, current_BE_distances) :
+              get_probability( R, current_pairs, current_BE_distances );
+
+	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
+	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
+	int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
+
+	Stopwatch swTotal;
+
 	int iLoop = 0;
 	int nLoops = paraRdr->getVal("shifter_nLoops");
-	for (iLoop = 0; iLoop < nLoops; iLoop++)
+	for (iLoop = 0; iLoop < nLoops; iLoop++)	// loop over all particles fixed number of times
 	{
-		int number_of_shifted_particles = 0;
-		for (int iParticle = 0; iParticle < number_of_particles; iParticle++)
+		// swTotal.Reset();
+		// swTotal.Start();
+		cerr << "Loop #" << iLoop << "\n";
+		for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 		{
 			// generate a shifted momentum
-			double x = allParticles[iParticle].p.pz();
-			double y = RNG_p0 * normal(generator);	// corresponds to choice of parameters in random_events.h
+			double x1 = allParticles[iParticle].p.px();
+			double y1 = allParticles[iParticle].p.py();
+			double z1 = allParticles[iParticle].p.pz();
+			double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;	// corresponds to choice of parameters in random_events.h
+			double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;	// corresponds to choice of parameters in random_events.h
+			double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;	// corresponds to choice of parameters in random_events.h
 
-			// get probability of current configuration
-			double P1 = (SHIFT_MODE == "RMSscale") ?
-									get_probability( RMSscale, current_pairs ) :
-									get_probability( R, current_pairs );
+			// compute shifted configuration
+			vector<ParticleRecord> allParticles_with_shift = allParticles;
+			allParticles_with_shift[iParticle].p.px(x2);
+			allParticles_with_shift[iParticle].p.py(y2);
+			allParticles_with_shift[iParticle].p.pz(z2);
+
+			get_shifted_pairs_FAST( shifted_pairs, shifted_BE_distances,
+															allParticles_with_shift, iParticle, R );
 
 			// get probability of shifted configuration
-			vector<ParticleRecord> allParticles_with_shift = allParticles;
-			allParticles_with_shift[iParticle].p.pz(y);
-			vector<double> shifted_pairs = get_shifted_pairs( current_pairs,
-																			allParticles_with_shift, iParticle );
-			double P2 = (SHIFT_MODE == "RMSscale") ?
-									get_probability( RMSscale, shifted_pairs ) :
-									get_probability( R, shifted_pairs );
+			double P2 = (SHIFT_MODE == "AlmostExact") ?
+		              mp.evaluate(allParticles_with_shift, shifted_BE_distances) :
+		              get_probability( R, shifted_pairs, shifted_BE_distances );
 
-			// choose new configuration (shifted or original)
-			double log_alpha = std::min(0.0, log(P2/P1) + 0.0*(y*y - x*x));
-			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
-
-			if ( SHIFT_MODE == "CramerVonMises" )
-				shift_this_particle = bool( P2 > P1 );
-
-			x = shift_this_particle ? y : x;
-
-// cout << "ratio = " << P2/P1 << ";   " << x << endl;
-
-			if (shift_this_particle)
+			// for debugging purposes, remove eventually
+			if (false && SHIFT_MODE == "Exact")
 			{
-				current_pairs = shifted_pairs;
-				number_of_shifted_particles++;
+				#pragma omp critical
+				{
+					cout << "  Compare unshifted: " << P1
+								<< "  " << mp.evaluate(allParticles, current_BE_distances)
+								<< "  " << get_probability( R, current_pairs, "Exact" )
+								<< "  " << get_probability( R, current_pairs, "FullProduct" ) << "\n";
+					cout << "  Compare shifted: " << P2
+								<< "  " << mp.evaluate(allParticles_with_shift, shifted_BE_distances)
+								<< "  " << get_probability( R, shifted_pairs, "Exact" )
+								<< "  " << get_probability( R, shifted_pairs, "FullProduct" ) << "\n";
+					// cout << "Seed = " << seed << endl;
+				}
+				// std::terminate();
 			}
 
-			// store (possibly new) x to appropriate particle
-			allParticles[iParticle].p.pz(x);
+			// std::cout << "CHECK: " << SHIFT_MODE << "   "
+			// 					<< x1 << "   " << y1 << "   " << z1 << "   "
+			// 					<< x2 << "   " << y2 << "   " << z2 << "   "
+			// 					<< P2/P1 << std::endl;
+			// for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
+			// std::cout << std::endl;
+			// for (const auto & p: allParticles_with_shift) std::cout << p.p.pz() << "   ";
+			// std::cout << std::endl;
+			// std::cout << "Iteration/particle = " << iLoop << " / " << iParticle << ": "
+			// 					<< get_probability( R, current_pairs, "Exact" ) << "   "
+			// 					<< get_probability( R, shifted_pairs, "Exact" ) << "   "
+			// 					<< get_probability( R, current_pairs, "FullProduct" ) << "   "
+			// 					<< get_probability( R, shifted_pairs, "FullProduct" ) << "   "
+			// 					<< get_probability( R, current_pairs, "TRIAL3" ) << "   "
+			// 					<< get_probability( R, shifted_pairs, "TRIAL3" ) << "   " << std::endl;
+
+			// choose new configuration (shifted or original)
+			double log_alpha = std::min(0.0, log(P2/P1));
+			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
+
+			// re-set shifted quantities
+			if (shift_this_particle)
+			{
+				// current_pairs = shifted_pairs;		// re-set current configuration
+				get_shifted_pairs_FAST( current_pairs, current_BE_distances,
+																allParticles_with_shift, iParticle, R );
+				P1 = P2;													// re-set probability of current configuration
+				allParticles[iParticle].p.px(x2);	// re-set momentum of particle
+				allParticles[iParticle].p.py(y2);	// re-set momentum of particle
+				allParticles[iParticle].p.pz(z2);	// re-set momentum of particle
+			}
+			else	// overwrite shifted pairs with current (unshifted)
+				get_shifted_pairs_FAST( shifted_pairs, shifted_BE_distances,
+																allParticles, iParticle, R );
+
 		}
-		if ( check_number_of_shifted_particles && number_of_shifted_particles == 0 ) break;
+		// swTotal.Stop();
+		// cout << "finished in " << swTotal.printTime() << " s.\n";
 	}
-
-	vector<double> old_pairs = get_pairs( allParticles_Original );
-	vector<double> new_pairs = get_pairs( allParticles );
-
-	for (int iPair = 0; iPair < new_pairs.size(); iPair++)
-		cout << "OUT: " << number_of_shifted_events << "   " << iPair
-				<< "   " << old_pairs[iPair]
-				<< "   " << new_pairs[iPair]
-				<< "   " << new_pairs[iPair] - old_pairs[iPair] << "\n";
-
-	cerr << "CHECK: " << standard_deviation( old_pairs )
-				<< "   " << standard_deviation( new_pairs ) << "   "
-				<< "   " << standard_deviation( new_pairs )
-											- standard_deviation( old_pairs ) << "\n";
-
-	cerr << "Finished shifting in " << iLoop << " of " << nLoops << " loops.\n";
 
 	// Done.
 	return;
-
 }
 
 		//--------------------------------
-		vector<double> shifter::get_shifted_pairs( const vector<double> & pairs,
+		vector<vector<double>> shifter::get_shifted_pairs( const vector<vector<double>> & pairs,
 		 																					 const vector<ParticleRecord> & particles,
 																							 const int shifted_particle_index )
 		{
-			vector<double> result = pairs;
+			vector<vector<double>> result = pairs;
 			// auto indexer = [nCols](size_t i, size_t j) { return i*nCols+j; };
 
 			const int number_of_particles = particles.size();
@@ -460,95 +540,51 @@ void shifter::shiftEvent_efficient()
 			for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
 			{
 				if (i1==shifted_particle_index || i2==shifted_particle_index)
-					result[iPair] = particles[i1].p.pz() - particles[i2].p.pz();
+					result[iPair] = vector<double>({
+														particles[i1].p.px() - particles[i2].p.px(),
+														particles[i1].p.py() - particles[i2].p.py(),
+														particles[i1].p.pz() - particles[i2].p.pz()});
 				iPair++;
 			}
 
 			return result;
 		}
 
-
-
-	//--------------------------------
-	bool shifter::setSortedPairs( const vector<ParticleRecord> & particles_to_sort )
-	{
-		// Reset.
-		pairs_sorted_by_qz.clear();
-		pairs_sorted_by_abs_qz.clear();
-
-		const int number_of_particles = particles_to_sort.size();
-
-		// get all values in vector first
-		for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
-		for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
-		{
-			// Vec4 q = particles_to_sort.at(i1).p - particles_to_sort.at(i2).p;
-			Vec4 q = particles_to_sort[i1].p - particles_to_sort[i2].p;
-			pairs_sorted_by_qz.push_back( std::make_pair( q.pz(), std::make_pair(i1, i2) ) );
-			pairs_sorted_by_abs_qz.push_back( std::make_pair( abs(q.pz()), std::make_pair(i1, i2) ) );
-		}
-
-		// check if there are enough pairs of this species to do shift
-		if (pairs_sorted_by_qz.size() < 2)
-		{
-			//cout << "Not enough sorted pairs of species with pid=" << idNow << endl;
-			return false;
-		}
-
-		// THEN sort them (sorts on first column in ascending order automatically)
-		sort( pairs_sorted_by_qz.begin(), pairs_sorted_by_qz.end() );
-		sort( pairs_sorted_by_abs_qz.begin(), pairs_sorted_by_abs_qz.end() );
-
-		return (true);
-	}
-
-
-
-	// current effective source is 1 + < cos(qz Delta_z) >
-	double shifter::evaluate_effective_source(
-					const vector< pair< double, pair <int,int> > > & pairs,
-					const double qz )
-	{
-		int npairs_in_average = 0;
-		double effective_source = 0.0;
-
-		// the BE enhancement piece
-		for (const auto & iPair : pairs)
-		{
-			const int i1 = iPair.second.first;
-			const int i2 = iPair.second.second;
-
-			if ( i1<0 or i2<0 ) continue;
-			//if ( this1 != i1 and this2 != i2 ) continue;
-			//if ( this1 != i1 or  this2 != i2 ) continue;
-
-			// Vec4 xDiff = ( allParticles.at(i1).x - allParticles.at(i2).x ) / HBARC;
-			Vec4 xDiff = ( allParticles[i1].x - allParticles[i2].x ) / HBARC;
-			const double Delta_z = xDiff.pz();
-
-			effective_source += cos(qz*Delta_z);
-
-			npairs_in_average++;
-		}
-
-		return ( 1.0 + effective_source / npairs_in_average );
-	}
-
 		//--------------------------------
-		double shifter::get_RMSscale( const vector<ParticleRecord> & particles )
+		void shifter::get_shifted_pairs_FAST( vector<vector<double>> & pairs,
+																					vector<double> & BE_distances,
+																				  const vector<ParticleRecord> & particles,
+																			    const int shifted_particle_index,
+                                          const double R )
 		{
-			double result = 0.0;
-			const int number_of_particles = particles.size();
-			const int number_of_pairs = number_of_particles*(number_of_particles-1)/2;
+			const int np = particles.size();
+			auto & spi = shifted_particle_index;
 
-			for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
-			for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
+			// indexes upper-triangular list of pairs given indices (i,j)
+			auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
+			auto get_q2 = [](std::initializer_list<double> q)
+										{ return inner_product( q.begin(), q.end(), q.begin(), 0.0 ); };
+
+			for (int i1 = 0; i1 < spi; ++i1)
 			{
-				const double dz = particles[i1].x.pz() - particles[i2].x.pz();
-				result += dz*dz;
+				int iPair = UTindexer(i1, spi, np);
+				auto q = { particles[i1].p.px() - particles[spi].p.px(),
+									 particles[i1].p.py() - particles[spi].p.py(),
+									 particles[i1].p.pz() - particles[spi].p.pz() };
+				BE_distances[iPair] = exp(-0.25 * R * R * get_q2(q));
+				pairs[iPair].assign(q);
 			}
 
-			return sqrt(0.5*result/number_of_pairs);
+			for (int i1 = spi+1; i1 < np; ++i1)
+			{
+				int iPair = UTindexer(spi, i1, np);
+				auto q = { particles[spi].p.px() - particles[i1].p.px(),
+									 particles[spi].p.py() - particles[i1].p.py(),
+									 particles[spi].p.pz() - particles[i1].p.pz() };
+				BE_distances[iPair] = exp(-0.25 * R * R * get_q2(q));
+				pairs[iPair].assign(q);
+			}
+			return;
 		}
 
 }	//End of namespace

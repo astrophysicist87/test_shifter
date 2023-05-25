@@ -11,7 +11,7 @@
 ##
 
 CC := g++
-CFLAGS= -O3 -std=c++17 -g
+CFLAGS= -Ofast -std=c++17 -g #-fopenmp
 
 RM				=	rm -f
 O               =	.o
@@ -41,7 +41,8 @@ INC			= 	$(INCDIR)/random_events.h \
 				$(INCDIR)/ParameterReader.h \
 				$(INCDIR)/Arsenal.h \
 				$(INCDIR)/ParticleRecord.h \
-				$(INCDIR)/FourVector.h
+				$(INCDIR)/FourVector.h \
+				$(INCDIR)/distribution_3D.h
 
 # -------------------------------------------------
 
@@ -71,7 +72,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 $(SRCDIR)/%.cpp:
 	if [ -f $@ ] ; then touch $@ ; else false ; fi
 
-$(TARGET):	$(OBJECTS)
+$(TARGET):	$(OBJECTS) $(INC)
 	-@mkdir -p $(LIBDIR)
 		$(CC) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
 
@@ -121,7 +122,10 @@ $(SRCDIR)/ParameterReader.cpp: $(INCDIR)/ParameterReader.h \
 $(SRCDIR)/shifter.cpp:         $(INCDIR)/shifter.h \
                                $(INCDIR)/ParameterReader.h \
                                $(INCDIR)/Arsenal.h \
-                               $(INCDIR)/ParticleRecord.h
+                               $(INCDIR)/ParticleRecord.h \
+															 $(INCDIR)/distribution_3D.h
 ./main.cpp:                    $(INCDIR)/shifter.h \
                                $(INCDIR)/ParameterReader.h \
-                               $(INCDIR)/ParticleRecord.h
+                               $(INCDIR)/ParticleRecord.h \
+															 $(INCDIR)/random_events.h \
+															 $(INCDIR)/distribution_3D.h

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 
+#include <omp.h>
+
 #include "include/shifter.h"
 #include "include/ParameterReader.h"
 #include "include/random_events.h"
@@ -29,53 +31,46 @@ int main(int argc, char *argv[])
 	ParameterReader * paraRdr = new ParameterReader;
 	paraRdr->readFromFile("./parameters.dat");
 
-	string results_directory = std::string(argv[1]) + "/";
+	if (argc < 3)
+	{
+		std::cerr << "--------------------------------------------------------------------------------" << std::endl;
+		std::cerr << "Cannot run with missing arguments!" << std::endl;
+		std::cerr << "--------------------------------------------------------------------------------" << std::endl;
+		std::terminate();
+	}
+
+	string results_directory = std::string(argv[1]);
+	string shift_mode = std::string(argv[2]);
 
 	// Read-in command-line arguments (skip one to require results directory path)
-	paraRdr->readFromArguments(argc, argv, (string)("#"), 2);
+	paraRdr->readFromArguments(argc, argv, (string)("#"), 3);
 	paraRdr->echo();
-
-	// Vector to hold all event information
-	vector<ParticleRecord> allParticles;
-
-	// Read in the files
-	generate_events(allParticles, paraRdr);
-
-	// garbage needly quickly
-	vector<double> v0, v1;
-	for (auto i: allParticles) v0.push_back(i.p.pz());
-
-	// Create HBT_event_generator object from allEvents
-	shifter event( paraRdr, allParticles, cout, cerr );
-
-	for (auto i: allParticles) v1.push_back(i.p.pz());
-	event.print( 0, allParticles, results_directory + "events.dat" );
-
 
 	// Loop over several events
 	const int nLoops = paraRdr->getVal("RNG_nLoops");
-	for (int iLoop = 1; iLoop < nLoops; ++iLoop)
+	int number_of_completed_events = 0;
+
+	#pragma omp parallel for schedule(static)
+	for (int iLoop = 0; iLoop < nLoops; ++iLoop)
 	{
+		// Vector to hold all event information
+		vector<ParticleRecord> allParticles;
+
+		// Read in the files
 		generate_events(allParticles, paraRdr);
-		for (auto i: allParticles) v0.push_back(i.p.pz());
-		event.update_records( allParticles );
-		for (auto i: allParticles) v1.push_back(i.p.pz());
-		event.print( iLoop, allParticles, results_directory + "events.dat" );
-		cerr << "Finished " << iLoop+1 << " events" << endl;
+
+		vector<ParticleRecord> allParticles_unshifted = allParticles;
+
+		// Create shifter object for each event
+		shifter event( paraRdr, allParticles, shift_mode, cout, cerr );
+
+		#pragma omp critical
+		{
+			event.print( number_of_completed_events, allParticles_unshifted, results_directory + "/events_unshifted.dat" );
+			event.print( number_of_completed_events, allParticles, results_directory + "/events.dat" );
+			cerr << "Finished " << ++number_of_completed_events << " events" << endl;
+		}
 	}
-
-	double s0 = standard_deviation(v0);
-	double s1 = standard_deviation(v1);
-
-	//for (int i = 0; i < v0.size(); i++)
-	//	cerr << i << "   " << v0.at(i) << "   " << v1.at(i) << "\n";
-
-	cerr << "Unshifted sigma = " << s0 << endl;
-	cerr << "Shifted sigma = " << s1 << endl;
-
-
-	//for ( auto const particle: allParticles )
-	//	cout << particle;
 
 	// Done.
 	return (0);
