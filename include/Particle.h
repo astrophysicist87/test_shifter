@@ -1,5 +1,5 @@
-#ifndef SHIFT_LIB_PARTICLERECORD_H
-#define SHIFT_LIB_PARTICLERECORD_H
+#ifndef SHIFT_LIB_PARTICLE_H
+#define SHIFT_LIB_PARTICLE_H
 
 #include <cmath>
 #include <cstdlib>
@@ -19,10 +19,12 @@ namespace shift_lib
 
 		double m, m2;
 
-		Vec4 x, p, pShift, pComp;
-	} ParticleRecord;
+		Vec4 x, p;
+	} Particle;
 
-	std::ostream& operator << (std::ostream& out, const ParticleRecord & a);
+	std::ostream& operator << (std::ostream& out, const Particle & a);
+
+	typedef std::pair<Particle, Particle> particle_pair;
 
 }
 

@@ -9,7 +9,7 @@
 #include <random>
 
 #include "./distribution_3D.h"
-#include "./ParticleRecord.h"
+#include "./Particle.h"
 #include "./ParameterReader.h"
 
 using namespace std;
@@ -17,7 +17,7 @@ using namespace std;
 namespace shift_lib
 {
 
-	void generate_events(vector<ParticleRecord> & allParticles, ParameterReader * paraRdr)
+	void generate_events(vector<Particle> & allParticles, ParameterReader * paraRdr)
 	{
 		//cout << "Using random number generator for toy model calculation!" << endl;
 
@@ -74,17 +74,17 @@ namespace shift_lib
 // if (1) std::terminate();
 				double Ep = sqrt( mass*mass + px*px + py*py + pz*pz );
 
-				ParticleRecord particle;
+				Particle particle;
 				//particle.eventID 	= iEvent;
 				particle.particleID = iParticle;
-				particle.p.e(Ep);
-				particle.p.px(px);
-				particle.p.py(py);
-				particle.p.pz(pz);
-				particle.x.e(tP);
-				particle.x.px(xP);
-				particle.x.py(yP);
-				particle.x.pz(zP);
+				particle.p.t(Ep);
+				particle.p.x(px);
+				particle.p.y(py);
+				particle.p.z(pz);
+				particle.x.t(tP);
+				particle.x.x(xP);
+				particle.x.y(yP);
+				particle.x.z(zP);
 
 				particle.m = mass;
 				particle.m2 = mass*mass;

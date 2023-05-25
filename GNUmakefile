@@ -11,7 +11,7 @@
 ##
 
 CC := g++
-CFLAGS= -Ofast -std=c++17 -g #-fopenmp
+CFLAGS= -O0 -std=c++17 -g #-fopenmp
 
 RM				=	rm -f
 O               =	.o
@@ -33,16 +33,18 @@ MAINSRC		=	main.cpp
 SRC			=	$(SRCDIR)/shifter.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
-				$(SRCDIR)/ParticleRecord.cpp \
+				$(SRCDIR)/Particle.cpp \
 				$(SRCDIR)/FourVector.cpp
 
 INC			= 	$(INCDIR)/random_events.h \
 				$(INCDIR)/shifter.h \
 				$(INCDIR)/ParameterReader.h \
 				$(INCDIR)/Arsenal.h \
-				$(INCDIR)/ParticleRecord.h \
+				$(INCDIR)/Particle.h \
 				$(INCDIR)/FourVector.h \
-				$(INCDIR)/distribution_3D.h
+				$(INCDIR)/distribution_3D.h \
+				$(INCDIR)/probability.h \
+				$(INCDIR)/QuantumSampler.h
 
 # -------------------------------------------------
 
@@ -122,10 +124,12 @@ $(SRCDIR)/ParameterReader.cpp: $(INCDIR)/ParameterReader.h \
 $(SRCDIR)/shifter.cpp:         $(INCDIR)/shifter.h \
                                $(INCDIR)/ParameterReader.h \
                                $(INCDIR)/Arsenal.h \
-                               $(INCDIR)/ParticleRecord.h \
-															 $(INCDIR)/distribution_3D.h
+                               $(INCDIR)/Particle.h \
+															 $(INCDIR)/distribution_3D.h \
+ 											 				 $(INCDIR)/probability.h \
+											 				 $(INCDIR)/QuantumSampler.h
 ./main.cpp:                    $(INCDIR)/shifter.h \
                                $(INCDIR)/ParameterReader.h \
-                               $(INCDIR)/ParticleRecord.h \
+                               $(INCDIR)/Particle.h \
 															 $(INCDIR)/random_events.h \
 															 $(INCDIR)/distribution_3D.h
