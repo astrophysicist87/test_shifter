@@ -246,25 +246,14 @@ class MatrixPermanent
       //------------------------------------------------------------------------
       // find pairs
       vv<double> pairs = get_pairs( cluster );
-// cout << __FUNCTION__ << "::cluster (size="<<cluster.size()<<"): ";
-// for (const auto & p: cluster) cout << "  " << p;
-// cout << endl << endl;
-
-// cout << __FUNCTION__ << "::pairs (size="<<pairs.size()<<"): ";
-// for (const auto & pp: pairs)
-// for (const auto & comp: pp) cout << "  " << comp;
-// cout << endl << endl;
 
       //------------------------------------------------------------------------
       // set matrix
       vector<double> A = get_A(pairs, cluster.size(), BE_distance);
-// cout << __FUNCTION__ << "::A: ";
-// for (const auto & elem: A) cout << "  " << elem;
-// cout << endl << endl;
 
       //------------------------------------------------------------------------
       // compute and return permanent
-      return permanent( A, cluster.size()/*, static_cast<bool>(cluster.size()==1)*/ );
+      return permanent( A, cluster.size() );
     }
 
 
@@ -274,14 +263,7 @@ class MatrixPermanent
     {
       double decomposed_permanent = 1.0;
       for (const auto & cluster: get_clusters_with_merging(particles, BE_distance))
-{
         decomposed_permanent *= compute_permanent_from_cluster(cluster, BE_distance);
-// cout << __FUNCTION__ << "::test: " << compute_permanent_from_cluster(cluster, BE_distance) << endl;
-// cout << __FUNCTION__ << "::BE distance:";
-// for (auto & a: BE_distance) cout << "  " << a;
-// cout << endl;
-}
-// if (decomposed_permanent < 1) std::terminate();
       return decomposed_permanent;
     }
 
