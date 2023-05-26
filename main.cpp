@@ -34,7 +34,8 @@ int main(int argc, char *argv[])
 	if (argc < 3)
 	{
 		std::cerr << "--------------------------------------------------------------------------------" << std::endl;
-		std::cerr << "Cannot run with missing arguments!" << std::endl;
+		std::cerr << "<<< Cannot run with missing arguments! >>>" << std::endl;
+		std::cerr << "Usage: ./shifter.e results_directory shift_mode" << std::endl;
 		std::cerr << "--------------------------------------------------------------------------------" << std::endl;
 		std::terminate();
 	}
@@ -54,12 +55,12 @@ int main(int argc, char *argv[])
 	for (int iLoop = 0; iLoop < nLoops; ++iLoop)
 	{
 		// Vector to hold all event information
-		vector<ParticleRecord> allParticles;
+		vector<Particle> allParticles;
 
 		// Read in the files
 		generate_events(allParticles, paraRdr);
 
-		vector<ParticleRecord> allParticles_unshifted = allParticles;
+		vector<Particle> allParticles_unshifted = allParticles;
 
 		// Create shifter object for each event
 		shifter event( paraRdr, allParticles, shift_mode, cout, cerr );

@@ -416,9 +416,9 @@ namespace shift_lib
 	  double TINY = std::numeric_limits<double>::epsilon();
 	  if ( abs(nPerp.pAbs()) < TINY) {
 		Vec4 aux;
-		if (v1.px() != 0.)      aux.p(v1.yy,v1.px(),v1.pz(),v1.e());
-		else if (v1.py() != 0.) aux.p(v1.px(),v1.pz(),v1.py(),v1.e());
-		else if (v1.pz() != 0.) aux.p(v1.pz(),v1.py(),v1.px(),v1.e());
+		if (v1.x() != 0.)      aux.p(v1.yy,v1.x(),v1.z(),v1.t());
+		else if (v1.y() != 0.) aux.p(v1.x(),v1.z(),v1.y(),v1.t());
+		else if (v1.z() != 0.) aux.p(v1.z(),v1.y(),v1.x(),v1.t());
 		nPerp.p( cross3(v1,aux) );
 	  }
 	  nPerp /= abs(nPerp.pAbs());

@@ -12,7 +12,7 @@ Version 1.01 (09-20-2011) Zhi Qiu
 using namespace std;
 
 namespace shift_lib
-	{
+{
 
 	class ParameterReader
 	{

@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "FourVector.h"
-#include "ParticleRecord.h"
+#include "Particle.h"
 
 using namespace std;
 using shift_lib::Vec4;
-using shift_lib::ParticleRecord;
+using shift_lib::Particle;
 
 // forward declaration
 // class MatrixPermanent;
@@ -25,21 +25,21 @@ class MatrixPermanent
   //============================================================================
   private:
     //--------------------------------------------------------------------------
-    const bool VERBOSE = false;
-    const double R = 5.0/0.19733;
+    bool VERBOSE = false;
+    double R = 5.0/0.19733;
     bool ASSUME_SPARSE = false;
     double TINY = 1e-3;
 
     vector<double> Cvec;
 
     //--------------------------------------------------------------------------
-    void print_clusters( const vv<ParticleRecord> & clusters )
+    void print_clusters( const vv<Particle> & clusters )
     {
     	std::cout << "\n\nClusters (size = " << clusters.size() << "):\n";
       int iCluster = 0;
     	for (const auto & cluster: clusters)
     	{
-        std::cout << "Cluster " <<iCluster  << " (size = " << cluster.size() << "):";
+        std::cout << "Cluster " << iCluster << " (size = " << cluster.size() << "):";
     		for (const auto & node: cluster)
     			std::cout << "  " << node;
     		std::cout << "\n";
@@ -48,7 +48,7 @@ class MatrixPermanent
     }
 
     //--------------------------------------------------------------------------
-    vv<double> get_pairs( const vector<ParticleRecord> & particles )
+    vv<double> get_pairs( const vector<Particle> & particles )
     {
     	vv<double> result;
 
@@ -59,7 +59,7 @@ class MatrixPermanent
     	for (int i2 = i1 + 1; i2 < n; ++i2)
       {
     		Vec4 q = particles[i1].p - particles[i2].p;
-    		result.push_back( vector<double>({q.px(), q.py(), q.pz()}) );
+    		result.push_back( vector<double>({q.x(), q.y(), q.z()}) );
       }
 
     	return result;
@@ -172,24 +172,24 @@ class MatrixPermanent
     //--------------------------------------------------------------------------
     inline double get_q2( const Vec4 & q )
     {
-      return q.px()*q.px() + q.py()*q.py() + q.pz()*q.pz();
+      return q.x()*q.x() + q.y()*q.y() + q.z()*q.z();
     }
 
     //--------------------------------------------------------------------------
-    inline double get_BE_distance( const ParticleRecord & p1,
-                                   const ParticleRecord & p2 )
+    inline double get_BE_distance( const Particle & p1,
+                                   const Particle & p2 )
     {
     	return exp(-0.25*get_q2(p1.p - p2.p)*R*R);
     }
 
     //--------------------------------------------------------------------------
-    vv<ParticleRecord> get_clusters_with_merging(
-                         const vector<ParticleRecord> & particles,
+    vv<Particle> get_clusters_with_merging(
+                         const vector<Particle> & particles,
                          const vector<double> & BE_distance )
     {
 			auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
 
-    	vv<ParticleRecord> clusters;
+    	vv<Particle> clusters;
       int number_of_particles = particles.size();
       for (const auto & particle: particles)
       {
@@ -213,12 +213,12 @@ class MatrixPermanent
         }
 
         if (indices.empty())          // add particle to new cluster
-          clusters.push_back( vector<ParticleRecord>({particle}) );
+          clusters.push_back( vector<Particle>({particle}) );
         else if (indices.size()==1)   // add particle to unique matching cluster
           clusters[ indices[0] ].push_back( particle );
         else // otherwise add to appropriate clusters and merge
         {
-          vector<ParticleRecord> merged_clusters{particle};
+          vector<Particle> merged_clusters{particle};
           for (auto it = indices.rbegin(); it != indices.rend(); ++it)
           {
             merged_clusters.insert( merged_clusters.end(),
@@ -240,7 +240,7 @@ class MatrixPermanent
 
     //--------------------------------------------------------------------------
     double compute_permanent_from_cluster(
-             const vector<ParticleRecord> & cluster,
+             const vector<Particle> & cluster,
              const vector<double> & BE_distance )
     {
       //------------------------------------------------------------------------
@@ -258,28 +258,28 @@ class MatrixPermanent
 
 
     //--------------------------------------------------------------------------
-    double permanent_by_decomposition( const vector<ParticleRecord> & particles,
+    double permanent_by_decomposition( const vector<Particle> & particles,
                                        const vector<double> & BE_distance )
     {
-      double decomposed_permament = 1.0;
+      double decomposed_permanent = 1.0;
       for (const auto & cluster: get_clusters_with_merging(particles, BE_distance))
-        decomposed_permament *= compute_permanent_from_cluster(cluster, BE_distance);
-      return decomposed_permament;
+        decomposed_permanent *= compute_permanent_from_cluster(cluster, BE_distance);
+      return decomposed_permanent;
     }
 
   //============================================================================
   public:
-    MatrixPermanent( const int n, const double TOLERANCE = 1e-6,
-                     const bool ASSUME_SPARSE_IN = false)
+    MatrixPermanent(){}
+    MatrixPermanent( const int n, double TOLERANCE, bool ASSUME_SPARSE_IN)
     : TINY{TOLERANCE},
       ASSUME_SPARSE{ASSUME_SPARSE_IN}
     {
       Cvec.resize(n+1);
-      for (long i = 0; i < n; i++)
+      for (long i = 0; i <= n; i++)
         Cvec[i] = (double)pow((double)2, i);
     }
     ~MatrixPermanent(){}
-    inline double evaluate( const vector<ParticleRecord> & particles,
+    inline double evaluate( const vector<Particle> & particles,
                             const vector<double> & BE_distance )
                   { return permanent_by_decomposition(particles, BE_distance); }
 

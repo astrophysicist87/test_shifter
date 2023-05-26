@@ -43,16 +43,16 @@ namespace shift_lib
 	  void p(double xIn, double yIn, double zIn, double tIn)
 		{xx = xIn; yy = yIn; zz = zIn; tt = tIn;}
 	  void p(Vec4 pIn) {xx = pIn.xx; yy = pIn.yy; zz = pIn.zz; tt = pIn.tt;}
-	  void px(double xIn) {xx = xIn;}
-	  void py(double yIn) {yy = yIn;}
-	  void pz(double zIn) {zz = zIn;}
-	  void e(double tIn) {tt = tIn;}
+	  void x(double xIn) {xx = xIn;}
+	  void y(double yIn) {yy = yIn;}
+	  void z(double zIn) {zz = zIn;}
+	  void t(double tIn) {tt = tIn;}
 
 	  // Member functions for output.
-	  double px() const {return xx;}
-	  double py() const {return yy;}
-	  double pz() const {return zz;}
-	  double e() const {return tt;}
+	  double x() const {return xx;}
+	  double y() const {return yy;}
+	  double z() const {return zz;}
+	  double t() const {return tt;}
 	  double& operator[](int i) {
 		if      (i == 1) return xx;
 		else if (i == 2) return yy;
