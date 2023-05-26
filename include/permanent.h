@@ -25,7 +25,7 @@ class MatrixPermanent
   //============================================================================
   private:
     //--------------------------------------------------------------------------
-    bool VERBOSE = false;
+    static constexpr bool VERBOSE = false;
     double R = 5.0/0.19733;
     bool ASSUME_SPARSE = false;
     double TINY = 1e-3;
@@ -93,7 +93,7 @@ class MatrixPermanent
     {
       if (VERBOSE)
       {
-        std::cout << "\nA(almost exact) =\n" << fixed << setprecision(6);
+        std::cout << "\nA(almost exact) =\n" << fixed << setprecision(4);
         for (int i = 0; i < n; ++i)
         {
           for (int j = 0; j < n; ++j)
@@ -201,6 +201,10 @@ class MatrixPermanent
           for (const auto & node: cluster)
           {
             // if ( get_BE_distance(particle, node) > TINY )
+// cout << "Check: " << get_BE_distance(particle, node) << "   "
+//       << BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
+//                             particle.particleID,
+//                             number_of_particles )] << endl;
             if ( BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
                                         particle.particleID,
                                         number_of_particles )] > TINY )
@@ -232,7 +236,8 @@ class MatrixPermanent
         // iParticle++;
       }
 
-      // print_clusters(clusters);
+      // if (VERBOSE)
+        // print_clusters(clusters);
 
       return clusters;
     }
@@ -253,7 +258,16 @@ class MatrixPermanent
 
       //------------------------------------------------------------------------
       // compute and return permanent
-      return permanent( A, cluster.size() );
+      if (VERBOSE)
+      {
+        double tmp = permanent( A, cluster.size() );
+        cout << "--------------------------------------------------" << endl;
+        cout << "Permanent of above A: " << tmp << endl;
+        cout << "--------------------------------------------------" << endl;
+        return tmp;
+      }
+      else
+        return permanent( A, cluster.size() );
     }
 
 

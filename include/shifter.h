@@ -15,6 +15,10 @@
 
 #include "ParameterReader.h"
 #include "Particle.h"
+#include "BoseEinsteinDistance.h"
+#include "probability.h"
+#include "QuantumSampler.h"
+#include "stopwatch.h"
 
 using namespace std;
 
@@ -64,7 +68,7 @@ namespace shift_lib
 				vector<double> & BE_distances,
 			  const vector<Particle> & particles,
 		    const int shifted_particle_index,
-        const double R );
+				const BoseEinsteinDistance & BEdist );
 
 		//--------------------------------------------------------------------------
 		public:

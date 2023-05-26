@@ -1,6 +1,7 @@
 #ifndef BOSEEINSTEINDISTANCE_H
 #define BOSEEINSTEINDISTANCE_H
 
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -23,6 +24,12 @@ class BoseEinsteinDistance
   	{
       return exp(-0.25 * R * R * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2]));
     }
+    // inline double get_distance_single_scale(std::initializer_list<double> q)
+  	// {
+    //   // return exp(-0.25 * R * R * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2]));
+    //   return exp(-0.25 * R * R * inner_product( q.begin(), q.end(),
+    //                                             q.begin(), 0.0 ));
+    // }
 
   //----------------------------------------------------------------------------
   public:

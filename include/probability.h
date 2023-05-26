@@ -18,7 +18,7 @@ class ConfigurationProbability
 		ostream & err;
     ParameterReader * paraRdr;
 
-    const double TINY = 1e-6;
+    static constexpr double TINY = 1e-6;
 
     inline vector<long> dec2binarr(long n, long dim)
 		{

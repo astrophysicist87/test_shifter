@@ -22,8 +22,8 @@ class QuantumSampler
 {
   //----------------------------------------------------------------------------
   private:
-    const double TINY = 1e-6;
-    const double HBARC = 0.19733;
+    static constexpr double TINY = 1e-6;
+    static constexpr double HBARC = 0.19733;
 
     //--------------------------------------------------------------------------
     int RNG_xDir { 0 };
@@ -32,12 +32,12 @@ class QuantumSampler
     int dimension { 0 };
     double sigma { 1.0 };  // fm
     vector<Particle> & particles;
-    std::mt19937 rng;
+    std::mt19937 rng, rng2;
     integer_range intdist;
     gaussian normdist;
 
     //--------------------------------------------------------------------------
-    inline int choose_particle() { return intdist(rng); };
+    inline int choose_particle() { return intdist(rng2); };
 
   //----------------------------------------------------------------------------
   public:
@@ -46,6 +46,7 @@ class QuantumSampler
                     unsigned seed )
     : particles{ particles_in },
       rng{ std::mt19937(seed) },
+      rng2{ std::mt19937(seed) },
       intdist{ integer_range(0, particles_in.size() - 1) },
       normdist{ gaussian(0.0, 1.0) }
     {
@@ -62,10 +63,12 @@ class QuantumSampler
     }
     ~QuantumSampler(){}
 
-    std::tuple<double,double,double> sample(
+    std::tuple<double,double,double> sample( int particle_to_sample = -1,
       std::tuple<double,double,double> def = std::make_tuple(0.0, 0.0, 0.0))
     {
-      auto & pi = particles[ choose_particle() ].p;
+      auto & pi = ( particle_to_sample < 0 ) ?
+                  particles[ choose_particle() ].p :
+                  particles[ particle_to_sample ].p;
       double w = 1.0/(sqrt(2.0)*sigma);
       double rx = RNG_xDir ? normdist(rng) : get<0>(def);
       double ry = RNG_yDir ? normdist(rng) : get<1>(def);
