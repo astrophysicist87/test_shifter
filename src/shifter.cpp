@@ -481,14 +481,14 @@ void shifter::shiftEvent_efficient()
 				// std::terminate();
 			}
 
-			// std::cout << "CHECK: " << SHIFT_MODE << "   "
-			// 					<< x1 << "   " << y1 << "   " << z1 << "   "
-			// 					<< x2 << "   " << y2 << "   " << z2 << "   "
-			// 					<< P2/P1 << std::endl;
-			// for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
-			// std::cout << std::endl;
-			// for (const auto & p: allParticles_with_shift) std::cout << p.p.pz() << "   ";
-			// std::cout << std::endl;
+			std::cout << "CHECK: " << SHIFT_MODE << "   "
+								<< x1 << "   " << y1 << "   " << z1 << "   "
+								<< x2 << "   " << y2 << "   " << z2 << "   "
+								<< P1 << "   " << P2 << std::endl;
+			for (const auto & p: allParticles) std::cout << p.p.pz() << "   ";
+			std::cout << std::endl;
+			for (const auto & p: allParticles_with_shift) std::cout << p.p.pz() << "   ";
+			std::cout << std::endl;
 			// std::cout << "Iteration/particle = " << iLoop << " / " << iParticle << ": "
 			// 					<< get_probability( R, current_pairs, "Exact" ) << "   "
 			// 					<< get_probability( R, shifted_pairs, "Exact" ) << "   "
