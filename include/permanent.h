@@ -39,7 +39,7 @@ class MatrixPermanent
       int iCluster = 0;
     	for (const auto & cluster: clusters)
     	{
-        std::cout << "Cluster " <<iCluster  << " (size = " << cluster.size() << "):";
+        std::cout << "Cluster " << iCluster << " (size = " << cluster.size() << "):";
     		for (const auto & node: cluster)
     			std::cout << "  " << node;
     		std::cout << "\n";
@@ -246,14 +246,25 @@ class MatrixPermanent
       //------------------------------------------------------------------------
       // find pairs
       vv<double> pairs = get_pairs( cluster );
+// cout << __FUNCTION__ << "::cluster (size="<<cluster.size()<<"): ";
+// for (const auto & p: cluster) cout << "  " << p;
+// cout << endl << endl;
+
+// cout << __FUNCTION__ << "::pairs (size="<<pairs.size()<<"): ";
+// for (const auto & pp: pairs)
+// for (const auto & comp: pp) cout << "  " << comp;
+// cout << endl << endl;
 
       //------------------------------------------------------------------------
       // set matrix
       vector<double> A = get_A(pairs, cluster.size(), BE_distance);
+// cout << __FUNCTION__ << "::A: ";
+// for (const auto & elem: A) cout << "  " << elem;
+// cout << endl << endl;
 
       //------------------------------------------------------------------------
       // compute and return permanent
-      return permanent( A, cluster.size() );
+      return permanent( A, cluster.size()/*, static_cast<bool>(cluster.size()==1)*/ );
     }
 
 
@@ -261,10 +272,17 @@ class MatrixPermanent
     double permanent_by_decomposition( const vector<Particle> & particles,
                                        const vector<double> & BE_distance )
     {
-      double decomposed_permament = 1.0;
+      double decomposed_permanent = 1.0;
       for (const auto & cluster: get_clusters_with_merging(particles, BE_distance))
-        decomposed_permament *= compute_permanent_from_cluster(cluster, BE_distance);
-      return decomposed_permament;
+{
+        decomposed_permanent *= compute_permanent_from_cluster(cluster, BE_distance);
+// cout << __FUNCTION__ << "::test: " << compute_permanent_from_cluster(cluster, BE_distance) << endl;
+// cout << __FUNCTION__ << "::BE distance:";
+// for (auto & a: BE_distance) cout << "  " << a;
+// cout << endl;
+}
+// if (decomposed_permanent < 1) std::terminate();
+      return decomposed_permanent;
     }
 
   //============================================================================
@@ -275,7 +293,7 @@ class MatrixPermanent
       ASSUME_SPARSE{ASSUME_SPARSE_IN}
     {
       Cvec.resize(n+1);
-      for (long i = 0; i < n; i++)
+      for (long i = 0; i <= n; i++)
         Cvec[i] = (double)pow((double)2, i);
     }
     ~MatrixPermanent(){}

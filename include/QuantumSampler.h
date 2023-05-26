@@ -43,9 +43,10 @@ class QuantumSampler
   public:
     QuantumSampler( vector<Particle> & particles_in,
                     double sigma_in, int RNG_xDir_in, int RNG_yDir_in, int RNG_zDir_in,
-                    unsigned seed = chrono::system_clock::now().time_since_epoch().count() )
+                    unsigned seed )
     : particles{ particles_in },
       rng{ std::mt19937(seed) },
+      generator{ default_random_engine(seed) },
       intdist{ integer_range(0, particles_in.size() - 1) },
       normdist{ gaussian(0.0, 1.0) }
     {
@@ -59,7 +60,8 @@ class QuantumSampler
       RNG_yDir = RNG_yDir_in;
       RNG_zDir = RNG_zDir_in;
       dimension = RNG_xDir + RNG_yDir + RNG_zDir;
-      // s1p_normalization = pow(2.0*sqrt(M_PI)*sigma, dimension);
+
+      for (int i = 0; i < particles.size(); ++i){normdist(generator);normdist(generator);}
     }
     ~QuantumSampler(){}
 
@@ -67,11 +69,16 @@ class QuantumSampler
       std::tuple<double,double,double> def = std::make_tuple(0.0, 0.0, 0.0))
     {
       auto & pi = particles[ choose_particle() ].p;
-      double w = 1.0/(sqrt(2.0)*sigma);
-      double rx = RNG_xDir ? normdist(rng) : get<0>(def);
-      double ry = RNG_yDir ? normdist(rng) : get<1>(def);
-      double rz = RNG_zDir ? normdist(rng) : get<2>(def);
-      return std::make_tuple( pi.x()+w*rx, pi.y()+w*ry, pi.z()+w*rz );
+      // double w = 1.0/(sqrt(2.0)*sigma);
+      // double rx = RNG_xDir ? normdist(rng) : get<0>(def);
+      // double ry = RNG_yDir ? normdist(rng) : get<1>(def);
+      // double rz = RNG_zDir ? normdist(rng) : get<2>(def);
+      // return std::make_tuple( pi.x()+w*rx, pi.y()+w*ry, pi.z()+w*rz );
+      double w = 1.0;
+      double rx = RNG_xDir ? normdist(generator) : get<0>(def);
+      double ry = RNG_yDir ? normdist(generator) : get<1>(def);
+      double rz = RNG_zDir ? normdist(generator) : get<2>(def);
+      return std::make_tuple( w*rx, w*ry, w*rz );
     }
 };
 

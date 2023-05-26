@@ -164,6 +164,17 @@ void shifter::shiftEvent()
 																			shifted_BE_distances );
 
 
+			std::cout << "CHECK: " << SHIFT_MODE << "   "
+								<< x1 << "   " << y1 << "   " << z1 << "   "
+								<< x2 << "   " << y2 << "   " << z2 << "   "
+								<< P1 << "   " << P2 << std::endl;
+			for (const auto & p: allParticles) std::cout << p.p.z() << "   ";
+			std::cout << std::endl;
+			for (const auto & p: allParticles_with_shift) std::cout << p.p.z() << "   ";
+			std::cout << std::endl;
+
+
+
 			// choose new configuration (shifted or original)
 			double log_alpha = std::min(0.0, log(P2/P1));
 			bool shift_this_particle = (log(uniform(generator)) <= log_alpha);
