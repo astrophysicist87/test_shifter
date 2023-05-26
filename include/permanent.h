@@ -112,30 +112,27 @@ class MatrixPermanent
       // loop all 2^n submatrices of A
       for (long k = 1; k < C; k++)
       {
-          rowsumprod = 1.0;
-          // chi = dec2binarr(k, n); // characteristic vector
-          std::fill( chi.begin(), chi.end(), 0 );
-          dec2binarr(k, n, chi); // characteristic vector
+        rowsumprod = 1.0;
+        std::fill( chi.begin(), chi.end(), 0 );
+        dec2binarr(k, n, chi); // characteristic vector
 
-          // loop columns of submatrix #k
-          for (long m = 0; m < n; m++)
-          {
-              rowsum = 0.0;
+        // loop columns of submatrix #k
+        for (long m = 0; m < n; m++)
+        {
+          rowsum = 0.0;
 
-              // loop rows and compute rowsum
-              for (long p = 0; p < n; p++)
-                  rowsum += chi[p] * A[m * n + p];
+          // loop rows and compute rowsum
+          for (long p = 0; p < n; p++)
+            rowsum += chi[p] * A[m * n + p];
 
-              // update product of rowsums
-              rowsumprod *= rowsum;
-              // rowsumprod *= inner_product( chi.cbegin(), chi.cbegin() + n,
-              //                              A.cbegin() + m*n, 0.0);
+          // update product of rowsums
+          rowsumprod *= rowsum;
 
-              // (optional -- use for sparse matrices)
-              if (ASSUME_SPARSE && rowsumprod < TINY) break;
-          }
+          // (optional -- use for sparse matrices)
+          if (ASSUME_SPARSE && rowsumprod < TINY) break;
+        }
 
-          sum += (double)pow((double)-1, n - chi[n]) * rowsumprod;
+        sum += (double)pow((double)-1, n - chi[n]) * rowsumprod;
       }
 
       return sum;
@@ -158,8 +155,6 @@ class MatrixPermanent
                                     q.cbegin(),
                                     0.0);
           double tmp = exp(-0.25*q2*R*R);
-          // double tmp = BE_distance[index];
-// cout << "check: " << tmp << "   " << BE_distance[index] << endl;
           if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
           A[i*np+j] = tmp;
           A[j*np+i] = tmp; // matrix is symmetric
@@ -167,19 +162,6 @@ class MatrixPermanent
         }
       }
       return A;
-    }
-
-    //--------------------------------------------------------------------------
-    inline double get_q2( const Vec4 & q )
-    {
-      return q.x()*q.x() + q.y()*q.y() + q.z()*q.z();
-    }
-
-    //--------------------------------------------------------------------------
-    inline double get_BE_distance( const Particle & p1,
-                                   const Particle & p2 )
-    {
-    	return exp(-0.25*get_q2(p1.p - p2.p)*R*R);
     }
 
     //--------------------------------------------------------------------------
@@ -201,10 +183,6 @@ class MatrixPermanent
           for (const auto & node: cluster)
           {
             // if ( get_BE_distance(particle, node) > TINY )
-// cout << "Check: " << get_BE_distance(particle, node) << "   "
-//       << BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
-//                             particle.particleID,
-//                             number_of_particles )] << endl;
             if ( BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
                                         particle.particleID,
                                         number_of_particles )] > TINY )
@@ -284,7 +262,7 @@ class MatrixPermanent
   //============================================================================
   public:
     MatrixPermanent(){}
-    MatrixPermanent( const int n, double TOLERANCE, bool ASSUME_SPARSE_IN)
+    MatrixPermanent( const int n, double TOLERANCE, bool ASSUME_SPARSE_IN )
     : TINY{TOLERANCE},
       ASSUME_SPARSE{ASSUME_SPARSE_IN}
     {
