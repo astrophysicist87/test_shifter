@@ -11,7 +11,7 @@
 ##
 
 CC := g++
-CFLAGS= -O0 -std=c++17 -g #-fopenmp
+CFLAGS= -O3 -std=c++17 -g #-fopenmp
 
 RM				=	rm -f
 O               =	.o
