@@ -11,12 +11,6 @@ using namespace std;
 using shift_lib::Vec4;
 using shift_lib::Particle;
 
-// forward declaration
-// class MatrixPermanent;
-// constexpr bool MatrixPermanent::VERBOSE = false;
-// constexpr double MatrixPermanent::R = 5.0/0.19733;
-
-
 class MatrixPermanent
 {
   template <typename T>
@@ -26,7 +20,7 @@ class MatrixPermanent
   private:
     //--------------------------------------------------------------------------
     static constexpr bool VERBOSE = false;
-    double R = 5.0/0.19733;
+    static constexpr double R = 5.0/0.19733;
     bool ASSUME_SPARSE = false;
     double TINY = 1e-3;
 
@@ -36,6 +30,7 @@ class MatrixPermanent
     bool clusters_set = false;
     vector<int> cluster_of_particle;
     vv<Particle> clusters;
+    vector<bool> place_particle_in_cluster;
 
     //--------------------------------------------------------------------------
     void print_clusters( const vv<Particle> & clusters_to_print )
@@ -179,6 +174,10 @@ class MatrixPermanent
       int number_of_particles = particles.size();
       for (const auto & particle: particles)
       {
+        // if this particle already belongs to a cluster, continue
+        if ( !place_particle_in_cluster[ particle.particleID ] )
+          continue;
+
         int iCluster = 0;
         vector<int> indices;
         for (const auto & cluster: clusters)  // loop over all clusters
@@ -223,7 +222,8 @@ class MatrixPermanent
 
       // set vector to track which cluster each particle belongs to
       clusters_set = true;
-      cluster_of_particle.resize(number_of_particles);
+      std::fill( cluster_of_particle.begin(),
+                 cluster_of_particle.end(), -1 );
       {
         int iCluster = 0;
         for (const auto & cluster: clusters)  // loop over all clusters
@@ -280,6 +280,7 @@ class MatrixPermanent
   //============================================================================
   public:
     MatrixPermanent(){}
+    ~MatrixPermanent(){}
     MatrixPermanent( const int n, double TOLERANCE, bool ASSUME_SPARSE_IN )
     : TINY{TOLERANCE},
       ASSUME_SPARSE{ASSUME_SPARSE_IN}
@@ -287,11 +288,37 @@ class MatrixPermanent
       Cvec.resize(n+1);
       for (long i = 0; i <= n; i++)
         Cvec[i] = (double)pow((double)2, i);
+      cluster_of_particle.resize(n, -1);
+      place_particle_in_cluster.resize(n, true);
     }
-    ~MatrixPermanent(){}
+
     inline double evaluate( const vector<Particle> & particles,
-                            const vector<double> & BE_distance )
-                  { return permanent_by_decomposition(particles, BE_distance); }
+                            const vector<double> & BE_distance,
+                            const int shifted_particle_index = -1 )
+    {
+      // if no/negative particle index passed, get permanent of all particles
+      if ( shifted_particle_index < 0 )
+      {
+        std::fill( place_particle_in_cluster.begin(),
+                   place_particle_in_cluster.end(), true );
+      }
+      else
+      {
+        // identify cluster which contains shifted particle
+        int cluster_to_remove = cluster_of_particle[ shifted_particle_index ];
+
+        // mark each particle in cluster as needing to be re-placed into a new cluster
+        for (const auto & node: clusters[ cluster_to_remove ])
+          place_particle_in_cluster[ node.particleID ] = true;
+
+        // remove this cluster
+        clusters.erase( clusters.begin() + cluster_to_remove );
+      }
+
+      // permanent_by_decomposition as usual either way
+      // (clusters get re-set inside)
+      return permanent_by_decomposition(particles, BE_distance);
+    }
 
 };
 
