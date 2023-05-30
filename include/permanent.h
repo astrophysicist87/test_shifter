@@ -23,6 +23,8 @@ class MatrixPermanent
     static constexpr double R = 5.0/0.19733;
     bool ASSUME_SPARSE = false;
     double TINY = 1e-3;
+    string PREFIX = "";
+    int SAVE_shifted_particle_index = -1;
 
     vector<double> Cvec;
 
@@ -31,20 +33,26 @@ class MatrixPermanent
     vector<int> cluster_of_particle;
     vv<Particle> clusters;
     vector<bool> place_particle_in_cluster;
+    vector<double> permanent_by_cluster;
 
     //--------------------------------------------------------------------------
-    void print_clusters( const vv<Particle> & clusters_to_print )
+    void print_clusters( const vv<Particle> & clusters_to_print, bool print_particles = false )
     {
-    	std::cout << "\n\nClusters (size = " << clusters_to_print.size() << "):\n";
+    	std::cout << "\n\n";
+      std::cout << "--------------------------------------------------------------------------------\n"
+                << "PRINTING CLUSTERS:\n"
+                << "Clusters (size = " << clusters_to_print.size() << "):\n" << setprecision(4);
       int iCluster = 0;
     	for (const auto & cluster: clusters_to_print)
     	{
-        std::cout << "Cluster " << iCluster << " (size = " << cluster.size() << "):";
-    		for (const auto & node: cluster)
-    			std::cout << "  " << node;
+        std::cout << PREFIX << "  - Cluster " << iCluster << " (size = " << cluster.size() << "):";
+    		if (print_particles)
+          for (const auto & node: cluster)
+    			 std::cout << "  " << node.particleID;
     		std::cout << "\n";
         iCluster++;
     	}
+      std::cout << "--------------------------------------------------------------------------------\n\n";
     }
 
     //--------------------------------------------------------------------------
@@ -164,19 +172,41 @@ class MatrixPermanent
       return A;
     }
 
+//--------------------------------------------------------------------------
+    inline double get_q2( const Vec4 & q )
+    {
+      return q.x()*q.x() + q.y()*q.y() + q.z()*q.z();
+    }
+
+    //--------------------------------------------------------------------------
+    inline double get_BE_distance( const Particle & p1,
+                                   const Particle & p2 )
+    {
+    	return exp(-0.25*get_q2(p1.p - p2.p)*R*R);
+    }
+
+
     //--------------------------------------------------------------------------
     void set_clusters_with_merging( const vector<Particle> & particles,
                                     const vector<double> & BE_distance )
     {
-      clusters.clear();
 			auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
 
+// cout << __LINE__ << ": clusters.size() = " << clusters.size() << "\n";
+        // print_clusters(clusters, true);
+
+
+      int iParticle = 0;
       int number_of_particles = particles.size();
       for (const auto & particle: particles)
       {
+
         // if this particle already belongs to a cluster, continue
         if ( !place_particle_in_cluster[ particle.particleID ] )
           continue;
+
+// cout << "  - place_particle_in_cluster[" << particle.particleID << "] = "
+//       << boolalpha << place_particle_in_cluster[ particle.particleID ] << noboolalpha << endl;
 
         int iCluster = 0;
         vector<int> indices;
@@ -185,17 +215,31 @@ class MatrixPermanent
           // check if particle is close to any node (particle) in this cluster
           for (const auto & node: cluster)
           {
+            auto [i,j] = std::minmax(node.particleID, particle.particleID);
+
+// cout << "----------------------\n";
+//   cout << "CHECK: " << setw(10) << setprecision(6) << get_BE_distance(particle, node)
+//         << "   " << BE_distance[UTindexer( i, j, number_of_particles )]
+//         << "   " << UTindexer( i, j, number_of_particles )
+//         << "  " << node.particleID << "  " << particle.particleID << "  " << TINY << endl;
+// cout << "CHECK(2): " << node;
+// cout << "CHECK(3): " << particle;
             // if ( get_BE_distance(particle, node) > TINY )
-            if ( BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
-                                        particle.particleID,
-                                        number_of_particles )] > TINY )
+            // if ( BE_distance[UTindexer( node.particleID,  // NOTE THE ORDER!!
+            //                             particle.particleID,
+            //                             number_of_particles )] > TINY )
+            if ( BE_distance[UTindexer( i, j, number_of_particles )] > TINY )
             {
+// cout << "  - placing particle #" << particle.particleID << " in cluster#" << iCluster << "\n";
               indices.push_back(iCluster);
               break;  // no need to check other nodes in this cluster
             }
           }
           ++iCluster;
         }
+
+// cout << __LINE__ << ": particle.particleID = " << particle.particleID << "\n";
+//         print_clusters(clusters, true);
 
         if (indices.empty())          // add particle to new cluster
           clusters.push_back( vector<Particle>({particle}) );
@@ -218,7 +262,8 @@ class MatrixPermanent
       }
 
       // if (VERBOSE)
-        // print_clusters(clusters);
+// cout << __LINE__ << ": clusters.size() = " << clusters.size() << "\n";
+//         print_clusters(clusters, true);
 
       // set vector to track which cluster each particle belongs to
       clusters_set = true;
@@ -227,12 +272,13 @@ class MatrixPermanent
       {
         int iCluster = 0;
         for (const auto & cluster: clusters)  // loop over all clusters
-        for (const auto & node: cluster)
         {
-          cluster_of_particle[ node.particleID ] = iCluster;
+          for (const auto & node: cluster)
+            cluster_of_particle[ node.particleID ] = iCluster;
           iCluster++;
         }
       }
+
 
       return;
     }
@@ -270,10 +316,25 @@ class MatrixPermanent
     double permanent_by_decomposition( const vector<Particle> & particles,
                                        const vector<double> & BE_distance )
     {
-      double decomposed_permanent = 1.0;
       set_clusters_with_merging( particles, BE_distance );
+
+      // store permanent for each cluster, recycle if unchanged
+      // permanent_by_cluster.resize(clusters.size(), 0.0);
+
+      // vector<double> permanent_factors;
+      double decomposed_permanent = 1.0;
       for (const auto & cluster: clusters)
-        decomposed_permanent *= compute_permanent_from_cluster(cluster, BE_distance);
+      {
+        double tmp = compute_permanent_from_cluster(cluster, BE_distance);
+        // permanent_factors.push_back( tmp );
+        decomposed_permanent *= tmp;
+      }
+
+      // debugging purposes only
+      // sort(permanent_factors.begin(), permanent_factors.end());
+      // for (const auto & tmp: permanent_factors)
+      //   cout << PREFIX << "  - tmp = " << setprecision(20) << tmp << "\n";
+
       return decomposed_permanent;
     }
 
@@ -281,9 +342,10 @@ class MatrixPermanent
   public:
     MatrixPermanent(){}
     ~MatrixPermanent(){}
-    MatrixPermanent( const int n, double TOLERANCE, bool ASSUME_SPARSE_IN )
+    MatrixPermanent( const int n, double TOLERANCE, bool ASSUME_SPARSE_IN, const string & PREFIX_IN )
     : TINY{TOLERANCE},
-      ASSUME_SPARSE{ASSUME_SPARSE_IN}
+      ASSUME_SPARSE{ASSUME_SPARSE_IN},
+      PREFIX{PREFIX_IN}
     {
       Cvec.resize(n+1);
       for (long i = 0; i <= n; i++)
@@ -296,9 +358,13 @@ class MatrixPermanent
                             const vector<double> & BE_distance,
                             const int shifted_particle_index = -1 )
     {
+      // allows to make revert_state consistent if needed
+      SAVE_shifted_particle_index = shifted_particle_index;
+
       // if no/negative particle index passed, get permanent of all particles
       if ( shifted_particle_index < 0 )
       {
+        clusters.clear();
         std::fill( place_particle_in_cluster.begin(),
                    place_particle_in_cluster.end(), true );
       }
@@ -307,9 +373,18 @@ class MatrixPermanent
         // identify cluster which contains shifted particle
         int cluster_to_remove = cluster_of_particle[ shifted_particle_index ];
 
+// cout << __LINE__ << " shifted_particle_index = " << shifted_particle_index << endl;
+// cout << __LINE__ << " cluster_to_remove = " << cluster_to_remove << endl;
+// cout << __LINE__ << " clusters[" << cluster_to_remove << "].size() = " << clusters[ cluster_to_remove ].size() << endl;
         // mark each particle in cluster as needing to be re-placed into a new cluster
-        for (const auto & node: clusters[ cluster_to_remove ])
+        // (must explicitly ignore those which are unchanged!)
+        std::fill( place_particle_in_cluster.begin(),
+                   place_particle_in_cluster.end(), false );
+        for ( const auto & node: clusters[ cluster_to_remove ] )
+        {
           place_particle_in_cluster[ node.particleID ] = true;
+// cout << PREFIX << "  " << __LINE__ << " node.particleID = " << node.particleID << endl;
+        }
 
         // remove this cluster
         clusters.erase( clusters.begin() + cluster_to_remove );
@@ -318,6 +393,33 @@ class MatrixPermanent
       // permanent_by_decomposition as usual either way
       // (clusters get re-set inside)
       return permanent_by_decomposition(particles, BE_distance);
+    }
+
+    // resets internal state of MatrixPermanent object if proposed shift rejected
+    void revert_state( const vector<Particle> & particles,
+                       const vector<double> & BE_distance )
+    {
+      // negative index means nothing to do,
+      // clusters were completely reset and nothing was saved
+      if (SAVE_shifted_particle_index < 0)
+        return;
+
+      // identify cluster which contains shifted particle
+      int cluster_to_remove = cluster_of_particle[ SAVE_shifted_particle_index ];
+
+      // mark each particle in cluster as needing to be re-placed into a new cluster
+      // (must explicitly ignore those which are unchanged!)
+      std::fill( place_particle_in_cluster.begin(),
+                 place_particle_in_cluster.end(), false );
+      for ( const auto & node: clusters[ cluster_to_remove ] )
+        place_particle_in_cluster[ node.particleID ] = true;
+
+      // remove this cluster
+      clusters.erase( clusters.begin() + cluster_to_remove );
+
+      set_clusters_with_merging( particles, BE_distance );
+
+      return;
     }
 
 };

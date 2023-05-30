@@ -87,7 +87,8 @@ class ConfigurationProbability
     //--------------------------------------------------------------------------
     double get_probability_Exact( const vector<Particle> & particles,
                                   const vector<vector<double>> & qVec,
-                                  const vector<double> & BE_distances )
+                                  const vector<double> & BE_distances,
+                                  const int shifted_particle_index )
     {
   		const int n = qVec.size();
   		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
@@ -104,7 +105,6 @@ class ConfigurationProbability
   																		q.cbegin(),
   																		0.0);
   					double tmp = exp(-0.25*q2*R*R);
-  // cout << "Check q: " << q[0] << "  " << q[1] << "  " << q[2] << "  " << q2 << "  " << tmp << "\n";
   					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
   					A[i*np+j] = tmp;
   					A[j*np+i] = tmp; // matrix is symmetric
@@ -118,7 +118,8 @@ class ConfigurationProbability
   	//--------------------------------------------------------------------------
     double get_probability_FullProduct( const vector<Particle> & particles,
                                         const vector<vector<double>> & qVec,
-                                        const vector<double> & BE_distances )
+                                        const vector<double> & BE_distances,
+                                        const int shifted_particle_index )
   	{
   		double result = 1.0;
   		double normalization = paraRdr->getVal("shifter_norm");
@@ -135,7 +136,8 @@ class ConfigurationProbability
   	//--------------------------------------------------------------------------
     double get_probability_Speed( const vector<Particle> & particles,
                                   const vector<vector<double>> & qVec,
-                                  const vector<double> & BE_distances )
+                                  const vector<double> & BE_distances,
+                                  const int shifted_particle_index )
   	{
   		// use only np-1 independent pairs, and cycle over which gets omitted
   		const int n = qVec.size();
@@ -164,9 +166,10 @@ class ConfigurationProbability
   	//--------------------------------------------------------------------------
     double get_probability_AlmostExact( const vector<Particle> & particles,
                                         const vector<vector<double>> & qVec,
-                                        const vector<double> & BE_distances )
+                                        const vector<double> & BE_distances,
+                                        const int shifted_particle_index )
     {
-      return mp.evaluate(particles, BE_distances);
+      return mp.evaluate(particles, BE_distances, shifted_particle_index);
     }
 
 
@@ -175,6 +178,7 @@ class ConfigurationProbability
     ConfigurationProbability( const string & mode,
                       				param_list & parameters,
                               ParameterReader * paraRdr_in,
+                              const string & prefix,
                       				ostream & out_stream = std::cout,
                       				ostream & err_stream = std::cerr )
 		: paraRdr{paraRdr_in},
@@ -186,12 +190,21 @@ class ConfigurationProbability
 				bool assume_sparse = std::get<bool>(parameters.at("assume_sparse"));
 				int n_particles    = std::get<int>(parameters.at("n_particles"));
 				double precision   = std::get<double>(parameters.at("precision"));
+
+        // set function for computing probability of given configuration
 				get_probability = [this]( const vector<Particle> & particles,
                                   const vector<vector<double>> & qVec,
-                                  const vector<double> & BE_distances )
+                                  const vector<double> & BE_distances,
+                                  const int shifted_particle_index )
                           { return get_probability_AlmostExact(
-                                    particles, qVec, BE_distances); };
-        mp = MatrixPermanent(n_particles, precision, assume_sparse);
+                                    particles, qVec, BE_distances,
+                                    shifted_particle_index ); };
+
+        // initialize MatrixPermanent mp object and pass to revert_state lambda
+        mp = MatrixPermanent(n_particles, precision, assume_sparse, prefix);
+        revert_state = [this]( const vector<Particle> & particles,
+                               const vector<double> & BE_distances )
+                       { mp.revert_state( particles, BE_distances ); };
 			}
 			else
 			{
@@ -203,8 +216,11 @@ class ConfigurationProbability
 
     std::function<double( const vector<Particle> &,
                           const vector<vector<double>> &,
-                          const vector<double> &)> get_probability;
+                          const vector<double> &,
+                          const int )> get_probability;
 
+    std::function<void( const vector<Particle> &,
+                        const vector<double> & )> revert_state;
 };
 
 #endif

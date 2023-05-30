@@ -128,10 +128,19 @@ namespace shift_lib
 															{"n_particles", (int)allParticles.size()},
 															{"assume_sparse", assume_sparse_pair_matrix} } );
 
-		ConfigurationProbability cp( SHIFT_MODE, parameters, paraRdr );
+		ConfigurationProbability cp( SHIFT_MODE, parameters, paraRdr, "Short" );
 		double P1 = cp.get_probability( allParticles,
 																		current_pairs,
-																		current_BE_distances );
+																		current_BE_distances, -1 );
+																		// last -1 means place all particles in clusters
+
+		ConfigurationProbability cp2( SHIFT_MODE, parameters, paraRdr, "Long" );
+		double P1correct = cp2.get_probability( allParticles,
+																		current_pairs,
+																		current_BE_distances, -1 );
+																		// last -1 means place all particles in clusters
+
+// cout << "Check initial: " << P1 << "  " << P1correct << endl;
 
 		//------------------------------------------------
 		// begin looping over particles
@@ -144,6 +153,13 @@ namespace shift_lib
 			cerr << "Loop #" << iLoop << ": ";
 			for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 			{
+
+// if (iLoop>0||iParticle>0) std::terminate();
+// cout << "\n\n\n\n\n\n\n\n\n\n";
+// cout << "=============================================================================\n";
+// cout << "STARTING LOOP = " << iLoop << " AND PARTICLE = " << iParticle << "\n";
+// cout << "=============================================================================\n";
+
 				// generate a shifted momentum
 				double x1 = allParticles[iParticle].p.x();
 				double y1 = allParticles[iParticle].p.y();
@@ -160,14 +176,44 @@ namespace shift_lib
 				allParticles_with_shift[iParticle].p.y(y2);
 				allParticles_with_shift[iParticle].p.z(z2);
 
+// cout << "OLD MOMENTUM: " << x1 << "   " << y1 << "   " << z1 << "\n"
+// 			<< "NEW MOMENTUM: " << x2 << "   " << y2 << "   " << z2 << "\n" << setprecision(4);
+
+
 				// get shifted pairs
 				get_shifted_pairs( shifted_pairs, shifted_BE_distances,
 													 allParticles_with_shift, iParticle, BEdist );
 
 				// get probability of shifted configuration
+// cout << "--------------------------------------------------------------------------------\n";
+// cout << "Short(tmp):\n";
 				double P2 = cp.get_probability( allParticles_with_shift,
 																				shifted_pairs,
-																				shifted_BE_distances );
+																				shifted_BE_distances, iParticle );
+
+// if (iParticle==7) std::terminate();
+// cout << "--------------------------------------------------------------------------------\n";
+// cout << "Long1(tmp):\n";
+// 				double tmpP = cp2.get_probability( allParticles,
+// 																				current_pairs,
+// 																				current_BE_distances, -1 );
+// 																				// last -1 means place all particles in clusters
+// cout << "--------------------------------------------------------------------------------\n";
+// cout << "Long2(tmp):\n";
+// 				double P2correct = cp2.get_probability( allParticles_with_shift,
+// 																				shifted_pairs,
+// 																				shifted_BE_distances, -1 );
+// 																				// last -1 means place all particles in clusters
+
+
+// cout << setprecision(20) << "Check shifted: " << iLoop << "  " << iParticle << "  "
+// 			/*<< tmpP << "  " */<< P2 << "  " << P2correct << endl;
+// if (abs(P2-P2correct)>1e-6)
+// {
+// 	std::terminate();
+// }
+
+// if (true) std::terminate();
 
 			// std::cout << "CHECK: " << SHIFT_MODE << "   "
 			// 					<< x1 << "   " << y1 << "   " << z1 << "   "
@@ -190,6 +236,8 @@ namespace shift_lib
 				// re-set shifted quantities
 				if (shift_this_particle)
 				{
+// cout << "==============================\n"
+// 		<< "ACCEPTING CHANGE!!!\n" << "==============================\n";
 					// current_pairs = shifted_pairs;		// re-set current configuration
 					get_shifted_pairs( current_pairs, current_BE_distances,
 														 allParticles_with_shift, iParticle, BEdist );
@@ -199,8 +247,18 @@ namespace shift_lib
 					allParticles[iParticle].p.z(z2);	// re-set momentum of particle
 				}
 				else	// overwrite shifted pairs with current (unshifted)
+				{
+					// cout << "==============================\n"
+					// 		<< "REJECTING CHANGE!!!\n" << "==============================\n";
+
+					// current particles vector used to overwrite shifted pairs and distances
 					get_shifted_pairs( shifted_pairs, shifted_BE_distances,
 														 allParticles, iParticle, BEdist );
+
+					// unshifted particles and distances overwrite current internal state
+					// of ConfigurationProbability cp object, if any
+					cp.revert_state( allParticles, current_BE_distances );
+				}
 
 			}
 			swTotal.Stop();
@@ -225,12 +283,29 @@ namespace shift_lib
 		// indexes upper-triangular list of pairs given indices (i,j)
 		auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
 
+// cout << "-----------------------------------------------------------------------\n";
+// cout << "In " << __FUNCTION__ << "(before):\n";
+// for (int i = 0; i < np; ++i)
+// for (int j = i+1; j < np; ++j)
+// 	if (i==0&&j==6)
+// 	{
+// 	cout << setprecision(6) << "  " << i << "  " << j << "  " << UTindexer(i, j, np) << "  "
+// 				<< BE_distances[UTindexer(i, j, np)] << endl;
+// 	cout << particles[i];
+// 	cout << particles[j];
+// 	}
+// cout << "-----------------------------------------------------------------------\n";
+
 		for (int i1 = 0; i1 < spi; ++i1)
 		{
 			int iPair = UTindexer(i1, spi, np);
 			auto q = { particles[i1].p.x() - particles[spi].p.x(),
 								 particles[i1].p.y() - particles[spi].p.y(),
 								 particles[i1].p.z() - particles[spi].p.z() };
+// if (i1==0&&spi==6)
+// 	cout << "Check(a): " << particles[i1]
+// 			<< "Check(b): " << particles[spi]
+// 			<< "Check(c): " << "  " << iPair << "  " << BE_distances[iPair] << endl;
 			BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
 			pairs[iPair].assign(q);
 		}
@@ -244,6 +319,20 @@ namespace shift_lib
 			BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
 			pairs[iPair].assign(q);
 		}
+
+// cout << "-----------------------------------------------------------------------\n";
+// cout << "In " << __FUNCTION__ << "(after):\n";
+// for (int i = 0; i < np; ++i)
+// for (int j = i+1; j < np; ++j)
+// 	if (i==0&&j==6)
+// 	{
+// 	cout << setprecision(6) << "  " << i << "  " << j << "  " << UTindexer(i, j, np) << "  "
+// 				<< BE_distances[UTindexer(i, j, np)] << endl;
+// 	cout << particles[i];
+// 	cout << particles[j];
+// 	}
+// cout << "-----------------------------------------------------------------------\n";
+
 		return;
 	}
 
