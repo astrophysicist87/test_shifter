@@ -14,7 +14,14 @@ using shift_lib::Particle;
 class MatrixPermanent
 {
   template <typename T>
-  using vv = std::vector<std::vector<T>>;
+    using vv = std::vector<std::vector<T>>;
+
+  typedef struct
+	{
+		int clusterID;
+		double permanent;
+		std::vector<Particle> v;
+	} Cluster;
 
   //============================================================================
   private:
@@ -31,12 +38,12 @@ class MatrixPermanent
     // use these for recycling quantities
     bool clusters_set = false;
     vector<int> cluster_of_particle;
-    vv<Particle> clusters;
+    vector<Cluster> clusters;
     vector<bool> place_particle_in_cluster;
     vector<double> permanent_by_cluster;
 
     //--------------------------------------------------------------------------
-    void print_clusters( const vv<Particle> & clusters_to_print, bool print_particles = false )
+    void print_clusters( const vector<Cluster> & clusters_to_print, bool print_particles = false )
     {
     	std::cout << "\n\n";
       std::cout << "--------------------------------------------------------------------------------\n"
@@ -45,9 +52,9 @@ class MatrixPermanent
       int iCluster = 0;
     	for (const auto & cluster: clusters_to_print)
     	{
-        std::cout << PREFIX << "  - Cluster " << iCluster << " (size = " << cluster.size() << "):";
+        std::cout << PREFIX << "  - Cluster " << iCluster << " (size = " << cluster.v.size() << "):";
     		if (print_particles)
-          for (const auto & node: cluster)
+          for (const auto & node: cluster.v)
     			 std::cout << "  " << node.particleID;
     		std::cout << "\n";
         iCluster++;
@@ -213,7 +220,7 @@ class MatrixPermanent
         for (const auto & cluster: clusters)  // loop over all clusters
         {
           // check if particle is close to any node (particle) in this cluster
-          for (const auto & node: cluster)
+          for (const auto & node: cluster.v)
           {
             auto [i,j] = std::minmax(node.particleID, particle.particleID);
 
@@ -242,20 +249,20 @@ class MatrixPermanent
 //         print_clusters(clusters, true);
 
         if (indices.empty())          // add particle to new cluster
-          clusters.push_back( vector<Particle>({particle}) );
+          clusters.push_back( Cluster({-1, -1.0, vector<Particle>({particle})}) );
         else if (indices.size()==1)   // add particle to unique matching cluster
-          clusters[ indices[0] ].push_back( particle );
+          clusters[ indices[0] ].v.push_back( particle );
         else // otherwise add to appropriate clusters and merge
         {
           vector<Particle> merged_clusters{particle};
           for (auto it = indices.rbegin(); it != indices.rend(); ++it)
           {
             merged_clusters.insert( merged_clusters.end(),
-                                    clusters[*it].begin(),
-                                    clusters[*it].end() );
+                                    clusters[*it].v.begin(),
+                                    clusters[*it].v.end() );
             clusters.erase (clusters.begin() + *it);
           }
-          clusters.push_back( merged_clusters );
+          clusters.push_back( Cluster({-1, -1.0, merged_clusters }) );
         }
 
         // iParticle++;
@@ -266,15 +273,20 @@ class MatrixPermanent
 //         print_clusters(clusters, true);
 
       // set vector to track which cluster each particle belongs to
+      // set also indices of cluster
       clusters_set = true;
       std::fill( cluster_of_particle.begin(),
                  cluster_of_particle.end(), -1 );
       {
         int iCluster = 0;
-        for (const auto & cluster: clusters)  // loop over all clusters
+        for (auto & cluster: clusters)  // loop over all clusters
         {
-          for (const auto & node: cluster)
+          cluster.clusterID = iCluster;
+          for (const auto & node: cluster.v)
             cluster_of_particle[ node.particleID ] = iCluster;
+
+          // compute permanent of this cluster
+          // cluster.permanent = compute_permanent_from_cluster(cluster.v, BE_distance);
           iCluster++;
         }
       }
@@ -286,29 +298,29 @@ class MatrixPermanent
 
     //--------------------------------------------------------------------------
     double compute_permanent_from_cluster(
-             const vector<Particle> & cluster,
+             const vector<Particle> & clusterList,
              const vector<double> & BE_distance )
     {
       //------------------------------------------------------------------------
       // find pairs
-      vv<double> pairs = get_pairs( cluster );
+      vv<double> pairs = get_pairs( clusterList );
 
       //------------------------------------------------------------------------
       // set matrix
-      vector<double> A = get_A(pairs, cluster.size(), BE_distance);
+      vector<double> A = get_A(pairs, clusterList.size(), BE_distance);
 
       //------------------------------------------------------------------------
       // compute and return permanent
       if (VERBOSE)
       {
-        double tmp = permanent( A, cluster.size() );
+        double tmp = permanent( A, clusterList.size() );
         cout << "--------------------------------------------------" << endl;
         cout << "Permanent of above A: " << tmp << endl;
         cout << "--------------------------------------------------" << endl;
         return tmp;
       }
       else
-        return permanent( A, cluster.size() );
+        return permanent( A, clusterList.size() );
     }
 
 
@@ -316,24 +328,12 @@ class MatrixPermanent
     double permanent_by_decomposition( const vector<Particle> & particles,
                                        const vector<double> & BE_distance )
     {
+      // set any clusters which have changed
       set_clusters_with_merging( particles, BE_distance );
 
-      // store permanent for each cluster, recycle if unchanged
-      // permanent_by_cluster.resize(clusters.size(), 0.0);
-
-      // vector<double> permanent_factors;
       double decomposed_permanent = 1.0;
       for (const auto & cluster: clusters)
-      {
-        double tmp = compute_permanent_from_cluster(cluster, BE_distance);
-        // permanent_factors.push_back( tmp );
-        decomposed_permanent *= tmp;
-      }
-
-      // debugging purposes only
-      // sort(permanent_factors.begin(), permanent_factors.end());
-      // for (const auto & tmp: permanent_factors)
-      //   cout << PREFIX << "  - tmp = " << setprecision(20) << tmp << "\n";
+        decomposed_permanent *= compute_permanent_from_cluster(cluster.v, BE_distance);
 
       return decomposed_permanent;
     }
@@ -380,7 +380,7 @@ class MatrixPermanent
         // (must explicitly ignore those which are unchanged!)
         std::fill( place_particle_in_cluster.begin(),
                    place_particle_in_cluster.end(), false );
-        for ( const auto & node: clusters[ cluster_to_remove ] )
+        for ( const auto & node: clusters[ cluster_to_remove ].v )
         {
           place_particle_in_cluster[ node.particleID ] = true;
 // cout << PREFIX << "  " << __LINE__ << " node.particleID = " << node.particleID << endl;
@@ -411,7 +411,7 @@ class MatrixPermanent
       // (must explicitly ignore those which are unchanged!)
       std::fill( place_particle_in_cluster.begin(),
                  place_particle_in_cluster.end(), false );
-      for ( const auto & node: clusters[ cluster_to_remove ] )
+      for ( const auto & node: clusters[ cluster_to_remove ].v )
         place_particle_in_cluster[ node.particleID ] = true;
 
       // remove this cluster
