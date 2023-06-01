@@ -23,11 +23,18 @@ class MatrixPermanent
 		std::vector<Particle> v;
 	} Cluster;
 
+  typedef struct
+	{
+		int ID1, ID2;
+    Particle p1, p2;
+		std::vector<double> q;
+	} Pair;
+
   //============================================================================
   private:
     //--------------------------------------------------------------------------
     static constexpr bool VERBOSE = false;
-    static constexpr bool APPROXIMATE_LARGE_N = false;
+    static constexpr bool APPROXIMATE_LARGE_N = true;
     static constexpr double R = 5.0/0.19733;
     bool ASSUME_SPARSE = false;
     double TINY = 1e-3;
@@ -64,9 +71,9 @@ class MatrixPermanent
     }
 
     //--------------------------------------------------------------------------
-    vv<double> get_pairs( const vector<Particle> & particles )
+    vector<Pair> get_pairs( const vector<Particle> & particles )
     {
-    	vv<double> result;
+    	vector<Pair> result;
 
     	const int n = particles.size();
 
@@ -75,7 +82,10 @@ class MatrixPermanent
     	for (int i2 = i1 + 1; i2 < n; ++i2)
       {
     		Vec4 q = particles[i1].p - particles[i2].p;
-    		result.push_back( vector<double>({q.x(), q.y(), q.z()}) );
+    		result.push_back( Pair({ particles[i1].particleID,
+                                 particles[i2].particleID,
+                                 particles[i1], particles[i2],
+                                 vector<double>({q.x(), q.y(), q.z()}) }) );
       }
 
     	return result;
@@ -157,21 +167,35 @@ class MatrixPermanent
 
 
     //--------------------------------------------------------------------------
-    vector<double> get_A( const vv<double> & pairs, const int np,
+    vector<double> get_A( const vector<Pair> & pairs, const int np,
                           const vector<double> & BE_distance )
     {
+			auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
       int index = 0;
       vector<double> A(np*np);
+      int total_n = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*BE_distance.size())));
       for (int i = 0; i < np; i++)
       {
         A[i*np+i] = 1.0;
         for (int j = i+1; j < np; j++)
         {
-          const auto & q = pairs[index];
+          auto & pair = pairs[index];
+          const auto & q = pair.q;
           double q2 = inner_product(q.cbegin(), q.cend(),
                                     q.cbegin(),
                                     0.0);
           double tmp = exp(-0.25*q2*R*R);
+// if (abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10)
+// {
+//   cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
+//   cout << "Particle 1: " << pair.p1 << "\n";
+//   cout << "Particle 2: " << pair.p2 << "\n";
+//   cout << tmp << "  " << UTindexer(pair.ID1, pair.ID2, total_n)
+//       << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "  "
+//       << abs(tmp-BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)]) << "\n\n";
+//   cout << "CHECK: " << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << endl;
+//   std::terminate();
+// }
           if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
           A[i*np+j] = tmp;
           A[j*np+i] = tmp; // matrix is symmetric
@@ -287,7 +311,7 @@ class MatrixPermanent
     {
       //------------------------------------------------------------------------
       // find pairs
-      vv<double> pairs = get_pairs( clusterList );
+      vector<Pair> pairs = get_pairs( clusterList );
 
       //------------------------------------------------------------------------
       // set matrix
@@ -297,11 +321,21 @@ class MatrixPermanent
       {
         // full product
         double full_product = 1.0;
-        for (const auto & q: pairs)
+        double sum1 = 1.0;
+        for (const auto & pair: pairs)
         {
-          double q2 = inner_product(q.cbegin(), q.cend(), q.cbegin(), 0.0);
+          double q2 = inner_product( pair.q.cbegin(), pair.q.cend(),
+                                     pair.q.cbegin(), 0.0 );
           full_product *= 1.0 + exp(-0.5*q2*R*R);
+          sum1 += exp(-0.5*q2*R*R);
         }
+
+        double sum2 = sum1;
+
+
+        // if (VERBOSE)
+          cout << "COMPARE: " << clusterList.size() << "  " << full_product
+                << "  " << sum1 << "  " << permanent( A, clusterList.size() ) << endl;
 
         return full_product;
       }
@@ -329,6 +363,7 @@ class MatrixPermanent
       // set any clusters which have changed
       set_clusters_with_merging( particles, BE_distance );
 
+      // total permanent is product of sub-permanents
       double decomposed_permanent = 1.0;
       for (const auto & cluster: clusters)
         decomposed_permanent *= cluster.permanent;
