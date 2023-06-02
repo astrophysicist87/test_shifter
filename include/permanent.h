@@ -6,6 +6,7 @@
 
 #include "FourVector.h"
 #include "Particle.h"
+#include "stopwatch.h"
 
 using namespace std;
 using shift_lib::Vec4;
@@ -34,8 +35,10 @@ class MatrixPermanent
   private:
     //--------------------------------------------------------------------------
     static constexpr bool VERBOSE = false;
-    static constexpr bool APPROXIMATE_LARGE_N = true;
+    static constexpr bool APPROXIMATE_LARGE_N = false;
     static constexpr double R = 5.0/0.19733;
+    static constexpr int CUTOFF = 1;
+    static constexpr int MAX_ROWSUM = 10000;
     bool ASSUME_SPARSE = false;
     double TINY = 1e-3;
     string PREFIX = "";
@@ -113,22 +116,26 @@ class MatrixPermanent
         return;
     }
 
+    void print_matrix( const vector<double> & A, long n )
+    {
+      std::cout << "\nn = " << n << "\n";
+      std::cout << "\nA(almost exact) =\n" << fixed << setprecision(4);
+      for (int i = 0; i < n; ++i)
+      {
+        for (int j = 0; j < n; ++j)
+          std::cout << " " << A[i*n+j];
+        cout << "\n";
+      }
+      cout << "\n";
+    }
+
+
     //--------------------------------------------------------------------------
     // expects n by n matrix encoded as vector
     double permanent( const vector<double> & A, long n )
     {
       if (VERBOSE)
-      {
-        std::cout << "\nn = " << n << "\n";
-        std::cout << "\nA(almost exact) =\n" << fixed << setprecision(4);
-        for (int i = 0; i < n; ++i)
-        {
-          for (int j = 0; j < n; ++j)
-            std::cout << " " << A[i*n+j];
-          cout << "\n";
-        }
-        cout << "\n";
-      }
+        print_matrix(A, n);
 
       double sum = 0.0;
       double rowsumprod = 0.0, rowsum = 0.0;
@@ -330,12 +337,22 @@ class MatrixPermanent
           sum1 += exp(-0.5*q2*R*R);
         }
 
-        double sum2 = sum1;
-
-
+        Stopwatch sw;
+        double time1 = 0.0, time2 = 0.0;
         // if (VERBOSE)
-          cout << "COMPARE: " << clusterList.size() << "  " << full_product
-                << "  " << sum1 << "  " << permanent( A, clusterList.size() ) << endl;
+//           cout << "COMPARE: " << clusterList.size() << "  " << full_product
+//                 << "  " << sum1;
+//           sw.Start();
+//           cout << "  " << permanent( A, clusterList.size() );
+//           sw.Stop();
+//           time1 = sw.printTime();
+//           sw.Reset();
+//           sw.Start();
+//           cout << "  " << sparse_permanent( A, clusterList.size() ) << endl;
+//           sw.Stop();
+//           time2 = sw.printTime();
+// cout << "  -> Took: " << time1 << " vs. " << time2 << endl;
+// cout << "------------------------------------------------------------------------" << endl;
 
         return full_product;
       }
@@ -351,8 +368,10 @@ class MatrixPermanent
         return tmp;
       }
       else
-        return permanent( A, clusterList.size() );
-
+      {
+// cout << "COMPARE: " << setprecision(12) << permanent( A, clusterList.size() ) << "  " << sparse_permanent( A, clusterList.size() ) << "\n";
+        return sparse_permanent( A, clusterList.size() );
+      }
     }
 
 
@@ -387,6 +406,100 @@ class MatrixPermanent
       // remove this cluster
       clusters.erase( clusters.begin() + cluster_to_remove );
     }
+
+
+
+
+double sparse_permanent( const vector<double> & A, long n )
+{
+  // if matrix is small enough, use Ryser-Niejenhuis-Wilf algorithm
+  if (n <= CUTOFF)
+    return permanent( A, n );
+    // otherwise, decompose into minors and try again
+  else
+  {
+    // compute rowsums of each particle
+    vector<long> rowsums = get_rowsums( A, n );
+
+    // sort particles by increasing rowsums
+    std::vector<long> indices(n);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::sort(indices.begin(), indices.end(),
+              [&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
+
+// print_matrix(A, n);
+//
+// cout << "\n\nRowsums:";
+// for (int i = 0; i < n; ++i) cout << "  " << rowsums[i];
+// cout << endl;
+
+    // re-compute sorted matrix
+    vector<double> A_sorted(n*n);
+    for (int i = 0; i < n; ++i)
+    for (int j = 0; j < n; ++j)
+      A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
+
+// print_matrix(A_sorted, n);
+
+// rowsums = get_rowsums( A_sorted, n );
+
+// cout << "\n\nRowsums (sorted):";
+// for (int i = 0; i < n; ++i) cout << "  " << rowsums[i];
+// cout << endl;
+//
+// std::terminate();
+
+    // expand low-rowsum particles in minors until RNW is viable
+    return permanent_by_expansion( A_sorted, n );
+  }
+}
+
+vector<double> take_minor( const vector<double> & A, long i0, long j0, long n )
+{
+  vector<double> A_minor((n-1)*(n-1));
+  long index = 0;
+  for (int i = 0; i < n; ++i)
+  for (int j = 0; j < n; ++j)
+    if (i!=i0 && j!=j0)
+      A_minor[index++] = A[i*n+j];
+  return A_minor;
+}
+
+
+double permanent_by_expansion( const vector<double> & A, long n )
+{
+  // if matrix is small enough, use Ryser-Niejenhuis-Wilf algorithm
+  if (n <= CUTOFF)
+    return permanent( A, n );
+  // otherwise, decompose into minors and try again
+  else
+  {
+    double result = 0.0;
+
+    if (n == 2)
+      return A[0*n+0]*A[1*n+1]+A[0*n+1]*A[1*n+0];
+
+    // loop over non-zero column entries in 0th row
+    constexpr long i = 0;  // 0th row
+    for (long j = 0; j < n; ++j)
+    {
+      if (abs(A[i*n+j]) > TINY)
+        result += A[i*n+j] * permanent_by_expansion( take_minor(A, i, j, n), n-1 );
+    }
+    return result;
+  }
+}
+
+
+vector<long> get_rowsums( const vector<double> & A, long n )
+{
+  vector<long> rowsums(n);
+  for (int i = 0; i < n; ++i)
+  for (int j = 0; j < n; ++j)
+    if (A[i*n+j] > TINY)
+      rowsums[i]++;
+  return rowsums;
+}
 
   //============================================================================
   public:
