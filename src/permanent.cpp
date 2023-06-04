@@ -3,10 +3,7 @@
 #include <numeric>
 #include <vector>
 
-// #include "../include/FourVector.h"
-// #include "../include/Particle.h"
 #include "../include/permanent.h"
-// #include "../include/stopwatch.h"
 
 using namespace std;
 using shift_lib::Vec4;
@@ -49,7 +46,7 @@ void MatrixPermanent::print_matrix( const vector<double> & A, long n )
   cout << "\n";
 }
 
-
+/*
 //--------------------------------------------------------------------------
 vector<Pair> MatrixPermanent::get_pairs( const vector<Particle> & particles )
 {
@@ -487,3 +484,4 @@ void MatrixPermanent::revert_state( const vector<Particle> & particles,
 
   return;
 }
+*/

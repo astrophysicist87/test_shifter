@@ -54,8 +54,8 @@ class MatrixPermanent
     vector<double> permanent_by_cluster;
 
     //--------------------------------------------------------------------------
-    void print_clusters( const vector<Cluster> & clusters_to_print, bool print_particles = false )
-    {
+    void print_clusters( const vector<Cluster> & clusters_to_print, bool print_particles = false );
+    /*{
     	std::cout << "\n\n";
       std::cout << "--------------------------------------------------------------------------------\n"
                 << "PRINTING CLUSTERS:\n"
@@ -71,7 +71,7 @@ class MatrixPermanent
         iCluster++;
     	}
       std::cout << "--------------------------------------------------------------------------------\n\n";
-    }
+    }*/
 
     //--------------------------------------------------------------------------
     vector<Pair> get_pairs( const vector<Particle> & particles )
@@ -116,8 +116,8 @@ class MatrixPermanent
         return;
     }
 
-    void print_matrix( const vector<double> & A, long n )
-    {
+    void print_matrix( const vector<double> & A, long n );
+    /*{
       std::cout << "\nn = " << n << "\n";
       std::cout << "\nA(almost exact) =\n" << fixed << setprecision(4);
       for (int i = 0; i < n; ++i)
@@ -127,7 +127,7 @@ class MatrixPermanent
         cout << "\n";
       }
       cout << "\n";
-    }
+    }*/
 
 
     //--------------------------------------------------------------------------
