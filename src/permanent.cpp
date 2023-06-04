@@ -9,9 +9,6 @@ using namespace std;
 using shift_lib::Vec4;
 using shift_lib::Particle;
 
-using Pair = MatrixPermanent::Pair;
-using Cluster = MatrixPermanent::Cluster;
-
 //--------------------------------------------------------------------------
 void MatrixPermanent::print_clusters( const vector<Cluster> & clusters_to_print, bool print_particles )
 {
@@ -46,9 +43,9 @@ void MatrixPermanent::print_matrix( const vector<double> & A, long n )
   cout << "\n";
 }
 
-/*
+
 //--------------------------------------------------------------------------
-vector<Pair> MatrixPermanent::get_pairs( const vector<Particle> & particles )
+vector<MatrixPermanent::Pair> MatrixPermanent::get_pairs( const vector<Particle> & particles )
 {
 	vector<Pair> result;
 
@@ -292,7 +289,8 @@ double MatrixPermanent::compute_permanent_from_cluster(
 
   //------------------------------------------------------------------------
   // compute and return permanent
-  return permanent_RNW( A, clusterList.size() );
+  // return permanent_RNW( A, clusterList.size() );
+  return sparse_permanent( A, clusterList.size() );
 }
 
 //------------------------------------------------------------------------------
@@ -309,6 +307,7 @@ double MatrixPermanent::get_full_product_from_pairs( const vector<Pair> & pairs 
 
   return full_product;
 }
+
 
 //--------------------------------------------------------------------------
 double MatrixPermanent::permanent_by_decomposition( const vector<Particle> & particles,
@@ -347,7 +346,7 @@ void MatrixPermanent::remove_shifted_cluster( int shifted_particle_index )
 //----------------------------------------------------------------------------
 double MatrixPermanent::sparse_permanent( const vector<double> & A, long n )
 {
-  // if matrix is small enough, use Ryser-Nijenhuis-Wilf algorithm
+  // if matrix is small enough, use Ryser-Niejenhuis-Wilf algorithm
   if (n <= CUTOFF)
     return permanent_RNW( A, n );
     // otherwise, decompose into minors and try again
@@ -372,6 +371,8 @@ double MatrixPermanent::sparse_permanent( const vector<double> & A, long n )
     return permanent_by_expansion( A_sorted, n );
   }
 }
+
+
 
 //----------------------------------------------------------------------------
 vector<double> MatrixPermanent::take_minor( const vector<double> & A, long i0, long j0, long n )
@@ -423,6 +424,7 @@ vector<long> MatrixPermanent::get_rowsums( const vector<double> & A, long n )
   return rowsums;
 }
 
+/*
 //----------------------------------------------------------------------------
 double MatrixPermanent::evaluate_approximate_permanent(
                           const vector<Particle> & particles,

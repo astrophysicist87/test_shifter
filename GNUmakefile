@@ -34,7 +34,8 @@ SRC			=	$(SRCDIR)/shifter.cpp \
 				$(SRCDIR)/ParameterReader.cpp \
 				$(SRCDIR)/Arsenal.cpp \
 				$(SRCDIR)/Particle.cpp \
-				$(SRCDIR)/FourVector.cpp
+				$(SRCDIR)/FourVector.cpp \
+				$(SRCDIR)/permanent.cpp
 
 INC			= 	$(INCDIR)/random_events.h \
 				$(INCDIR)/shifter.h \
@@ -44,6 +45,7 @@ INC			= 	$(INCDIR)/random_events.h \
 				$(INCDIR)/FourVector.h \
 				$(INCDIR)/distribution_3D.h \
 				$(INCDIR)/probability.h \
+				$(INCDIR)/permanent.h \
 				$(INCDIR)/QuantumSampler.h
 
 # -------------------------------------------------
@@ -128,6 +130,10 @@ $(SRCDIR)/shifter.cpp:         $(INCDIR)/shifter.h \
 															 $(INCDIR)/distribution_3D.h \
  											 				 $(INCDIR)/probability.h \
 											 				 $(INCDIR)/QuantumSampler.h
+$(SRCDIR)/permanent.cpp:       $(INCDIR)/permanent.h \
+                               $(INCDIR)/Particle.h \
+                               $(INCDIR)/FourVector.h \
+                               $(INCDIR)/stopwatch.h
 ./main.cpp:                    $(INCDIR)/shifter.h \
                                $(INCDIR)/ParameterReader.h \
                                $(INCDIR)/Particle.h \
