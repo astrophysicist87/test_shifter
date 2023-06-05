@@ -140,7 +140,7 @@ namespace shift_lib
 																		current_BE_distances, -1 );
 																		// last -1 means place all particles in clusters
 // cout << "Finished initializing cp." << endl;
-cout << "CHECK: " << P1 << "  " << P1FP << endl;
+// cout << "CHECK: " << P1 << "  " << P1FP << endl;
 
 		//------------------------------------------------
 		// begin looping over particles
