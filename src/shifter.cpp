@@ -175,7 +175,7 @@ cout << "CHECK: " << P1 << "  " << P1FP << endl;
 													 allParticles_with_shift, iParticle, BEdist );
 
 				// get probability of shifted configuration
-				auto [P1, P2FP] = cp.get_probability( allParticles_with_shift,
+				auto [P2, P2FP] = cp.get_probability( allParticles_with_shift,
 																				shifted_pairs,
 																				shifted_BE_distances, iParticle );
 
