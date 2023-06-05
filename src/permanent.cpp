@@ -467,6 +467,7 @@ double MatrixPermanent::evaluate_full_product(
 {
   return get_full_product_from_pairs( get_pairs( particles ) );
 }
+*/
 
 //----------------------------------------------------------------------------
 // resets internal state of MatrixPermanent object if proposed shift rejected
@@ -486,4 +487,3 @@ void MatrixPermanent::revert_state( const vector<Particle> & particles,
 
   return;
 }
-*/

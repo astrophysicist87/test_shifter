@@ -122,8 +122,8 @@ class MatrixPermanent
 
     // resets internal state of MatrixPermanent object if proposed shift rejected
     void revert_state( const vector<Particle> & particles,
-                       const vector<double> & BE_distance )
-    {
+                       const vector<double> & BE_distance );
+    /*{
       // negative index means nothing to do,
       // clusters were completely reset and nothing was saved
       if (SAVE_shifted_particle_index < 0)
@@ -136,7 +136,7 @@ class MatrixPermanent
       set_clusters_with_merging( particles, BE_distance );
 
       return;
-    }
+    }*/
 
 };
 

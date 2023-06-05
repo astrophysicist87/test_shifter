@@ -196,6 +196,54 @@ class ConfigurationProbability
                                   const vector<vector<double>> & qVec,
                                   const vector<double> & BE_distances,
                                   const int shifted_particle_index )
+                          { return { get_probability_AlmostExact(
+                                      particles, qVec, BE_distances,
+                                      shifted_particle_index ),
+                                     get_probability_FullProduct(
+                                      particles, qVec, BE_distances,
+                                      shifted_particle_index )}; };
+
+        // initialize MatrixPermanent mp object and pass to revert_state lambda
+        mp = MatrixPermanent(n_particles, precision, assume_sparse, prefix);
+        revert_state = [this]( const vector<Particle> & particles,
+                               const vector<double> & BE_distances )
+                       { mp.revert_state( particles, BE_distances ); };
+			}
+      /*else if (mode == "Exact")
+      {
+        bool assume_sparse = std::get<bool>(parameters.at("assume_sparse"));
+        int n_particles    = std::get<int>(parameters.at("n_particles"));
+        double precision   = std::get<double>(parameters.at("precision"));
+
+        // set function for computing probability of given configuration
+        get_probability = [this]( const vector<Particle> & particles,
+                                  const vector<vector<double>> & qVec,
+                                  const vector<double> & BE_distances,
+                                  const int shifted_particle_index )
+                          { return { get_probability_Exact(
+                                      particles, qVec, BE_distances,
+                                      shifted_particle_index ),
+                                     get_probability_FullProduct(
+                                      particles, qVec, BE_distances,
+                                      shifted_particle_index )}; };
+
+        // initialize MatrixPermanent mp object and pass to revert_state lambda
+        mp = MatrixPermanent(n_particles, precision, assume_sparse, prefix);
+        revert_state = [this]( const vector<Particle> & particles,
+                               const vector<double> & BE_distances )
+                       { mp.revert_state( particles, BE_distances ); };
+      }
+      else if (mode == "FullProduct")
+      {
+        bool assume_sparse = std::get<bool>(parameters.at("assume_sparse"));
+        int n_particles    = std::get<int>(parameters.at("n_particles"));
+        double precision   = std::get<double>(parameters.at("precision"));
+
+        // set function for computing probability of given configuration
+        get_probability = [this]( const vector<Particle> & particles,
+                                  const vector<vector<double>> & qVec,
+                                  const vector<double> & BE_distances,
+                                  const int shifted_particle_index )
                           { return get_probability_AlmostExact(
                                     particles, qVec, BE_distances,
                                     shifted_particle_index ); };
@@ -205,8 +253,8 @@ class ConfigurationProbability
         revert_state = [this]( const vector<Particle> & particles,
                                const vector<double> & BE_distances )
                        { mp.revert_state( particles, BE_distances ); };
-			}
-			else
+      }*/
+      else
 			{
 				err << "Invalid mode = " << mode << endl;
 				std::terminate();
@@ -214,7 +262,7 @@ class ConfigurationProbability
 		}
     ~ConfigurationProbability(){}
 
-    std::function<double( const vector<Particle> &,
+    std::function<std::pair<double,double>( const vector<Particle> &,
                           const vector<vector<double>> &,
                           const vector<double> &,
                           const int )> get_probability;
