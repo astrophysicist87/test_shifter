@@ -69,68 +69,8 @@ class MatrixPermanent
 
 
     //--------------------------------------------------------------------------
-    double compute_permanent_from_cluster(
-             const vector<Particle> & clusterList,
-             const vector<double> & BE_distance );
-    /*{
-      //------------------------------------------------------------------------
-      // find pairs
-      vector<Pair> pairs = get_pairs( clusterList );
-
-      //------------------------------------------------------------------------
-      // set matrix
-      vector<double> A = get_A(pairs, clusterList.size(), BE_distance);
-
-      if (APPROXIMATE_LARGE_N && clusterList.size()>20)
-      {
-        // full product
-        double full_product = 1.0;
-        double sum1 = 1.0;
-        for (const auto & pair: pairs)
-        {
-          double q2 = inner_product( pair.q.cbegin(), pair.q.cend(),
-                                     pair.q.cbegin(), 0.0 );
-          full_product *= 1.0 + exp(-0.5*q2*R*R);
-          sum1 += exp(-0.5*q2*R*R);
-        }
-
-        Stopwatch sw;
-        double time1 = 0.0, time2 = 0.0;
-        // if (VERBOSE)
-//           cout << "COMPARE: " << clusterList.size() << "  " << full_product
-//                 << "  " << sum1;
-//           sw.Start();
-//           cout << "  " << permanent_RNW( A, clusterList.size() );
-//           sw.Stop();
-//           time1 = sw.printTime();
-//           sw.Reset();
-//           sw.Start();
-//           cout << "  " << sparse_permanent( A, clusterList.size() ) << endl;
-//           sw.Stop();
-//           time2 = sw.printTime();
-// cout << "  -> Took: " << time1 << " vs. " << time2 << endl;
-// cout << "------------------------------------------------------------------------" << endl;
-
-        return full_product;
-      }
-
-      //------------------------------------------------------------------------
-      // compute and return permanent
-      if (VERBOSE)
-      {
-        double tmp = permanent_RNW( A, clusterList.size() );
-        cout << "--------------------------------------------------" << endl;
-        cout << "Permanent of above A: " << tmp << endl;
-        cout << "--------------------------------------------------" << endl;
-        return tmp;
-      }
-      else
-      {
-// cout << "COMPARE: " << setprecision(12) << permanent_RNW( A, clusterList.size() ) << "  " << sparse_permanent( A, clusterList.size() ) << "\n";
-        return sparse_permanent( A, clusterList.size() );
-      }
-    }*/
-
+    double compute_permanent_from_cluster( const vector<Particle> & clusterList,
+                                           const vector<double> & BE_distance );
     double get_full_product_from_pairs( const vector<Pair> & pairs );
     //--------------------------------------------------------------------------
     double permanent_by_decomposition( const vector<Particle> & particles,
@@ -146,7 +86,6 @@ class MatrixPermanent
   //============================================================================
   public:
     MatrixPermanent(){}
-    ~MatrixPermanent(){}
     MatrixPermanent( const int n, double TOLERANCE, bool ASSUME_SPARSE_IN, const string & PREFIX_IN )
     : TINY{TOLERANCE},
       ASSUME_SPARSE{ASSUME_SPARSE_IN},
