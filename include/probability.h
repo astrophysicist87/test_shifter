@@ -196,12 +196,9 @@ class ConfigurationProbability
                                   const vector<vector<double>> & qVec,
                                   const vector<double> & BE_distances,
                                   const int shifted_particle_index )
-                          { return make_pair( get_probability_AlmostExact(
+                          { return get_probability_AlmostExact(
                                       particles, qVec, BE_distances,
-                                      shifted_particle_index ),
-                                     get_probability_FullProduct(
-                                      particles, qVec, BE_distances,
-                                      shifted_particle_index ) ); };
+                                      shifted_particle_index ); };
 
         // initialize MatrixPermanent mp object and pass to revert_state lambda
         mp = MatrixPermanent(n_particles, precision, assume_sparse, prefix);
@@ -262,7 +259,7 @@ class ConfigurationProbability
 		}
     ~ConfigurationProbability(){}
 
-    std::function<std::pair<double,double>( const vector<Particle> &,
+    std::function<double( const vector<Particle> &,
                           const vector<vector<double>> &,
                           const vector<double> &,
                           const int )> get_probability;
