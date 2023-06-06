@@ -90,27 +90,10 @@ void MatrixPermanent::dec2binarr(long n, long dim, vector<long> & res)
 
 //--------------------------------------------------------------------------
 // expects n by n matrix encoded as vector
-double MatrixPermanent::permanent_RNW( /*const*/ vector<double> & A, long n )
+double MatrixPermanent::permanent_RNW( const vector<double> & A, long n )
 {
   if (VERBOSE)
     print_matrix(A, n);
-
-	// compute rowsums of each particle
-	vector<long> rowsums = get_rowsums( A, n );
-
-	// sort particles by increasing rowsums
-	std::vector<long> indices(n);
-	std::iota(indices.begin(), indices.end(), 0);
-	std::sort(indices.begin(), indices.end(),
-						[&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
-
-	// re-compute sorted matrix
-	vector<double> A_sorted(n*n);
-	for (int i = 0; i < n; ++i)
-	for (int j = 0; j < n; ++j)
-		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
-
-	A = A_sorted;
 
   double sum = 0.0;
   double rowsumprod = 0.0, rowsum = 0.0;
@@ -306,6 +289,23 @@ double MatrixPermanent::compute_permanent_from_cluster(
   //------------------------------------------------------------------------
   // set matrix
   vector<double> A = get_A(pairs, clusterList.size(), BE_distance);
+
+	// compute rowsums of each particle
+	vector<long> rowsums = get_rowsums( A, n );
+
+	// sort particles by increasing rowsums
+	std::vector<long> indices(n);
+	std::iota(indices.begin(), indices.end(), 0);
+	std::sort(indices.begin(), indices.end(),
+						[&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
+
+	// re-compute sorted matrix
+	vector<double> A_sorted(n*n);
+	for (int i = 0; i < n; ++i)
+	for (int j = 0; j < n; ++j)
+		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
+
+	A = A_sorted;
 
   //------------------------------------------------------------------------
   // compute and return permanent
