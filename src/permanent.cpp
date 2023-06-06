@@ -102,7 +102,8 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, long n )
   double C = Cvec[n];
 
   // loop all 2^n submatrices of A
-  for (long k = 1; k < C; k++)
+  // for (long k = 1; k < C; k++)
+	for (long k = lround(C - 1); k >= 1; --k)
   {
     rowsumprod = 1.0;
     std::fill( chi.begin(), chi.end(), 0 );
@@ -307,7 +308,6 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
 
 	A = A_sorted;
-  reverse( A.begin(), A.end() );
 
   //------------------------------------------------------------------------
   // compute and return permanent
