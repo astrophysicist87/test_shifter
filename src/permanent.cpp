@@ -90,7 +90,7 @@ void MatrixPermanent::dec2binarr(long n, long dim, vector<long> & res)
 
 //--------------------------------------------------------------------------
 // expects n by n matrix encoded as vector
-double MatrixPermanent::permanent_RNW( const vector<double> & A, long n )
+double MatrixPermanent::permanent_RNW( /*const*/ vector<double> & A, long n )
 {
   if (VERBOSE)
     print_matrix(A, n);

@@ -59,7 +59,7 @@ class MatrixPermanent
     //--------------------------------------------------------------------------
     vector<Pair> get_pairs( const vector<Particle> & particles );
     void dec2binarr(long n, long dim, vector<long> & res);
-    double permanent_RNW( const vector<double> & A, long n );
+    double permanent_RNW( /*const*/ vector<double> & A, long n );
     //--------------------------------------------------------------------------
     vector<double> get_A( const vector<Pair> & pairs, const int np,
                           const vector<double> & BE_distance );
