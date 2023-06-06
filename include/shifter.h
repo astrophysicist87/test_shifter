@@ -64,7 +64,7 @@ namespace shift_lib
 				const vector<Particle> & particles );
 
 			void get_shifted_pairs(
-				vector<vector<double>> & pairs,
+				// vector<vector<double>> & pairs,
 				vector<double> & BE_distances,
 			  const vector<Particle> & particles,
 		    const int shifted_particle_index,
