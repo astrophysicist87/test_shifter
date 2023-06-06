@@ -291,6 +291,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
   vector<double> A = get_A(pairs, clusterList.size(), BE_distance);
 
 	// compute rowsums of each particle
+	const int n = clusterList.size();
 	vector<long> rowsums = get_rowsums( A, n );
 
 	// sort particles by increasing rowsums
