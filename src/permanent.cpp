@@ -125,7 +125,10 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, long n )
     }
 
     sum += (double)pow((double)-1, n - chi[n]) * rowsumprod;
+		if (n>20) cout << "CHECK: " << sum << "\n";
   }
+
+if (n>20) std::terminate();
 
   return sum;
 }
@@ -289,8 +292,8 @@ double MatrixPermanent::compute_permanent_from_cluster(
 
   //------------------------------------------------------------------------
   // compute and return permanent
-  // return permanent_RNW( A, clusterList.size() );
-  return sparse_permanent( A, clusterList.size() );
+  return permanent_RNW( A, clusterList.size() );
+  // return sparse_permanent( A, clusterList.size() );
 }
 
 //------------------------------------------------------------------------------

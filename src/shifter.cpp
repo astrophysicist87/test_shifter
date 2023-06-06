@@ -160,9 +160,9 @@ namespace shift_lib
 				double z1 = allParticles[iParticle].p.z();
 				// auto [x2, y2, z2] = qs.sample(iParticle, std::make_tuple(x1, y1, z1));
 
-				double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;	// corresponds to choice of parameters in random_events.h
-				double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;	// corresponds to choice of parameters in random_events.h
-				double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;	// corresponds to choice of parameters in random_events.h
+				double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;
+				double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;
+				double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;
 
 				// set configuration containing shifted particle
 				vector<Particle> allParticles_with_shift = allParticles;
@@ -171,7 +171,7 @@ namespace shift_lib
 				allParticles_with_shift[iParticle].p.z(z2);
 
 				// get shifted pairs
-				get_shifted_pairs( shifted_pairs, shifted_BE_distances,
+				get_shifted_pairs( /*shifted_pairs,*/ shifted_BE_distances,
 													 allParticles_with_shift, iParticle, BEdist );
 
 				// get probability of shifted configuration
@@ -202,7 +202,7 @@ namespace shift_lib
 				if (shift_this_particle)
 				{
 					// current_pairs = shifted_pairs;		// re-set current configuration
-					get_shifted_pairs( current_pairs, current_BE_distances,
+					get_shifted_pairs( /*current_pairs,*/ current_BE_distances,
 														 allParticles_with_shift, iParticle, BEdist );
 					P1 = P2;													// re-set probability of current configuration
 					allParticles[iParticle].p.x(x2);	// re-set momentum of particle
@@ -212,7 +212,7 @@ namespace shift_lib
 				else	// overwrite shifted pairs with current (unshifted)
 				{
 					// current particles vector used to overwrite shifted pairs and distances
-					get_shifted_pairs( shifted_pairs, shifted_BE_distances,
+					get_shifted_pairs( /*shifted_pairs,*/ shifted_BE_distances,
 														 allParticles, iParticle, BEdist );
 
 					// unshifted particles and distances overwrite current internal state
@@ -231,7 +231,7 @@ namespace shift_lib
 
 
 	//--------------------------------
-	void shifter::get_shifted_pairs( vector<vector<double>> & pairs,
+	void shifter::get_shifted_pairs( //vector<vector<double>> & pairs,
 																	 vector<double> & BE_distances,
 																   const vector<Particle> & particles,
 															     const int shifted_particle_index,
