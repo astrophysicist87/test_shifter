@@ -20,22 +20,24 @@ class ConfigurationProbability
 
     static constexpr double TINY = 1e-6;
 
+    //--------------------------------------------------------------------------
+    double get_probability_Exact( const vector<Particle> & particles,
+                                  const vector<vector<double>> & qVec,
+                                  const vector<double> & BE_distances,
+                                  const int shifted_particle_index )
+    {
+      return mp.evaluate_exact_permanent( particles, BE_distances,
+                                          shifted_particle_index );
+  	}
+
   	//--------------------------------------------------------------------------
     double get_probability_FullProduct( const vector<Particle> & particles,
                                         const vector<vector<double>> & qVec,
                                         const vector<double> & BE_distances,
                                         const int shifted_particle_index )
   	{
-  		double result = 1.0;
-  		double normalization = paraRdr->getVal("shifter_norm");
-  		for (const auto & q: qVec)
-  		{
-  			double q2 = inner_product(q.cbegin(), q.cend(),
-  																q.cbegin(),
-  																0.0);
-  			result *= 1.0 + normalization*exp(-0.5*q2*R*R);
-  		}
-  		return result;
+      return mp.evaluate_full_product( particles, BE_distances,
+                                       shifted_particle_index );
   	}
 
   	//--------------------------------------------------------------------------
