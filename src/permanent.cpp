@@ -449,7 +449,7 @@ double MatrixPermanent::evaluate_approximate_permanent(
   return permanent_by_decomposition(particles, BE_distance);
 }
 
-/*
+
 //----------------------------------------------------------------------------
 double MatrixPermanent::evaluate_exact_permanent(
                           const vector<Particle> & particles,
@@ -467,7 +467,7 @@ double MatrixPermanent::evaluate_full_product(
 {
   return get_full_product_from_pairs( get_pairs( particles ) );
 }
-*/
+
 
 //----------------------------------------------------------------------------
 // resets internal state of MatrixPermanent object if proposed shift rejected

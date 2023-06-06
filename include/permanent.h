@@ -102,27 +102,6 @@ class MatrixPermanent
     double evaluate_approximate_permanent( const vector<Particle> & particles,
                         const vector<double> & BE_distance,
                         const int shifted_particle_index = -1 );
-    /*inline double evaluate( const vector<Particle> & particles,
-                            const vector<double> & BE_distance,
-                            const int shifted_particle_index = -1 )
-    {
-      // allows to make revert_state consistent if needed
-      SAVE_shifted_particle_index = shifted_particle_index;
-
-      // if no/negative particle index passed, get permanent of all particles
-      if ( shifted_particle_index < 0 )
-      {
-        clusters.clear();
-        std::fill( place_particle_in_cluster.begin(),
-                   place_particle_in_cluster.end(), true );
-      }
-      else
-        remove_shifted_cluster( shifted_particle_index );
-
-      // permanent_by_decomposition as usual either way
-      // (clusters get re-set inside)
-      return permanent_by_decomposition(particles, BE_distance);
-    }*/
 
     // resets internal state of MatrixPermanent object if proposed shift rejected
     void revert_state( const vector<Particle> & particles,
