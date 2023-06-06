@@ -20,37 +20,6 @@ class ConfigurationProbability
 
     static constexpr double TINY = 1e-6;
 
-    //--------------------------------------------------------------------------
-    double get_probability_Exact( const vector<Particle> & particles,
-                                  const vector<vector<double>> & qVec,
-                                  const vector<double> & BE_distances,
-                                  const int shifted_particle_index )
-    {
-  		const int n = qVec.size();
-  		const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
-  		vector<double> A(np*np);
-  		{
-  			int index = 0;
-  			for (int i = 0; i < np; i++)
-  			{
-  				A[i*np+i] = 1.0;
-  				for (int j = i+1; j < np; j++)
-  				{
-  					auto q = qVec[index];
-  					double q2 = inner_product(q.cbegin(), q.cend(),
-  																		q.cbegin(),
-  																		0.0);
-  					double tmp = exp(-0.25*q2*R*R);
-  					if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
-  					A[i*np+j] = tmp;
-  					A[j*np+i] = tmp; // matrix is symmetric
-  					index++;
-  				}
-  			}
-  		}
-  		return permanent(A, np);
-  	}
-
   	//--------------------------------------------------------------------------
     double get_probability_FullProduct( const vector<Particle> & particles,
                                         const vector<vector<double>> & qVec,
