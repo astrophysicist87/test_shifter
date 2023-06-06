@@ -98,7 +98,11 @@ class MatrixPermanent
       place_particle_in_cluster.resize(n, true);
     }
 
-    inline double evaluate( const vector<Particle> & particles,
+
+    double evaluate_approximate_permanent( const vector<Particle> & particles,
+                        const vector<double> & BE_distance,
+                        const int shifted_particle_index = -1 );
+    /*inline double evaluate( const vector<Particle> & particles,
                             const vector<double> & BE_distance,
                             const int shifted_particle_index = -1 )
     {
@@ -118,25 +122,11 @@ class MatrixPermanent
       // permanent_by_decomposition as usual either way
       // (clusters get re-set inside)
       return permanent_by_decomposition(particles, BE_distance);
-    }
+    }*/
 
     // resets internal state of MatrixPermanent object if proposed shift rejected
     void revert_state( const vector<Particle> & particles,
                        const vector<double> & BE_distance );
-    /*{
-      // negative index means nothing to do,
-      // clusters were completely reset and nothing was saved
-      if (SAVE_shifted_particle_index < 0)
-        return;
-
-      // remove the cluster containing the shifted particle
-      remove_shifted_cluster( SAVE_shifted_particle_index );
-
-      // re-distribute removed cluster amongst remaining clusters
-      set_clusters_with_merging( particles, BE_distance );
-
-      return;
-    }*/
 
 };
 

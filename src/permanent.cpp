@@ -424,7 +424,7 @@ vector<long> MatrixPermanent::get_rowsums( const vector<double> & A, long n )
   return rowsums;
 }
 
-/*
+
 //----------------------------------------------------------------------------
 double MatrixPermanent::evaluate_approximate_permanent(
                           const vector<Particle> & particles,
@@ -449,7 +449,7 @@ double MatrixPermanent::evaluate_approximate_permanent(
   return permanent_by_decomposition(particles, BE_distance);
 }
 
-
+/*
 //----------------------------------------------------------------------------
 double MatrixPermanent::evaluate_exact_permanent(
                           const vector<Particle> & particles,

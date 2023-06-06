@@ -169,7 +169,8 @@ class ConfigurationProbability
                                         const vector<double> & BE_distances,
                                         const int shifted_particle_index )
     {
-      return mp.evaluate(particles, BE_distances, shifted_particle_index);
+      return mp.evaluate_approximate_permanent( particles, BE_distances,
+                                                shifted_particle_index );
     }
 
 
