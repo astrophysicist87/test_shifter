@@ -20,16 +20,15 @@ class BoseEinsteinDistance
 		ostream & out;
 		ostream & err;
 
-    inline double get_distance_single_scale(const vector<double> & q)
-  	{
-      return exp(-0.25 * R * R * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2]));
-    }
-    // inline double get_distance_single_scale(std::initializer_list<double> q)
+    // inline double get_distance_single_scale(const vector<double> & q)
   	// {
-    //   // return exp(-0.25 * R * R * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2]));
-    //   return exp(-0.25 * R * R * inner_product( q.begin(), q.end(),
-    //                                             q.begin(), 0.0 ));
+    //   return exp(-0.25 * R * R * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2]));
     // }
+    inline double get_distance_single_scale(std::initializer_list<double> q)
+  	{
+      return exp(-0.25 * R * R * inner_product( q.begin(), q.end(),
+                                                q.begin(), 0.0 ));
+    }
 
   //----------------------------------------------------------------------------
   public:
@@ -43,7 +42,9 @@ class BoseEinsteinDistance
 			if (mode == "SingleScale")
 			{
 				R = std::get<double>(parameters.at("R"));
-				get_distance = [this](const vector<double> & q)
+				// get_distance = [this](const vector<double> & q)
+        //                { return get_distance_single_scale(q); };
+        get_distance = [this](const std::initializer_list<double> & q)
                        { return get_distance_single_scale(q); };
 			}
 			else
@@ -54,7 +55,8 @@ class BoseEinsteinDistance
 		}
     ~BoseEinsteinDistance(){}
 
-    std::function<double(const vector<double> &)> get_distance;
+    // std::function<double(const vector<double> &)> get_distance;
+    std::function<double(const std::initializer_list<double>)> get_distance;
 };
 
 #endif

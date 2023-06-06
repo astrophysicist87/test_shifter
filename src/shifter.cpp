@@ -116,8 +116,8 @@ namespace shift_lib
 		double R = paraRdr->getVal("RNG_R") / HBARC;
 		BoseEinsteinDistance BEdist( "SingleScale", { {"R", R} } );
 		vector<double> current_BE_distances(current_pairs.size(), 0.0);
-		std::transform( current_pairs.cbegin(), current_pairs.cend(),
-	                  current_BE_distances.begin(), BEdist.get_distance );
+		// std::transform( current_pairs.cbegin(), current_pairs.cend(),
+	  //                 current_BE_distances.begin(), BEdist.get_distance );
 		vector<double> shifted_BE_distances = current_BE_distances;
 
 		//------------------------------------------------
@@ -245,21 +245,28 @@ namespace shift_lib
 
 		for (int i1 = 0; i1 < spi; ++i1)
 		{
-			int iPair = UTindexer(i1, spi, np);
-			auto q = { particles[i1].p.x() - particles[spi].p.x(),
+			// int iPair = UTindexer(i1, spi, np);
+			// auto q = { particles[i1].p.x() - particles[spi].p.x(),
+			// 					 particles[i1].p.y() - particles[spi].p.y(),
+			// 					 particles[i1].p.z() - particles[spi].p.z() };
+			// BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
+			BE_distances[UTindexer(i1, spi, np)]
+				= BEdist.get_distance({ particles[i1].p.x() - particles[spi].p.x(),
 								 particles[i1].p.y() - particles[spi].p.y(),
-								 particles[i1].p.z() - particles[spi].p.z() };
-			BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
+								 particles[i1].p.z() - particles[spi].p.z() });
 			// pairs[iPair].assign(q);
 		}
 
 		for (int i1 = spi+1; i1 < np; ++i1)
 		{
-			int iPair = UTindexer(spi, i1, np);
-			auto q = { particles[spi].p.x() - particles[i1].p.x(),
+			// int iPair = UTindexer(spi, i1, np);
+			// auto q = { particles[spi].p.x() - particles[i1].p.x(),
+			// 					 particles[spi].p.y() - particles[i1].p.y(),
+			// 					 particles[spi].p.z() - particles[i1].p.z() };
+			BE_distances[UTindexer(spi, i1, np)]
+				= BEdist.get_distance({ particles[spi].p.x() - particles[i1].p.x(),
 								 particles[spi].p.y() - particles[i1].p.y(),
-								 particles[spi].p.z() - particles[i1].p.z() };
-			BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
+								 particles[spi].p.z() - particles[i1].p.z() });
 			// pairs[iPair].assign(q);
 		}
 
