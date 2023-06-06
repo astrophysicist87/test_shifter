@@ -103,6 +103,14 @@ class MatrixPermanent
                         const vector<double> & BE_distance,
                         const int shifted_particle_index = -1 );
 
+    double evaluate_exact_permanent( const vector<Particle> & particles,
+                        const vector<double> & BE_distance,
+                        const int shifted_particle_index = -1 );
+
+    double evaluate_full_product( const vector<Particle> & particles,
+                        const vector<double> & BE_distance,
+                        const int shifted_particle_index = -1 );
+
     // resets internal state of MatrixPermanent object if proposed shift rejected
     void revert_state( const vector<Particle> & particles,
                        const vector<double> & BE_distance );
