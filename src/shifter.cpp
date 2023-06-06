@@ -250,7 +250,7 @@ namespace shift_lib
 								 particles[i1].p.y() - particles[spi].p.y(),
 								 particles[i1].p.z() - particles[spi].p.z() };
 			BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
-			pairs[iPair].assign(q);
+			// pairs[iPair].assign(q);
 		}
 
 		for (int i1 = spi+1; i1 < np; ++i1)
@@ -260,7 +260,7 @@ namespace shift_lib
 								 particles[spi].p.y() - particles[i1].p.y(),
 								 particles[spi].p.z() - particles[i1].p.z() };
 			BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
-			pairs[iPair].assign(q);
+			// pairs[iPair].assign(q);
 		}
 
 		return;
