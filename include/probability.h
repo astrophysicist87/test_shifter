@@ -189,7 +189,7 @@ class ConfigurationProbability
         return get_probability_Speed( particles, BE_distances, shifted_particle_index );
       else
 			{
-				err << "Invalid mode = " << mode << endl;
+				err << "Invalid mode = " << chosen_mode << endl;
 				std::terminate();
 			}
     }
