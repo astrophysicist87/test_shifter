@@ -174,9 +174,10 @@ class ConfigurationProbability
 		}
     // ~ConfigurationProbability(){}
 
-    double get_probability_mode( const vector<Particle> &,
-                          const vector<double> &,
-                          const int, const string & chosen_mode )
+    double get_probability_mode( const vector<Particle> & particles,
+                          const vector<double> & BE_distances,
+                          const int shifted_particle_index,
+                          const string & chosen_mode )
     {
       if (chosen_mode == "AlmostExact")
         return get_probability_AlmostExact( particles, BE_distances, shifted_particle_index );
