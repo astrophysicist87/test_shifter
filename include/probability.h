@@ -31,6 +31,7 @@ class ConfigurationProbability
   	}
 
   	//--------------------------------------------------------------------------
+    // sorted in MP as this gives a mediocre approximation of permanent
     double get_probability_FullProduct( const vector<Particle> & particles,
                                         // const vector<vector<double>> & qVec,
                                         const vector<double> & BE_distances,
@@ -42,13 +43,10 @@ class ConfigurationProbability
 
   	//--------------------------------------------------------------------------
     double get_probability_Speed( const vector<Particle> & particles,
-                                  // const vector<vector<double>> & qVec,
                                   const vector<double> & BE_distances,
                                   const int shifted_particle_index )
   	{
   		// use only np-1 independent pairs, and cycle over which gets omitted
-  		// const int n = qVec.size();
-  		// const int np = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*n)));
       const int np = particles.size();
   		double normalization = paraRdr->getVal("shifter_norm");
 
@@ -102,11 +100,10 @@ class ConfigurationProbability
 
         // set function for computing probability of given configuration
 				get_probability = [this]( const vector<Particle> & particles,
-                                  // const vector<vector<double>> & qVec,
                                   const vector<double> & BE_distances,
                                   const int shifted_particle_index )
                           { return get_probability_AlmostExact(
-                                      particles, /*qVec,*/ BE_distances,
+                                      particles, BE_distances,
                                       shifted_particle_index ); };
 
         // initialize MatrixPermanent mp object and pass to revert_state lambda
@@ -123,11 +120,10 @@ class ConfigurationProbability
 
         // set function for computing probability of given configuration
         get_probability = [this]( const vector<Particle> & particles,
-                                  // const vector<vector<double>> & qVec,
                                   const vector<double> & BE_distances,
                                   const int shifted_particle_index )
                           { return get_probability_Exact(
-                                      particles, /*qVec,*/ BE_distances,
+                                      particles, BE_distances,
                                       shifted_particle_index ); };
 
         // initialize MatrixPermanent mp object and pass to revert_state lambda
@@ -144,11 +140,10 @@ class ConfigurationProbability
 
         // set function for computing probability of given configuration
         get_probability = [this]( const vector<Particle> & particles,
-                                  // const vector<vector<double>> & qVec,
                                   const vector<double> & BE_distances,
                                   const int shifted_particle_index )
                           { return get_probability_FullProduct(
-                                    particles, /*qVec,*/ BE_distances,
+                                    particles, BE_distances,
                                     shifted_particle_index ); };
 
         // initialize MatrixPermanent mp object and pass to revert_state lambda
@@ -157,16 +152,48 @@ class ConfigurationProbability
                                const vector<double> & BE_distances )
                        { mp.revert_state( particles, BE_distances ); };
       }
+      else if (mode == "Speed")
+      {
+        // set function for computing probability of given configuration
+        get_probability = [this]( const vector<Particle> & particles,
+                                  const vector<double> & BE_distances,
+                                  const int shifted_particle_index )
+                          { return get_probability_FullProduct(
+                                    particles, BE_distances,
+                                    shifted_particle_index ); };
+
+        // revert_state does nothing in this case
+        revert_state = [this]( const vector<Particle> & particles,
+                               const vector<double> & BE_distances ) { ; };
+      }
       else
 			{
 				err << "Invalid mode = " << mode << endl;
 				std::terminate();
 			}
 		}
-    ~ConfigurationProbability(){}
+    // ~ConfigurationProbability(){}
+
+    double get_probability( const vector<Particle> &,
+                          const vector<double> &,
+                          const int, const string & chosen_mode )
+    {
+      if (chosen_mode == "AlmostExact")
+        return get_probability_AlmostExact( particles, BE_distances, shifted_particle_index );
+      else if (chosen_mode == "Exact")
+        return get_probability_Exact( particles, BE_distances, shifted_particle_index );
+      else if (chosen_mode == "FullProduct")
+        return get_probability_FullProduct( particles, BE_distances, shifted_particle_index );
+      else if (chosen_mode == "Speed")
+        return get_probability_Speed( particles, BE_distances, shifted_particle_index );
+      else
+			{
+				err << "Invalid mode = " << mode << endl;
+				std::terminate();
+			}
+    }
 
     std::function<double( const vector<Particle> &,
-                          // const vector<vector<double>> &,
                           const vector<double> &,
                           const int )> get_probability;
 

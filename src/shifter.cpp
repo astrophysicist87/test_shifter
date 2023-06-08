@@ -135,9 +135,7 @@ namespace shift_lib
 // cout << "Direct = " << BEdist.get_distance(current_pairs[0]) << endl;
 // cout << "current_BE_distances[0] = " << current_BE_distances[0] << endl;
 		ConfigurationProbability cp( SHIFT_MODE, parameters, paraRdr, "Short" );
-		double P1 = cp.get_probability( allParticles,
-																		// current_pairs,
-																		current_BE_distances, -1 );
+		double P1 = cp.get_probability( allParticles, current_BE_distances, -1 );
 																		// last -1 means place all particles in clusters
 // cout << "Finished initializing cp." << endl;
 // cout << "CHECK: " << P1 << "  " << P1FP << endl;
@@ -176,7 +174,6 @@ namespace shift_lib
 
 				// get probability of shifted configuration
 				double P2 = cp.get_probability( allParticles_with_shift,
-																				// shifted_pairs,
 																				shifted_BE_distances, iParticle );
 
 

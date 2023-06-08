@@ -109,6 +109,10 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, long n )
     std::fill( chi.begin(), chi.end(), 0 );
     dec2binarr(k, n, chi); // characteristic vector
 
+		cout << "chi:";
+		for (const auto & c: chi) cout << "  " << c;
+		cout << "\n";
+
     // loop columns of submatrix #k
     for (long m = 0; m < n; m++)
     {
@@ -129,7 +133,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, long n )
 		if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
   }
 
-if (n>20) std::terminate();
+/*if (n>20)*/ std::terminate();
 
   return sum;
 }
