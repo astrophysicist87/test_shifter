@@ -1,6 +1,7 @@
 #ifndef PERMANENT_H
 #define PERMANENT_H
 
+#include <cassert>
 #include <functional>
 #include <vector>
 
