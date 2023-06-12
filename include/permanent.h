@@ -55,7 +55,7 @@ class MatrixPermanent
     void print_matrix( const vector<double> & A, long n );
     //--------------------------------------------------------------------------
     vector<Pair> get_pairs( const vector<Particle> & particles );
-    double permanent_RNW( const vector<double> & A, long n );
+    double permanent_RNW( const vector<double> & A, const long long n );
     //--------------------------------------------------------------------------
     vector<double> get_A( const vector<Pair> & pairs, const int np,
                           const vector<double> & BE_distance );
