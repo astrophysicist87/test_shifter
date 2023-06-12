@@ -14,9 +14,6 @@ using shift_lib::Particle;
 
 class MatrixPermanent
 {
-  template <typename T>
-    using vv = std::vector<std::vector<T>>;
-
   typedef struct
 	{
 		int clusterID;
@@ -58,7 +55,6 @@ class MatrixPermanent
     void print_matrix( const vector<double> & A, long n );
     //--------------------------------------------------------------------------
     vector<Pair> get_pairs( const vector<Particle> & particles );
-    void dec2binarr(long n, long dim, vector<long> & res);
     double permanent_RNW( const vector<double> & A, long n );
     //--------------------------------------------------------------------------
     vector<double> get_A( const vector<Pair> & pairs, const int np,

@@ -67,79 +67,53 @@ vector<MatrixPermanent::Pair> MatrixPermanent::get_pairs( const vector<Particle>
 
 
 //--------------------------------------------------------------------------
-void MatrixPermanent::dec2binarr(long n, long dim, vector<long> & res)
-{
-    // note: res[dim] will save the sum res[0]+...+res[dim-1]
-    // long* res = (long*)calloc(dim + 1, sizeof(long));
-    // vector<long> res(dim+1);
-    long pos = dim - 1;
-
-    // note: this will crash if dim < log_2(n)...
-    while (n > 0)
-    {
-        res[pos] = n % 2;
-        res[dim] += res[pos];
-        n /= 2; // integer division
-        pos--;
-    }
-
-    return;
-}
-
-
-
-//--------------------------------------------------------------------------
 // expects n by n matrix encoded as vector
-double MatrixPermanent::permanent_RNW( const vector<double> & A, long n )
+double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long n )
 {
+	assert((A.size() == n*n) && "A must be an n x n matrix!");
   if (VERBOSE)
     print_matrix(A, n);
 
-  double sum = 0.0;
-  double rowsumprod = 0.0, rowsum = 0.0;
-  vector<long> chi(n + 1);
-  // double C = (double)pow((double)2, n);
-  double C = Cvec[n];
-
   // loop all 2^n submatrices of A
-  // for (long k = 1; k < C; k++)
-	for (long k = lround(C - 1); k >= 1; --k)
+  double sum = 0.0;
+  unsigned long long count = 0;
+  unsigned long long C = (1 << n); // bitshift equals integer pow() for base2
+
+  vector<bool> chi(n);
+  vector<double> rowsums(n, 0.0);
+  for ( unsigned long long k = 0; k < C - 1; ++k )
   {
-    rowsumprod = 1.0;
-    std::fill( chi.begin(), chi.end(), 0 );
-    dec2binarr(k, n, chi); // characteristic vector
+    // order submatrices by gray code, identify which bit changes
+    unsigned long long mask = 1, index = 0;
+		while (k & mask)
+		{
+			mask <<= 1;
+			++index;
+		}
 
-if (n==2)
-{
-		cout << "chi:";
-		for (const auto & c: chi) cout << "  " << c;
-		cout << "\n";
-}
+    // flip the bit and store the change in sign
+    chi[index] = !chi[index];
+    double sign = static_cast<double>(chi[index]) - static_cast<double>(!chi[index]);
+    count += llround(sign); // store the current number of 1s
 
-    // loop columns of submatrix #k
-    for (long m = 0; m < n; m++)
+    // evaluate this term in Ryser's formula
+    double rowsumprod = 1.0;
+    for ( unsigned long long m = 0; m < n; ++m )
     {
-      rowsum = 0.0;
+      rowsums[m] += sign * A[(m + 1) * n - index - 1];
+      rowsumprod *= rowsums[m];
 
-      // loop rows and compute rowsum
-      for (long p = 0; p < n; p++)
-        rowsum += chi[p] * A[m * n + p];
-
-      // update product of rowsums
-      rowsumprod *= rowsum;
-
-      // (optional -- use for sparse matrices)
-      if (ASSUME_SPARSE && rowsumprod < TINY) break;
+			// (optional -- use for sparse matrices)
+      // if (ASSUME_SPARSE && rowsumprod < TINY) break;
     }
 
-    sum += (double)pow((double)-1, n - chi[n]) * rowsumprod;
-		if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
+		// if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
+
+    sum += rowsumprod * ( ((n - count) % 2) ? -1.0 : 1.0 );
   }
-
-if (n==2) std::terminate();
-
   return sum;
 }
+
 
 
 //--------------------------------------------------------------------------
