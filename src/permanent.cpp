@@ -431,7 +431,7 @@ double MatrixPermanent::permanent_by_expansion( const vector<double> & A, long n
     constexpr long i = 0;  // 0th row
     for (long j = 0; j < n; ++j)
     {
-      if (abs(A[i*n+j]) > TINY)
+      if (A[i*n+j] > TINY)
         result += A[i*n+j] * permanent_by_expansion( take_minor(A, i, j, n), n-1 );
     }
     return result;
