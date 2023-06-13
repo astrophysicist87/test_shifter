@@ -71,7 +71,7 @@ vector<MatrixPermanent::Pair> MatrixPermanent::get_pairs( const vector<Particle>
 double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long n )
 {
 	assert((A.size() == n*n) && "A must be an n x n matrix!");
-  if (VERBOSE || n > 20)
+  if (VERBOSE || n >= 30)
     print_matrix(A, n);
 
 	if (n >= 30) cout << "n = " << n << endl;
