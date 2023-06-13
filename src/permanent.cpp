@@ -83,7 +83,8 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
 
   vector<bool> chi(n);
   vector<double> rowsums(n, 0.0);
-  for ( unsigned long long k = 0; k < C - 1; ++k )
+  // for ( unsigned long long k = 0; k < C - 1; ++k )
+	for ( unsigned long long k = C-2; k >= 0; --k )
   {
     // order submatrices by gray code, identify which bit changes
     unsigned long long mask = 1, index = 0;
