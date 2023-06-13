@@ -71,7 +71,7 @@ vector<MatrixPermanent::Pair> MatrixPermanent::get_pairs( const vector<Particle>
 double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long n )
 {
 	assert((A.size() == n*n) && "A must be an n x n matrix!");
-  if (VERBOSE)
+  if (VERBOSE || n > 20)
     print_matrix(A, n);
 
 	if (n >= 30) cout << "n = " << n << endl;
@@ -106,7 +106,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
       rowsumprod *= rowsums[m];
 
 			// (optional -- use for sparse matrices)
-      if (/*ASSUME_SPARSE &&*/ n > 30 &&  rowsumprod*rowsumprod < 1e-12) break;
+      // if (/*ASSUME_SPARSE &&*/ n > 30 &&  rowsumprod*rowsumprod < 1e-12) break;
     }
 
 		// if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
