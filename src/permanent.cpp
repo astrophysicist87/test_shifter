@@ -373,7 +373,7 @@ void MatrixPermanent::remove_shifted_cluster( int shifted_particle_index )
 double MatrixPermanent::sparse_permanent( const vector<double> & A, long n )
 {
   // if matrix is small enough, use Ryser-Niejenhuis-Wilf algorithm
-  if (n <= CUTOFF)
+  if (n <= 1)
     return permanent_RNW( A, n );
     // otherwise, decompose into minors and try again
   else
@@ -417,7 +417,7 @@ vector<double> MatrixPermanent::take_minor( const vector<double> & A, long i0, l
 double MatrixPermanent::permanent_by_expansion( const vector<double> & A, long n )
 {
   // if matrix is small enough, use Ryser-Nijenhuis-Wilf algorithm
-  if (n <= CUTOFF)
+  if (n <= 1)
     return permanent_RNW( A, n );
   // otherwise, decompose into minors and try again
   else
