@@ -313,10 +313,10 @@ double MatrixPermanent::compute_permanent_from_cluster(
 
   //------------------------------------------------------------------------
   // compute and return permanent
-	// if (n<CUTOFF)
+	if (n<CUTOFF)
   	return permanent_RNW( A, clusterList.size() );
-	// else
-  // 	return sparse_permanent( A, clusterList.size() );
+	else
+  	return sparse_permanent( A, clusterList.size() );
 }
 
 //------------------------------------------------------------------------------
