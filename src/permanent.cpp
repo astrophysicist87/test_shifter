@@ -284,7 +284,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		cout << "unsorted rowsums:";
 		for (auto rowsum: rowsums) cout << "  " << rowsum;
 		cout << endl;
-		print_matrix(A, n);
+		// print_matrix(A, n);
 	}
 
 	// sort particles by increasing rowsums
@@ -307,14 +307,16 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		cout << "sorted rowsums:";
 		for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
 		cout << endl;
-		print_matrix(A, n);
-		std::terminate();
+		// print_matrix(A, n);
+		// std::terminate();
 	}
 
   //------------------------------------------------------------------------
   // compute and return permanent
-  return permanent_RNW( A, clusterList.size() );
-  // return sparse_permanent( A, clusterList.size() );
+	// if (n<CUTOFF)
+  	return permanent_RNW( A, clusterList.size() );
+	// else
+  // 	return sparse_permanent( A, clusterList.size() );
 }
 
 //------------------------------------------------------------------------------
