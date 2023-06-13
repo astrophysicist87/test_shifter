@@ -74,7 +74,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
   if (VERBOSE)
     print_matrix(A, n);
 
-	if (n > 28) cout << "n = " << n << endl;
+	if (n > 20) cout << "n = " << n << endl;
 
   // loop all 2^n submatrices of A
   double sum = 0.0;
@@ -109,10 +109,11 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
       // if (ASSUME_SPARSE && rowsumprod < TINY) break;
     }
 
-		if (n>28) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
+		if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
 
     sum += rowsumprod * ( ((n - count) % 2) ? -1.0 : 1.0 );
   }
+	if (n>20) std::terminate();
   return sum;
 }
 
