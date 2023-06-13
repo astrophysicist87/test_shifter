@@ -83,8 +83,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
 
   vector<bool> chi(n);
   vector<double> rowsums(n, 0.0);
-  // for ( unsigned long long k = 0; k < C - 1; ++k )
-	for ( unsigned long long k = C-2; k >= 0; --k )
+  for ( unsigned long long k = 0; k < C - 1; ++k )
   {
     // order submatrices by gray code, identify which bit changes
     unsigned long long mask = 1, index = 0;
@@ -110,11 +109,11 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
       // if (ASSUME_SPARSE && rowsumprod < TINY) break;
     }
 
-		if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
+		// if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
 
     sum += rowsumprod * ( ((n - count) % 2) ? -1.0 : 1.0 );
   }
-	if (n>20) std::terminate();
+	// if (n>20) std::terminate();
   return sum;
 }
 
@@ -280,6 +279,10 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	const int n = clusterList.size();
 	vector<long> rowsums = get_rowsums( A, n );
 
+	if (n>20) cout << "unsorted rowsums:";
+	for (auto rowsum: rowsums) cout << "  " << rowsum;
+	cout << endl;
+
 	// sort particles by increasing rowsums
 	std::vector<long> indices(n);
 	std::iota(indices.begin(), indices.end(), 0);
@@ -293,6 +296,11 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
 
 	A = A_sorted;
+
+	vector<long> sorted_rowsums = get_rowsums( A, n );
+	if (n>20) cout << "sorted rowsums:";
+	for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
+	cout << endl;
 
   //------------------------------------------------------------------------
   // compute and return permanent
