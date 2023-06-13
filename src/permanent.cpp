@@ -279,9 +279,12 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	const int n = clusterList.size();
 	vector<long> rowsums = get_rowsums( A, n );
 
-	if (n>20) cout << "unsorted rowsums:";
-	for (auto rowsum: rowsums) cout << "  " << rowsum;
-	cout << endl;
+	if (n>20)
+	{
+		cout << "unsorted rowsums:";
+		for (auto rowsum: rowsums) cout << "  " << rowsum;
+		cout << endl;
+	}
 
 	// sort particles by increasing rowsums
 	std::vector<long> indices(n);
@@ -298,9 +301,12 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	A = A_sorted;
 
 	vector<long> sorted_rowsums = get_rowsums( A, n );
-	if (n>20) cout << "sorted rowsums:";
-	for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
-	cout << endl;
+	if (n>20)
+	{
+		cout << "sorted rowsums:";
+		for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
+		cout << endl;
+	}
 
   //------------------------------------------------------------------------
   // compute and return permanent
