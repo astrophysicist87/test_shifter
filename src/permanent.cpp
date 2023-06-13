@@ -74,7 +74,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
   if (VERBOSE)
     print_matrix(A, n);
 
-	if (n > 20) cout << "n = " << n << endl;
+	if (n >= 30) cout << "n = " << n << endl;
 
   // loop all 2^n submatrices of A
   double sum = 0.0;
@@ -279,7 +279,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	const int n = clusterList.size();
 	vector<long> rowsums = get_rowsums( A, n );
 
-	if (n>20)
+	if (n>=30)
 	{
 		cout << "unsorted rowsums:";
 		for (auto rowsum: rowsums) cout << "  " << rowsum;
@@ -301,7 +301,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	A = A_sorted;
 
 	vector<long> sorted_rowsums = get_rowsums( A, n );
-	if (n>20)
+	if (n>=30)
 	{
 		cout << "sorted rowsums:";
 		for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
