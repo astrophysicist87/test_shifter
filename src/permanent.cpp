@@ -106,7 +106,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
       rowsumprod *= rowsums[m];
 
 			// (optional -- use for sparse matrices)
-      // if (ASSUME_SPARSE && rowsumprod < TINY) break;
+      if (/*ASSUME_SPARSE &&*/ rowsumprod*rowsumprod < 1e-12) break;
     }
 
 		// if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
