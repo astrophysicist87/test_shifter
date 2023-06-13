@@ -71,7 +71,7 @@ vector<MatrixPermanent::Pair> MatrixPermanent::get_pairs( const vector<Particle>
 double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long n )
 {
 	assert((A.size() == n*n) && "A must be an n x n matrix!");
-  if (VERBOSE || n >= 30)
+  if (VERBOSE)
     print_matrix(A, n);
 
 	if (n >= 30) cout << "n = " << n << endl;
@@ -284,6 +284,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		cout << "unsorted rowsums:";
 		for (auto rowsum: rowsums) cout << "  " << rowsum;
 		cout << endl;
+		print_matrix(A, n);
 	}
 
 	// sort particles by increasing rowsums
@@ -306,6 +307,8 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		cout << "sorted rowsums:";
 		for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
 		cout << endl;
+		print_matrix(A, n);
+		std::terminate();
 	}
 
   //------------------------------------------------------------------------
