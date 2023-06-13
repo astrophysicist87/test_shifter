@@ -74,7 +74,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
   if (VERBOSE)
     print_matrix(A, n);
 
-	if (n > 30) cout << "n = " << n << endl;
+	if (n > 20) cout << "n = " << n << endl;
 
   // loop all 2^n submatrices of A
   double sum = 0.0;
