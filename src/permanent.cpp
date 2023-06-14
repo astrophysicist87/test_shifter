@@ -280,7 +280,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	const int n = clusterList.size();
 	vector<long> rowsums = get_rowsums( A, n );
 
-	if (n>=30)
+	if (n>=CUTOFF)
 	{
 		cout << "unsorted rowsums:";
 		for (auto rowsum: rowsums) cout << "  " << rowsum;
@@ -300,10 +300,10 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	for (int j = 0; j < n; ++j)
 		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
 
-	// A = A_sorted;
+	A = A_sorted;
 
 	vector<long> sorted_rowsums = get_rowsums( A, n );
-	if (n>=30)
+	if (n>=CUTOFF)
 	{
 		cout << "sorted rowsums:";
 		for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
