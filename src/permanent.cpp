@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <functional>
+#include <limits>
 #include <numeric>
 #include <vector>
 
@@ -82,7 +83,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
   unsigned long long count = 0;
   unsigned long long C = (1 << n); // bitshift equals integer pow() for base2
 
-	if (n>=25) cout << "C(n=" << n<< ") = " << C << endl;
+	if (n>=25) cout << "C(n=" << n<< ") = " << C << " vs. " << ULLONG_MAX << endl;
 
   vector<bool> chi(n);
   vector<double> rowsums(n, 0.0);
