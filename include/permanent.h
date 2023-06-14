@@ -35,7 +35,7 @@ class MatrixPermanent
     static constexpr bool VERBOSE = false;
     static constexpr bool APPROXIMATE_LARGE_N = false;
     static constexpr double R = 5.0/0.19733;
-    static constexpr int CUTOFF = 30;
+    static constexpr int CUTOFF = 1000;
     static constexpr int MAX_ROWSUM = 10000;
     bool ASSUME_SPARSE = false;
     double TINY = 1e-3;

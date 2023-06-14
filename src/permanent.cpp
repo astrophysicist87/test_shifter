@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../include/permanent.h"
+#include "../include/sparse_matrix_permanent.h"
 
 using namespace std;
 using shift_lib::Vec4;
@@ -104,9 +105,6 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
     {
       rowsums[m] += sign * A[(m + 1) * n - index - 1];
       rowsumprod *= rowsums[m];
-
-			// (optional -- use for sparse matrices)
-      // if (/*ASSUME_SPARSE &&*/ n > 30 &&  rowsumprod*rowsumprod < 1e-12) break;
     }
 
 		// if (n>20) cout << "CHECK: " << k << "  " << C-1 << "  " << sum << "\n";
@@ -313,8 +311,17 @@ double MatrixPermanent::compute_permanent_from_cluster(
 
   //------------------------------------------------------------------------
   // compute and return permanent
-	// if (n<CUTOFF)
+	if (n<CUTOFF)
   	return permanent_RNW( A, clusterList.size() );
+	else
+	{
+		vector<Sparse::Element> A_sparse;
+		for (int i = 0; i < n; ++i)
+		for (int j = 0; j < n; ++j)
+			if (A[i*n+j] > TINY)
+				A_sparse.push_back( make_tuple( i, j, A[i*n+j] ) );
+		return Sparse::permanent( Sparse::Matrix(A_sparse, n) );
+	}
 	// else
   // 	return sparse_permanent( A, clusterList.size() );
 }
