@@ -330,6 +330,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		Stopwatch sw;
 		sw.Start();
 		cout << "------------------------------------------------------------" << endl;
+		cout << "Matrix size = " << n << endl;
 		cout << "Evaluated RNW = " << permanent_RNW( A, clusterList.size() );
 		sw.Stop();
 		cout << " in " << sw.printTime() << " s." << endl;
