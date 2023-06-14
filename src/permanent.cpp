@@ -82,6 +82,8 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
   unsigned long long count = 0;
   unsigned long long C = (1 << n); // bitshift equals integer pow() for base2
 
+	if (n>=30) cout << "C(n=" << n<< ") = " << C << endl;
+
   vector<bool> chi(n);
   vector<double> rowsums(n, 0.0);
   for ( unsigned long long k = 0; k < C - 1; ++k )
