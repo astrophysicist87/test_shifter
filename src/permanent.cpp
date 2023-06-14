@@ -315,6 +315,15 @@ double MatrixPermanent::compute_permanent_from_cluster(
   	return permanent_RNW( A, clusterList.size() );
 	else
 	{
+		cout << setprecision(12) << "{";
+	  for (long long i = 0; i < n; i++)
+	  {
+	    cout << "{";
+	    for (long long j = 0; j < n; j++)
+	      cout << "  " /*<< setw(12) << right*/ << matrix[i*n+j] << ",";
+	    cout << "},";
+	  }
+	  cout << "}\n";
 		Stopwatch sw;
 		sw.Start();
 		cout << "------------------------------------------------------------" << endl;
@@ -333,6 +342,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		sw.Stop();
 		cout << " in " << sw.printTime() << " s." << endl;
 		cout << "------------------------------------------------------------" << endl;
+		if (true) std::terminate();
 		return tmp;
 	}
 	// else
