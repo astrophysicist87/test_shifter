@@ -81,7 +81,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
   // loop all 2^n submatrices of A
   double sum = 0.0;
   unsigned long long count = 0;
-  unsigned long long C = (1 << n); // bitshift equals integer pow() for base2
+  unsigned long long C = (1ULL << n); // bitshift equals integer pow() for base2
 
 	if (n>=25) cout << "C(n=" << n<< ") = " << C << " vs. " << ULLONG_MAX << endl;
 
