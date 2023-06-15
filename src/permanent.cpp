@@ -301,7 +301,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
 
 	A = A_sorted;
-	std::reverse(A.begin(), A.end());
+	// std::reverse(A.begin(), A.end());
 
 	if (n>=25)
 	{
