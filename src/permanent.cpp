@@ -294,6 +294,8 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	std::sort(indices.begin(), indices.end(),
 						[&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
 
+	std::reverse(indices.begin(), indices.end());
+
 	// re-compute sorted matrix
 	vector<double> A_sorted(n*n);
 	for (int i = 0; i < n; ++i)
@@ -301,7 +303,6 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
 
 	A = A_sorted;
-	// std::reverse(A.begin(), A.end());
 
 	if (n>=25)
 	{
