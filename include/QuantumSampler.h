@@ -70,11 +70,18 @@ class QuantumSampler
                   particles[ choose_particle() ].p :
                   particles[ particle_to_sample ].p;
       double w = 1.0/(sqrt(2.0)*sigma);
-      cout << "w = " << w << endl;
-      if (true) std::terminate();
       double rx = RNG_xDir ? normdist(rng) : get<0>(def);
       double ry = RNG_yDir ? normdist(rng) : get<1>(def);
       double rz = RNG_zDir ? normdist(rng) : get<2>(def);
+      cout << "w = " << w << endl;
+      cout << "pi.x = " << pi.x() << endl;
+      cout << "pi.y = " << pi.y() << endl;
+      cout << "pi.z = " << pi.z() << endl;
+      cout << "Shifts:" << endl;
+      cout << "  " << w*rx << endl;
+      cout << "  " << w*ry << endl;
+      cout << "  " << w*rz << endl;
+      if (true) std::terminate();
       return std::make_tuple( pi.x()+w*rx, pi.y()+w*ry, pi.z()+w*rz );
     }
 };
