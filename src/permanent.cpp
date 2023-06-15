@@ -294,7 +294,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	std::sort(indices.begin(), indices.end(),
 						[&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
 
-	std::reverse(indices.begin(), indices.end());
+	// std::reverse(indices.begin(), indices.end());
 
 	// re-compute sorted matrix
 	vector<double> A_sorted(n*n);
