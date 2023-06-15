@@ -70,6 +70,8 @@ class QuantumSampler
                   particles[ choose_particle() ].p :
                   particles[ particle_to_sample ].p;
       double w = 1.0/(sqrt(2.0)*sigma);
+      cout << "w = " << w << endl;
+      if (true) std::terminate();
       double rx = RNG_xDir ? normdist(rng) : get<0>(def);
       double ry = RNG_yDir ? normdist(rng) : get<1>(def);
       double rz = RNG_zDir ? normdist(rng) : get<2>(def);
