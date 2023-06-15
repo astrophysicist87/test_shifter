@@ -303,6 +303,13 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	A = A_sorted;
 	std::reverse(A.begin(), A.end());
 
+	if (n>25)
+	{
+		cout << "A(n="<<n<<"):" << endl << "{";
+		for (const auto & e: A) cout << "  " << e << ",";
+		cout << "}";
+	}
+
 	vector<long> sorted_rowsums = get_rowsums( A, n );
 	if (n>=CUTOFF)
 	{
