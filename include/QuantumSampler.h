@@ -31,7 +31,7 @@ class QuantumSampler
     int RNG_zDir { 0 };
     int dimension { 0 };
     double sigma { 1.0 };  // fm
-    vector<Particle> & particles;
+    vector<Particle> particles;
     std::mt19937 rng, rng2;
     integer_range intdist;
     gaussian normdist;
@@ -41,7 +41,7 @@ class QuantumSampler
 
   //----------------------------------------------------------------------------
   public:
-    QuantumSampler( vector<Particle> & particles_in,
+    QuantumSampler( const vector<Particle> & particles_in,
                     double sigma_in, int RNG_xDir_in, int RNG_yDir_in, int RNG_zDir_in,
                     unsigned seed )
     : particles{ particles_in },
@@ -66,9 +66,9 @@ class QuantumSampler
     std::tuple<double,double,double> sample( int particle_to_sample = -1,
       std::tuple<double,double,double> def = std::make_tuple(0.0, 0.0, 0.0))
     {
-      auto & pi = ( particle_to_sample < 0 ) ?
-                  particles[ choose_particle() ].p :
-                  particles[ particle_to_sample ].p;
+      const auto & pi = ( particle_to_sample < 0 ) ?
+                          particles[ choose_particle() ].p :
+                          particles[ particle_to_sample ].p;
       double w = 1.0/(sqrt(2.0)*sigma);
       double rx = RNG_xDir ? normdist(rng) : get<0>(def);
       double ry = RNG_yDir ? normdist(rng) : get<1>(def);
