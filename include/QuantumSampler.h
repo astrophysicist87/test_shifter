@@ -73,6 +73,8 @@ class QuantumSampler
       double rx = RNG_xDir ? normdist(rng) : get<0>(def);
       double ry = RNG_yDir ? normdist(rng) : get<1>(def);
       double rz = RNG_zDir ? normdist(rng) : get<2>(def);
+      if (particle_to_sample == 0)
+      {
       cout << "w = " << w << endl;
       cout << "pi.x = " << pi.x() << endl;
       cout << "pi.y = " << pi.y() << endl;
@@ -81,7 +83,8 @@ class QuantumSampler
       cout << "  " << w*rx << endl;
       cout << "  " << w*ry << endl;
       cout << "  " << w*rz << endl;
-      if (true) std::terminate();
+      }
+      // if (true) std::terminate();
       return std::make_tuple( pi.x()+w*rx, pi.y()+w*ry, pi.z()+w*rz );
     }
 };
