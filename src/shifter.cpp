@@ -158,7 +158,7 @@ namespace shift_lib
 				double z1 = allParticles[iParticle].p.z();
 
 				// QuantumSampler fixes distribution in terms of original particles
-				auto [x2, y2, z2] = qs.sample(iParticle, std::make_tuple(x1, y1, z1));
+				auto [x2, y2, z2] = qs.sample(iParticle/*, std::make_tuple(x1, y1, z1)*/);
 
 				// use simple Gaussian for checks
 				// double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;

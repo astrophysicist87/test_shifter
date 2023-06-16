@@ -63,27 +63,30 @@ class QuantumSampler
     }
     ~QuantumSampler(){}
 
-    std::tuple<double,double,double> sample( int particle_to_sample = -1,
-      std::tuple<double,double,double> def = std::make_tuple(0.0, 0.0, 0.0))
+    std::tuple<double,double,double> sample( int particle_to_sample = -1/*,
+      std::tuple<double,double,double> def = std::make_tuple(0.0, 0.0, 0.0)*/)
     {
       const auto & pi = ( particle_to_sample < 0 ) ?
                           particles[ choose_particle() ].p :
                           particles[ particle_to_sample ].p;
       double w = 1.0/(sqrt(2.0)*sigma);
-      double rx = RNG_xDir ? normdist(rng) : get<0>(def);
-      double ry = RNG_yDir ? normdist(rng) : get<1>(def);
-      double rz = RNG_zDir ? normdist(rng) : get<2>(def);
-      if (particle_to_sample == 0)
-      {
-      cout << "w = " << w << endl;
-      cout << "pi.x = " << pi.x() << endl;
-      cout << "pi.y = " << pi.y() << endl;
-      cout << "pi.z = " << pi.z() << endl;
-      cout << "Shifts:" << endl;
-      cout << "  " << w*rx << endl;
-      cout << "  " << w*ry << endl;
-      cout << "  " << w*rz << endl;
-      }
+      // double rx = RNG_xDir ? normdist(rng) : get<0>(def);
+      // double ry = RNG_yDir ? normdist(rng) : get<1>(def);
+      // double rz = RNG_zDir ? normdist(rng) : get<2>(def);
+      double rx = RNG_xDir ? normdist(rng) : 0.0;
+      double ry = RNG_yDir ? normdist(rng) : 0.0;
+      double rz = RNG_zDir ? normdist(rng) : 0.0;
+      // if (particle_to_sample == 0)
+      // {
+      // cout << "w = " << w << endl;
+      // cout << "pi.x = " << pi.x() << endl;
+      // cout << "pi.y = " << pi.y() << endl;
+      // cout << "pi.z = " << pi.z() << endl;
+      // cout << "Shifts:" << endl;
+      // cout << "  " << w*rx << endl;
+      // cout << "  " << w*ry << endl;
+      // cout << "  " << w*rz << endl;
+      // }
       // if (true) std::terminate();
       return std::make_tuple( pi.x()+w*rx, pi.y()+w*ry, pi.z()+w*rz );
     }
