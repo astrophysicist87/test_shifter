@@ -280,13 +280,13 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	const int n = clusterList.size();
 	vector<long> rowsums = get_rowsums( A, n );
 
-	if (n>=CUTOFF)
-	{
-		cout << "unsorted rowsums:";
-		for (auto rowsum: rowsums) cout << "  " << rowsum;
-		cout << endl;
-		// print_matrix(A, n);
-	}
+	// if (n>=CUTOFF)
+	// {
+	// 	cout << "unsorted rowsums:";
+	// 	for (auto rowsum: rowsums) cout << "  " << rowsum;
+	// 	cout << endl;
+	// 	// print_matrix(A, n);
+	// }
 
 	// sort particles by increasing rowsums
 	std::vector<long> indices(n);
@@ -304,22 +304,22 @@ double MatrixPermanent::compute_permanent_from_cluster(
 
 	A = A_sorted;
 
-	if (n>=25)
-	{
-		cout << "A(n="<<n<<"):" << endl << "{";
-		for (const auto & e: A) cout << "  " << e << ",";
-		cout << "}";
-	}
+	// if (n>=CUTOFF)
+	// {
+	// 	cout << "A(n="<<n<<"):" << endl << "{";
+	// 	for (const auto & e: A) cout << "  " << e << ",";
+	// 	cout << "}\n";
+	// }
 
-	vector<long> sorted_rowsums = get_rowsums( A, n );
-	if (n>=CUTOFF)
-	{
-		cout << "sorted rowsums:";
-		for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
-		cout << endl;
-		// print_matrix(A, n);
-		// std::terminate();
-	}
+	// vector<long> sorted_rowsums = get_rowsums( A, n );
+	// if (n>=CUTOFF)
+	// {
+	// 	cout << "sorted rowsums:";
+	// 	for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
+	// 	cout << endl;
+	// 	// print_matrix(A, n);
+	// 	// std::terminate();
+	// }
 
   //------------------------------------------------------------------------
   // compute and return permanent
@@ -337,12 +337,12 @@ double MatrixPermanent::compute_permanent_from_cluster(
 	  // }
 	  // cout << "}\n";
 		Stopwatch sw;
-		sw.Start();
-		cout << "------------------------------------------------------------" << endl;
-		cout << "Matrix size = " << n << endl;
-		cout << "Evaluated RNW = " << permanent_RNW( A, clusterList.size() );
-		sw.Stop();
-		cout << " in " << sw.printTime() << " s." << endl;
+		// sw.Start();
+		// cout << "------------------------------------------------------------" << endl;
+		// cout << "Matrix size = " << n << endl;
+		// cout << "Evaluated RNW = " << permanent_RNW( A, clusterList.size() );
+		// sw.Stop();
+		// cout << " in " << sw.printTime() << " s." << endl;
 		sw.Reset();
 		sw.Start();
 		vector<Sparse::Element> A_sparse;
