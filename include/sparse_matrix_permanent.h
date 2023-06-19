@@ -217,7 +217,7 @@ namespace Sparse
         return sm.v[0].value;
       else
       {
-        if (sm.get_matrix_size() > 7)
+        if (sm.rowsums[0] < 4 && sm.get_matrix_size() > 7)
         {
           double sum = 0.0;
           for (const auto & e: sm.v)
