@@ -349,7 +349,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
 		for (int i = 0; i < n; ++i)
 		for (int j = 0; j < n; ++j)
 			if (A[i*n+j] > TINY)
-				A_sparse.push_back( make_tuple( i, j, A[i*n+j] ) );
+				A_sparse.push_back( Sparse::Element( {i, j, A[i*n+j]} ) );
 		long double tmp = Sparse::permanent( Sparse::Matrix(A_sparse, n) );
 		cout << "Evaluated sparse = " << tmp;
 		sw.Stop();
