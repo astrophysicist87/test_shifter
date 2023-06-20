@@ -137,6 +137,7 @@ namespace shift_lib
 		ConfigurationProbability cp( SHIFT_MODE, parameters, paraRdr, "Short" );
 		double P1 = cp.get_probability( allParticles, current_BE_distances, -1 );
 																		// last -1 means place all particles in clusters
+		cout << "current_BE_distances.size() = " << current_BE_distances.size() << endl;
 // cout << "Finished initializing cp." << endl;
 // cout << "CHECK: " << P1 << "  " << P1FP << endl;
 
