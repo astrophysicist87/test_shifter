@@ -149,6 +149,11 @@ if (abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10)
 			<< "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "  "
       << abs(tmp-BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)]) << "\n\n";
   cout << "CHECK: " << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << endl;
+
+	cout << "======================================================================================\n";
+	cout << "CHECK PAIRS and BEDISTANCES:\n";
+	for (const auto & pair: pairs)
+		cout << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "\n";
   std::terminate();
 }
       if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
