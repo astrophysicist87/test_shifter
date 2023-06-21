@@ -141,7 +141,7 @@ cout << "at line = " << __LINE__ << endl;
 		// std::terminate();
 		}
 		cout << "All particles:\n";
-		for (const auto & p: allParticles) cout << p;
+		for (const auto & p: allParticles) cout << p.ID << ":  " << p;
 
 
 		//------------------------------------------------
