@@ -111,6 +111,8 @@ namespace shift_lib
 		current_pairs = get_pairs(allParticles);
 		shifted_pairs = current_pairs;
 
+cout << "at line = " << __LINE__ << endl;
+
 		//------------------------------------------------
 		// set tabulated BE distances for below
 		double R = paraRdr->getVal("RNG_R") / HBARC;
@@ -119,6 +121,8 @@ namespace shift_lib
 		std::transform( current_pairs.cbegin(), current_pairs.cend(),
 	                  current_BE_distances.begin(), BEdist.get_distance_v );
 		vector<double> shifted_BE_distances = current_BE_distances;
+
+cout << "at line = " << __LINE__ << endl;
 
 		// if (true)
 		// {
@@ -157,6 +161,8 @@ namespace shift_lib
 		cout << "current_BE_distances.size() = " << current_BE_distances.size() << endl;
 // cout << "Finished initializing cp." << endl;
 // cout << "CHECK: " << P1 << "  " << P1FP << endl;
+
+cout << "at line = " << __LINE__ << endl;
 
 		//------------------------------------------------
 		// begin looping over particles

@@ -141,6 +141,7 @@ vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
       double tmp = exp(-0.25*q2*R*R);
 if (abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10)
 {
+	cout << "pairs.size() = " << pairs.size() << "\n\n";
   cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
   cout << "Particle 1: " << pair.p1 << "\n";
   cout << "Particle 2: " << pair.p2 << "\n";
@@ -260,7 +261,6 @@ void MatrixPermanent::set_clusters_with_merging( const vector<Particle> & partic
       iCluster++;
     }
   }
-
 
   return;
 }
