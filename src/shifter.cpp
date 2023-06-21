@@ -172,10 +172,10 @@ cout << "at line = " << __LINE__ << endl;
 		{
 			swTotal.Reset();
 			swTotal.Start();
-			cerr << "Loop #" << iLoop << ": \n";
+			// cerr << "Loop #" << iLoop << ": \n";
 			for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 			{
-				cerr << "  --> Particle #" << iParticle << "\n";
+				// cerr << "  --> Particle #" << iParticle << "\n";
 
 				// generate a shifted momentum
 				double x1 = allParticles[iParticle].p.x();
