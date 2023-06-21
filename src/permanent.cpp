@@ -134,33 +134,39 @@ vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
     for (int j = i+1; j < np; j++)
     {
       auto & pair = pairs[index];
-      const auto & q = pair.q;
-      double q2 = inner_product(q.cbegin(), q.cend(),
-                                q.cbegin(),
-                                0.0);
-      double tmp = exp(-0.25*q2*R*R);
-			auto [minID, maxID] = std::minmax(pair.ID1, pair.ID2);
-			cout << "CHECK COMPARISON: " << BE_distance[UTindexer(minID, maxID, total_n)] << "  " << tmp << "\n";
-if (abs(BE_distance[UTindexer(minID, maxID, total_n)]-tmp) > 1e-10)
-{
-	cout << "pairs.size() = " << pairs.size() << "\n\n";
-  cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
-  cout << "Particle 1: " << minID << "\n";
-  cout << "Particle 2: " << maxID << "\n";
-  cout << tmp << "  " << UTindexer(minID, maxID, total_n);
-  cout << "  " << BE_distance.at(UTindexer(minID, maxID, total_n)) << "  ";
-  cout << abs(tmp-BE_distance.at(UTindexer(minID, maxID, total_n))) << "\n\n";
-  cout << "CHECK: " << minID << "  " << maxID << "  "
-	     << BE_distance[UTindexer(minID, maxID, total_n)] << endl;
+			// OLD version
+      // const auto & q = pair.q;
+      // double q2 = inner_product(q.cbegin(), q.cend(),
+      //                           q.cbegin(),
+      //                           0.0);
+			// double tmp = exp(-0.25*q2*R*R);
 
-	// cout << "======================================================================================\n";
-	// cout << "CHECK PAIRS and BEDISTANCES:\n";
-	// cout << "BE_distance.size() = " << BE_distance.size() << "  " << np << "  " << total_n << endl;
-	// for (int i = 0; i < total_n; i++)
-	// for (int j = i+1; j < total_n; j++)
-	// 		cout << i << "  " << j << "  " << UTindexer(i, j, total_n) << "  " << BE_distance[UTindexer(i, j, total_n)] << "\n";
-  std::terminate();
-}
+			// NEW version
+			auto [minID, maxID] = std::minmax(pair.ID1, pair.ID2);
+			double tmp = BE_distance[UTindexer(minID, maxID, total_n)];
+
+
+// 			cout << "CHECK COMPARISON: " << BE_distance[UTindexer(minID, maxID, total_n)] << "  " << tmp << "\n";
+// if (abs(BE_distance[UTindexer(minID, maxID, total_n)]-tmp) > 1e-10)
+// {
+// 	cout << "pairs.size() = " << pairs.size() << "\n\n";
+//   cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
+//   cout << "Particle 1: " << minID << "\n";
+//   cout << "Particle 2: " << maxID << "\n";
+//   cout << tmp << "  " << UTindexer(minID, maxID, total_n);
+//   cout << "  " << BE_distance.at(UTindexer(minID, maxID, total_n)) << "  ";
+//   cout << abs(tmp-BE_distance.at(UTindexer(minID, maxID, total_n))) << "\n\n";
+//   cout << "CHECK: " << minID << "  " << maxID << "  "
+// 	     << BE_distance[UTindexer(minID, maxID, total_n)] << endl;
+//
+// 	// cout << "======================================================================================\n";
+// 	// cout << "CHECK PAIRS and BEDISTANCES:\n";
+// 	// cout << "BE_distance.size() = " << BE_distance.size() << "  " << np << "  " << total_n << endl;
+// 	// for (int i = 0; i < total_n; i++)
+// 	// for (int j = i+1; j < total_n; j++)
+// 	// 		cout << i << "  " << j << "  " << UTindexer(i, j, total_n) << "  " << BE_distance[UTindexer(i, j, total_n)] << "\n";
+//   std::terminate();
+// }
       if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
       A[i*np+j] = tmp;
       A[j*np+i] = tmp; // matrix is symmetric

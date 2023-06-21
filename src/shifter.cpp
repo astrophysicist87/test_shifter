@@ -87,7 +87,7 @@ namespace shift_lib
 
 
 	std::normal_distribution<double>       normal(0.0, 1.0);
-	for (const auto & p: allParticles) {normal(generator); normal(generator); /*normal(generator);*/}
+	for (const auto & p: allParticles) {normal(generator); normal(generator); normal(generator);}
 	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
 	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
 	int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
@@ -111,8 +111,6 @@ namespace shift_lib
 		current_pairs = get_pairs(allParticles);
 		shifted_pairs = current_pairs;
 
-cout << "at line = " << __LINE__ << endl;
-
 		//------------------------------------------------
 		// set tabulated BE distances for below
 		double R = paraRdr->getVal("RNG_R") / HBARC;
@@ -121,8 +119,6 @@ cout << "at line = " << __LINE__ << endl;
 		std::transform( current_pairs.cbegin(), current_pairs.cend(),
 	                  current_BE_distances.begin(), BEdist.get_distance_v );
 		vector<double> shifted_BE_distances = current_BE_distances;
-
-cout << "at line = " << __LINE__ << endl;
 
 		//------------------------------------------------
 		// compute probability of initial configuration
@@ -141,11 +137,9 @@ cout << "at line = " << __LINE__ << endl;
 		ConfigurationProbability cp( SHIFT_MODE, parameters, paraRdr, "Short" );
 		double P1 = cp.get_probability( allParticles, current_BE_distances, -1 );
 																		// last -1 means place all particles in clusters
-		cout << "current_BE_distances.size() = " << current_BE_distances.size() << endl;
+		// cout << "current_BE_distances.size() = " << current_BE_distances.size() << endl;
 // cout << "Finished initializing cp." << endl;
 // cout << "CHECK: " << P1 << "  " << P1FP << endl;
-
-cout << "at line = " << __LINE__ << endl;
 
 		//------------------------------------------------
 		// begin looping over particles
