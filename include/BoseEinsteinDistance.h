@@ -42,8 +42,8 @@ class BoseEinsteinDistance
 			if (mode == "SingleScale")
 			{
 				R = std::get<double>(parameters.at("R"));
-				// get_distance = [this](const vector<double> & q)
-        //                { return get_distance_single_scale(q); };
+				get_distance_v = [this](const vector<double> & q)
+                       { return get_distance_single_scale(q); };
         get_distance = [this](const std::initializer_list<double> & q)
                        { return get_distance_single_scale(q); };
 			}
@@ -55,7 +55,7 @@ class BoseEinsteinDistance
 		}
     ~BoseEinsteinDistance(){}
 
-    // std::function<double(const vector<double> &)> get_distance;
+    std::function<double(const vector<double> &)> get_distance_v;
     std::function<double(const std::initializer_list<double>)> get_distance;
 };
 

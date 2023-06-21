@@ -117,7 +117,7 @@ namespace shift_lib
 		BoseEinsteinDistance BEdist( "SingleScale", { {"R", R} } );
 		vector<double> current_BE_distances(current_pairs.size(), 0.0);
 		std::transform( current_pairs.cbegin(), current_pairs.cend(),
-	                  current_BE_distances.begin(), BEdist.get_distance );
+	                  current_BE_distances.begin(), BEdist.get_distance_v );
 		vector<double> shifted_BE_distances = current_BE_distances;
 
 		if (true)
