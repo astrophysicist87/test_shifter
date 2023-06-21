@@ -205,10 +205,10 @@ cout << "at line = " << __LINE__ << endl;
 																				shifted_BE_distances, iParticle );
 
 
-			// std::cout << "CHECK: " << SHIFT_MODE << "   "
-			// 					<< x1 << "   " << y1 << "   " << z1 << "   "
-			// 					<< x2 << "   " << y2 << "   " << z2 << "   "
-			// 					<< P2/P1 << std::endl << setprecision(4);
+			std::cout << "CHECK: " << SHIFT_MODE << "   "
+								<< x1 << "   " << y1 << "   " << z1 << "   "
+								<< x2 << "   " << y2 << "   " << z2 << "   "
+								<< P2/P1 << std::endl << setprecision(4);
 // cout << "--------------------------------------------------------------------------------------------------------------------" << endl;
 // 			for (const auto & p: allParticles) std::cout << setw(10) << right << p.p.z() << "   ";
 // 			std::cout << std::endl;
