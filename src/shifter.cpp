@@ -124,22 +124,22 @@ cout << "at line = " << __LINE__ << endl;
 
 cout << "at line = " << __LINE__ << endl;
 
-		// if (true)
-		// {
-		// cout << "R: "<< R << endl;
-		// cout << "BEdistances:" << endl;
-		// int total_n = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*current_BE_distances.size())));
-		// int index = 0;
-		// for (int i = 0; i < total_n; i++)
-		// for (int j = i+1; j < total_n; j++)
-		// {
-		// 	const auto & q = current_pairs.at(index);
-		// 	cout << index << "  " << i << "  " << j << "  " << q[0] << "  " << q[1] << "  " << q[2]
-		// 	     << "  " << current_BE_distances.at(index) << "\n";
-		// 	index++;
-		// }
+		if (true)
+		{
+		cout << "R: "<< R << endl;
+		cout << "BEdistances:" << endl;
+		int total_n = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*current_BE_distances.size())));
+		int index = 0;
+		for (int i = 0; i < total_n; i++)
+		for (int j = i+1; j < total_n; j++)
+		{
+			const auto & q = current_pairs.at(index);
+			cout << index << "  " << i << "  " << j << "  " << q[0] << "  " << q[1] << "  " << q[2]
+			     << "  " << current_BE_distances.at(index) << "\n";
+			index++;
+		}
 		// std::terminate();
-		// }
+		}
 
 		//------------------------------------------------
 		// compute probability of initial configuration
