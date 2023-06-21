@@ -240,7 +240,7 @@ void MatrixPermanent::set_clusters_with_merging( const vector<Particle> & partic
   }
 
   // if (VERBOSE)
-    print_clusters(clusters, true);
+    // print_clusters(clusters, true);
 
   // set vector to track which cluster each particle belongs to
   // set also indices of cluster
