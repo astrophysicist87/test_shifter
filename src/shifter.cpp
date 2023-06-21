@@ -116,8 +116,8 @@ namespace shift_lib
 		double R = paraRdr->getVal("RNG_R") / HBARC;
 		BoseEinsteinDistance BEdist( "SingleScale", { {"R", R} } );
 		vector<double> current_BE_distances(current_pairs.size(), 0.0);
-		// std::transform( current_pairs.cbegin(), current_pairs.cend(),
-	  //                 current_BE_distances.begin(), BEdist.get_distance );
+		std::transform( current_pairs.cbegin(), current_pairs.cend(),
+	                  current_BE_distances.begin(), BEdist.get_distance );
 		vector<double> shifted_BE_distances = current_BE_distances;
 
 		if (true)
