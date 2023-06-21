@@ -139,25 +139,26 @@ vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
                                 q.cbegin(),
                                 0.0);
       double tmp = exp(-0.25*q2*R*R);
-if (true /*abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10*/)
-{
-	cout << "pairs.size() = " << pairs.size() << "\n\n";
-  cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
-  cout << "Particle 1: " << pair.p1 << "\n";
-  cout << "Particle 2: " << pair.p2 << "\n";
-  cout << tmp << "  " << UTindexer(pair.ID1, pair.ID2, total_n);
-  cout << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "  ";
-  cout << abs(tmp-BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)]) << "\n\n";
-  cout << "CHECK: " << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << endl;
-
-	// cout << "======================================================================================\n";
-	// cout << "CHECK PAIRS and BEDISTANCES:\n";
-	// cout << "BE_distance.size() = " << BE_distance.size() << "  " << np << "  " << total_n << endl;
-	// for (int i = 0; i < total_n; i++)
-	// for (int j = i+1; j < total_n; j++)
-	// 		cout << i << "  " << j << "  " << UTindexer(i, j, total_n) << "  " << BE_distance[UTindexer(i, j, total_n)] << "\n";
-  std::terminate();
-}
+			cout << "CHECK COMPARISON: " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "  " << tmp << "\n";
+// if (true /*abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10*/)
+// {
+// 	cout << "pairs.size() = " << pairs.size() << "\n\n";
+//   cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
+//   cout << "Particle 1: " << pair.p1 << "\n";
+//   cout << "Particle 2: " << pair.p2 << "\n";
+//   cout << tmp << "  " << UTindexer(pair.ID1, pair.ID2, total_n);
+//   cout << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "  ";
+//   cout << abs(tmp-BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)]) << "\n\n";
+//   cout << "CHECK: " << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << endl;
+//
+// 	// cout << "======================================================================================\n";
+// 	// cout << "CHECK PAIRS and BEDISTANCES:\n";
+// 	// cout << "BE_distance.size() = " << BE_distance.size() << "  " << np << "  " << total_n << endl;
+// 	// for (int i = 0; i < total_n; i++)
+// 	// for (int j = i+1; j < total_n; j++)
+// 	// 		cout << i << "  " << j << "  " << UTindexer(i, j, total_n) << "  " << BE_distance[UTindexer(i, j, total_n)] << "\n";
+//   std::terminate();
+// }
       if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
       A[i*np+j] = tmp;
       A[j*np+i] = tmp; // matrix is symmetric
