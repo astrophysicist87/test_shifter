@@ -139,14 +139,13 @@ vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
                                 q.cbegin(),
                                 0.0);
       double tmp = exp(-0.25*q2*R*R);
-if (abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10)
+if (true /*abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10*/)
 {
 	cout << "pairs.size() = " << pairs.size() << "\n\n";
   cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
   cout << "Particle 1: " << pair.p1 << "\n";
   cout << "Particle 2: " << pair.p2 << "\n";
   cout << tmp << "  " << UTindexer(pair.ID1, pair.ID2, total_n);
-  cout << "  " << BE_distance.at(UTindexer(pair.ID1, pair.ID2, np)) << "  ";
   cout << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "  ";
   cout << abs(tmp-BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)]) << "\n\n";
   cout << "CHECK: " << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << endl;
