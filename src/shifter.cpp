@@ -130,7 +130,7 @@ namespace shift_lib
 		for (int j = i; j < total_n; j++)
 		{
 			const auto & q = current_pairs.at(index);
-			cout << i << "  " << j << "  " << q[0] << "  " << q[1] << "  " << q[2]
+			cout << index << "  " << i << "  " << j << "  " << q[0] << "  " << q[1] << "  " << q[2]
 			     << "  " << current_BE_distances.at(index) << "\n";
 			index++;
 		}
