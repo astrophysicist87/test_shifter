@@ -152,7 +152,7 @@ if (abs(BE_distance[UTindexer(pair.ID1, pair.ID2, np)]-tmp) > 1e-10)
 
 	cout << "======================================================================================\n";
 	cout << "CHECK PAIRS and BEDISTANCES:\n";
-	cout << "BE_distance.size() = " << BE_distance.size() << endl;
+	cout << "BE_distance.size() = " << BE_distance.size() << "  " << np  << "  " << total_n << endl;
 	for (const auto & pair: pairs)
 		cout << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "\n";
   std::terminate();
