@@ -87,7 +87,7 @@ namespace shift_lib
 
 
 	std::normal_distribution<double>       normal(0.0, 1.0);
-	for (const auto & p: allParticles) {normal(generator); normal(generator); normal(generator);}
+	for (const auto & p: allParticles) {normal(generator); normal(generator); /*normal(generator);*/}
 	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
 	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
 	int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
