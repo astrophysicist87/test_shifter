@@ -87,7 +87,7 @@ namespace shift_lib
 
 
 	std::normal_distribution<double>       normal(0.0, 1.0);
-	for (const auto & p: allParticles) {normal(generator); normal(generator);}
+	for (const auto & p: allParticles) {normal(generator); normal(generator); normal(generator);}
 	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
 	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
 	int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
@@ -192,11 +192,6 @@ cout << "at line = " << __LINE__ << endl;
 				double x2 = RNG_xDir ? RNG_p0 * normal(generator) : x1;
 				double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;
 				double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;
-
-				// std::cout << "CHECK: " << SHIFT_MODE << "   "
-				// 					<< x1 << "   " << y1 << "   " << z1 << "   "
-				// 					<< x2 << "   " << y2 << "   " << z2 << "\n";
-
 
 				// set configuration containing shifted particle
 				vector<Particle> allParticles_with_shift = allParticles;

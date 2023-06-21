@@ -140,7 +140,7 @@ vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
                                 0.0);
       double tmp = exp(-0.25*q2*R*R);
 			auto [minID, maxID] = std::minmax(pair.ID1, pair.ID2);
-			// cout << "CHECK COMPARISON: " << BE_distance[UTindexer(minID, maxID, total_n)] << "  " << tmp << "\n";
+			cout << "CHECK COMPARISON: " << BE_distance[UTindexer(minID, maxID, total_n)] << "  " << tmp << "\n";
 if (abs(BE_distance[UTindexer(minID, maxID, total_n)]-tmp) > 1e-10)
 {
 	cout << "pairs.size() = " << pairs.size() << "\n\n";
