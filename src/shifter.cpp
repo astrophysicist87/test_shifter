@@ -175,10 +175,10 @@ cout << "at line = " << __LINE__ << endl;
 		{
 			swTotal.Reset();
 			swTotal.Start();
-			cerr << "Loop #" << iLoop << ": \n";
+			// cerr << "Loop #" << iLoop << ": \n";
 			for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 			{
-				cerr << "  --> Particle #" << iParticle << "\n";
+				// cerr << "  --> Particle #" << iParticle << "\n";
 
 				// generate a shifted momentum
 				double x1 = allParticles[iParticle].p.x();
@@ -193,9 +193,9 @@ cout << "at line = " << __LINE__ << endl;
 				double y2 = RNG_yDir ? RNG_p0 * normal(generator) : y1;
 				double z2 = RNG_zDir ? RNG_p0 * normal(generator) : z1;
 
-				std::cout << "CHECK: " << SHIFT_MODE << "   "
-									<< x1 << "   " << y1 << "   " << z1 << "   "
-									<< x2 << "   " << y2 << "   " << z2 << "\n";
+				// std::cout << "CHECK: " << SHIFT_MODE << "   "
+				// 					<< x1 << "   " << y1 << "   " << z1 << "   "
+				// 					<< x2 << "   " << y2 << "   " << z2 << "\n";
 
 
 				// set configuration containing shifted particle
@@ -283,13 +283,13 @@ cout << "at line = " << __LINE__ << endl;
 			// 					 particles[i1].p.y() - particles[spi].p.y(),
 			// 					 particles[i1].p.z() - particles[spi].p.z() };
 			// BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
-			cout << "Updating: " << i1 << "  " << spi << "  " << UTindexer(i1, spi, np) << "  "
-						<< BE_distances[UTindexer(i1, spi, np)] << " --> ";
+			// cout << "Updating: " << i1 << "  " << spi << "  " << UTindexer(i1, spi, np) << "  "
+			// 			<< BE_distances[UTindexer(i1, spi, np)] << " --> ";
 			BE_distances[UTindexer(i1, spi, np)]
 				= BEdist.get_distance({ particles[i1].p.x() - particles[spi].p.x(),
 								 particles[i1].p.y() - particles[spi].p.y(),
 								 particles[i1].p.z() - particles[spi].p.z() });
-			 cout << BE_distances[UTindexer(i1, spi, np)] << "\n";
+			 // cout << BE_distances[UTindexer(i1, spi, np)] << "\n";
 			// pairs[iPair].assign(q);
 		}
 
@@ -299,13 +299,13 @@ cout << "at line = " << __LINE__ << endl;
 			// auto q = { particles[spi].p.x() - particles[i1].p.x(),
 			// 					 particles[spi].p.y() - particles[i1].p.y(),
 			// 					 particles[spi].p.z() - particles[i1].p.z() };
-			cout << "Updating: " << spi << "  " << i1 << "  " << UTindexer(spi, i1, np) << "  "
-						<< BE_distances[UTindexer(spi, i1, np)] << " --> ";
+			// cout << "Updating: " << spi << "  " << i1 << "  " << UTindexer(spi, i1, np) << "  "
+			// 			<< BE_distances[UTindexer(spi, i1, np)] << " --> ";
 			BE_distances[UTindexer(spi, i1, np)]
 				= BEdist.get_distance({ particles[spi].p.x() - particles[i1].p.x(),
 								 particles[spi].p.y() - particles[i1].p.y(),
 								 particles[spi].p.z() - particles[i1].p.z() });
-		 	cout << BE_distances[UTindexer(spi, i1, np)] << "\n";
+		 	// cout << BE_distances[UTindexer(spi, i1, np)] << "\n";
 			// pairs[iPair].assign(q);
 		}
 
