@@ -120,6 +120,17 @@ namespace shift_lib
 	  //                 current_BE_distances.begin(), BEdist.get_distance );
 		vector<double> shifted_BE_distances = current_BE_distances;
 
+		if (true)
+		{
+		cout << "BEdistances:" << endl;
+		int total_n = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*current_BE_distances.size())));
+		int index = 0;
+		for (int i = 0; i < total_n; i++)
+		for (int j = i; j < total_n; j++)
+				cout << i << "  " << j << "  " << current_BE_distances.at(index++) << "\n";
+		std::terminate();
+		}
+
 		//------------------------------------------------
 		// compute probability of initial configuration
 		const double precision = 1e-2;
@@ -245,9 +256,6 @@ namespace shift_lib
 		// indexes upper-triangular list of pairs given indices (i,j)
 		auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
 
-		cout << 72 << "  " << 4 << "  " << UTindexer(72, 4, np) << "  " << BE_distances[UTindexer(72, 4, np)] << "\n";
-
-
 		for (int i1 = 0; i1 < spi; ++i1)
 		{
 			// int iPair = UTindexer(i1, spi, np);
@@ -274,9 +282,6 @@ namespace shift_lib
 								 particles[spi].p.z() - particles[i1].p.z() });
 			// pairs[iPair].assign(q);
 		}
-
-		cout << 72 << "  " << 4 << "  " << UTindexer(72, 4, np) << "  " << BE_distances[UTindexer(72, 4, np)] << "\n";
-
 
 		return;
 	}
