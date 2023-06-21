@@ -283,10 +283,13 @@ cout << "at line = " << __LINE__ << endl;
 			// 					 particles[i1].p.y() - particles[spi].p.y(),
 			// 					 particles[i1].p.z() - particles[spi].p.z() };
 			// BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
+			cout << "Updating: " << i1 << "  " << spi << "  " << UTindexer(i1, spi, np) << "  "
+						<< BE_distances[UTindexer(i1, spi, np)] << " --> ";
 			BE_distances[UTindexer(i1, spi, np)]
 				= BEdist.get_distance({ particles[i1].p.x() - particles[spi].p.x(),
 								 particles[i1].p.y() - particles[spi].p.y(),
 								 particles[i1].p.z() - particles[spi].p.z() });
+			 cout << BE_distances[UTindexer(i1, spi, np)] << "\n";
 			// pairs[iPair].assign(q);
 		}
 
@@ -296,10 +299,13 @@ cout << "at line = " << __LINE__ << endl;
 			// auto q = { particles[spi].p.x() - particles[i1].p.x(),
 			// 					 particles[spi].p.y() - particles[i1].p.y(),
 			// 					 particles[spi].p.z() - particles[i1].p.z() };
+			cout << "Updating: " << spi << "  " << i1 << "  " << UTindexer(spi, i1, np) << "  "
+						<< BE_distances[UTindexer(spi, i1, np)] << " --> ";
 			BE_distances[UTindexer(spi, i1, np)]
 				= BEdist.get_distance({ particles[spi].p.x() - particles[i1].p.x(),
 								 particles[spi].p.y() - particles[i1].p.y(),
 								 particles[spi].p.z() - particles[i1].p.z() });
+		 	cout << BE_distances[UTindexer(spi, i1, np)] << "\n";
 			// pairs[iPair].assign(q);
 		}
 
