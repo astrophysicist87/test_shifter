@@ -87,7 +87,7 @@ namespace shift_lib
 
 
 	std::normal_distribution<double>       normal(0.0, 1.0);
-	for (const auto & p: allParticles) {normal(generator); normal(generator); normal(generator);}
+	for (const auto & p: allParticles) {normal(generator); normal(generator); /*normal(generator);*/}
 	int RNG_xDir 	= paraRdr->getVal("RNG_xDir");
 	int RNG_yDir 	= paraRdr->getVal("RNG_yDir");
 	int RNG_zDir 	= paraRdr->getVal("RNG_zDir");
@@ -123,26 +123,6 @@ cout << "at line = " << __LINE__ << endl;
 		vector<double> shifted_BE_distances = current_BE_distances;
 
 cout << "at line = " << __LINE__ << endl;
-
-		if (false)
-		{
-		cout << "R: "<< R << endl;
-		cout << "BEdistances:" << endl;
-		int total_n = static_cast<int>(0.5*(1.0+sqrt(1.0+8.0*current_BE_distances.size())));
-		int index = 0;
-		for (int i = 0; i < total_n; i++)
-		for (int j = i+1; j < total_n; j++)
-		{
-			const auto & q = current_pairs.at(index);
-			cout << index << "  " << i << "  " << j << "  " << q[0] << "  " << q[1] << "  " << q[2]
-			     << "  " << current_BE_distances.at(index) << "\n";
-			index++;
-		}
-		// std::terminate();
-		}
-		cout << "All particles:\n";
-		for (const auto & p: allParticles) cout << p.particleID << ":  " << p;
-
 
 		//------------------------------------------------
 		// compute probability of initial configuration
