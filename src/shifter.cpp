@@ -140,6 +140,9 @@ cout << "at line = " << __LINE__ << endl;
 		}
 		// std::terminate();
 		}
+		cout << "All particles:\n";
+		for (const auto & p: allParticles) cout << p;
+
 
 		//------------------------------------------------
 		// compute probability of initial configuration
