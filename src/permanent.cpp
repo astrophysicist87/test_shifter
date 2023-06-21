@@ -134,39 +134,8 @@ vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
     for (int j = i+1; j < np; j++)
     {
       auto & pair = pairs[index];
-			// OLD version
-      // const auto & q = pair.q;
-      // double q2 = inner_product(q.cbegin(), q.cend(),
-      //                           q.cbegin(),
-      //                           0.0);
-			// double tmp = exp(-0.25*q2*R*R);
-
-			// NEW version
 			auto [minID, maxID] = std::minmax(pair.ID1, pair.ID2);
 			double tmp = BE_distance[UTindexer(minID, maxID, total_n)];
-
-
-// 			cout << "CHECK COMPARISON: " << BE_distance[UTindexer(minID, maxID, total_n)] << "  " << tmp << "\n";
-// if (abs(BE_distance[UTindexer(minID, maxID, total_n)]-tmp) > 1e-10)
-// {
-// 	cout << "pairs.size() = " << pairs.size() << "\n\n";
-//   cout << "q: " << q[0] << "  " << q[1] << "  " << q[2] << "\n\n";
-//   cout << "Particle 1: " << minID << "\n";
-//   cout << "Particle 2: " << maxID << "\n";
-//   cout << tmp << "  " << UTindexer(minID, maxID, total_n);
-//   cout << "  " << BE_distance.at(UTindexer(minID, maxID, total_n)) << "  ";
-//   cout << abs(tmp-BE_distance.at(UTindexer(minID, maxID, total_n))) << "\n\n";
-//   cout << "CHECK: " << minID << "  " << maxID << "  "
-// 	     << BE_distance[UTindexer(minID, maxID, total_n)] << endl;
-//
-// 	// cout << "======================================================================================\n";
-// 	// cout << "CHECK PAIRS and BEDISTANCES:\n";
-// 	// cout << "BE_distance.size() = " << BE_distance.size() << "  " << np << "  " << total_n << endl;
-// 	// for (int i = 0; i < total_n; i++)
-// 	// for (int j = i+1; j < total_n; j++)
-// 	// 		cout << i << "  " << j << "  " << UTindexer(i, j, total_n) << "  " << BE_distance[UTindexer(i, j, total_n)] << "\n";
-//   std::terminate();
-// }
       if (tmp < TINY) tmp = 0.0;	// make matrix as sparse as possible
       A[i*np+j] = tmp;
       A[j*np+i] = tmp; // matrix is symmetric
@@ -175,19 +144,6 @@ vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
   }
   return A;
 }
-
-// //--------------------------------------------------------------------------
-// double MatrixPermanent::get_q2( const Vec4 & q )
-// {
-//   return q.x()*q.x() + q.y()*q.y() + q.z()*q.z();
-// }
-//
-// //--------------------------------------------------------------------------
-// double MatrixPermanent::get_BE_distance( const Particle & p1,
-//                                const Particle & p2 )
-// {
-// 	return exp(-0.25*get_q2(p1.p - p2.p)*R*R);
-// }
 
 
 //--------------------------------------------------------------------------
@@ -285,97 +241,44 @@ double MatrixPermanent::compute_permanent_from_cluster(
 
   //------------------------------------------------------------------------
   // approximate this cluster with full product, if necessary
-  if (APPROXIMATE_LARGE_N && clusterList.size()>20)
+	const int n = clusterList.size();
+  if (APPROXIMATE_LARGE_N && n >= CUTOFF)
     return get_full_product_from_pairs( pairs );
 
   //------------------------------------------------------------------------
   // set matrix
-  vector<double> A = get_A(pairs, clusterList.size(), BE_distance);
-
-	// compute rowsums of each particle
-	const int n = clusterList.size();
-	vector<long> rowsums = get_rowsums( A, n );
-
-	if (n>=CUTOFF)
-	{
-		cout << "unsorted rowsums:";
-		for (auto rowsum: rowsums) cout << "  " << rowsum;
-		cout << endl;
-		// print_matrix(A, n);
-	}
-
-	// sort particles by increasing rowsums
-	std::vector<long> indices(n);
-	std::iota(indices.begin(), indices.end(), 0);
-	std::sort(indices.begin(), indices.end(),
-						[&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
-
-	// std::reverse(indices.begin(), indices.end());
-
-	// re-compute sorted matrix
-	vector<double> A_sorted(n*n);
-	for (int i = 0; i < n; ++i)
-	for (int j = 0; j < n; ++j)
-		A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
-
-	A = A_sorted;
-
-	if (n>=CUTOFF)
-	{
-		cout << "A(n="<<n<<"):" << endl << "{";
-		for (const auto & e: A) cout << "  " << e << ",";
-		cout << "}\n";
-	}
-
-	if (n>=CUTOFF)
-	{
-		vector<long> sorted_rowsums = get_rowsums( A, n );
-		cout << "sorted rowsums:";
-		for (auto rowsum: sorted_rowsums) cout << "  " << rowsum;
-		cout << endl;
-		// print_matrix(A, n);
-		// std::terminate();
-	}
+  vector<double> A = get_A(pairs, n, BE_distance);
 
   //------------------------------------------------------------------------
   // compute and return permanent
-	if (n<CUTOFF)
-  	return permanent_RNW( A, clusterList.size() );
+	if (n < CUTOFF)
+  	return permanent_RNW( A, n );
 	else
 	{
-		// cout << setprecision(6) << "{";
-	  // for (long long i = 0; i < n; i++)
-	  // {
-	  //   cout << "{";
-	  //   for (long long j = 0; j < n; j++)
-	  //     cout << "  " /*<< setw(10) << right*/ << A[i*n+j] << ",";
-	  //   cout << "},";
-	  // }
-	  // cout << "}\n";
-		Stopwatch sw;
-		// sw.Start();
-		// cout << "------------------------------------------------------------" << endl;
-		// cout << "Matrix size = " << n << endl;
-		// cout << "Evaluated RNW = " << permanent_RNW( A, clusterList.size() );
-		// sw.Stop();
-		// cout << " in " << sw.printTime() << " s." << endl;
-		sw.Reset();
-		sw.Start();
+		// compute rowsums of each particle
+		vector<long> rowsums = get_rowsums( A, n );
+
+		// sort particles by increasing rowsums
+		std::vector<long> indices(n);
+		std::iota(indices.begin(), indices.end(), 0);
+		std::sort(indices.begin(), indices.end(),
+							[&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
+
+		// re-compute sorted matrix
+		vector<double> A_sorted(n*n);
+		for (int i = 0; i < n; ++i)
+		for (int j = 0; j < n; ++j)
+			A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
+
+		A = std::move(A_sorted);
+
 		vector<Sparse::Element> A_sparse;
 		for (int i = 0; i < n; ++i)
 		for (int j = 0; j < n; ++j)
 			if (A[i*n+j] > TINY)
 				A_sparse.push_back( Sparse::Element( {i, j, A[i*n+j]} ) );
-		long double tmp = Sparse::permanent( Sparse::Matrix(A_sparse, n) );
-		cout << "Evaluated sparse = " << tmp;
-		sw.Stop();
-		cout << " in " << sw.printTime() << " s." << endl;
-		cout << "------------------------------------------------------------" << endl;
-		// if (true) std::terminate();
-		return tmp;
+		return Sparse::permanent( Sparse::Matrix(A_sparse, n) );
 	}
-	// else
-  // 	return sparse_permanent( A, clusterList.size() );
 }
 
 //------------------------------------------------------------------------------
@@ -425,76 +328,6 @@ void MatrixPermanent::remove_shifted_cluster( int shifted_particle_index )
 
   // remove this cluster
   clusters.erase( clusters.begin() + cluster_to_remove );
-}
-
-
-//----------------------------------------------------------------------------
-double MatrixPermanent::sparse_permanent( const vector<double> & A, long n )
-{
-  // if matrix is small enough, use Ryser-Niejenhuis-Wilf algorithm
-  if (n <= 1)
-    return permanent_RNW( A, n );
-    // otherwise, decompose into minors and try again
-  else
-  {
-    // compute rowsums of each particle
-    vector<long> rowsums = get_rowsums( A, n );
-
-    // sort particles by increasing rowsums
-    std::vector<long> indices(n);
-    std::iota(indices.begin(), indices.end(), 0);
-    std::sort(indices.begin(), indices.end(),
-              [&](int i, int j) -> bool { return rowsums[i] < rowsums[j]; });
-
-    // re-compute sorted matrix
-    vector<double> A_sorted(n*n);
-    for (int i = 0; i < n; ++i)
-    for (int j = 0; j < n; ++j)
-      A_sorted[i*n+j] = A[indices[i]*n+indices[j]];
-
-    // expand low-rowsum particles in minors until RNW is viable
-    return permanent_by_expansion( A_sorted, n );
-  }
-}
-
-
-
-//----------------------------------------------------------------------------
-vector<double> MatrixPermanent::take_minor( const vector<double> & A, long i0, long j0, long n )
-{
-  vector<double> A_minor((n-1)*(n-1));
-  long index = 0;
-  for (int i = 0; i < n; ++i)
-  for (int j = 0; j < n; ++j)
-    if (i!=i0 && j!=j0)
-      A_minor[index++] = A[i*n+j];
-  return A_minor;
-}
-
-
-//----------------------------------------------------------------------------
-double MatrixPermanent::permanent_by_expansion( const vector<double> & A, long n )
-{
-  // if matrix is small enough, use Ryser-Nijenhuis-Wilf algorithm
-  if (n <= 1)
-    return permanent_RNW( A, n );
-  // otherwise, decompose into minors and try again
-  else
-  {
-    double result = 0.0;
-
-    if (n == 2)
-      return A[0*n+0]*A[1*n+1]+A[0*n+1]*A[1*n+0];
-
-    // loop over non-zero column entries in 0th row
-    constexpr long i = 0;  // 0th row
-    for (long j = 0; j < n; ++j)
-    {
-      if (A[i*n+j] > TINY)
-        result += A[i*n+j] * permanent_by_expansion( take_minor(A, i, j, n), n-1 );
-    }
-    return result;
-  }
 }
 
 

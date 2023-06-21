@@ -128,18 +128,9 @@ namespace shift_lib
 															{"n_particles", (int)allParticles.size()},
 															{"assume_sparse", assume_sparse_pair_matrix} } );
 
-// cout << "Initializing cp..." << endl;
-// cout << "current_pairs.size() = " << current_pairs.size() << endl;
-// cout << "current_pairs[0] = " << "  " << current_pairs[0][0] << "  " << current_pairs[0][1]
-// 			<< "  " << current_pairs[0][2] << endl;
-// cout << "Direct = " << BEdist.get_distance(current_pairs[0]) << endl;
-// cout << "current_BE_distances[0] = " << current_BE_distances[0] << endl;
 		ConfigurationProbability cp( SHIFT_MODE, parameters, paraRdr, "Short" );
 		double P1 = cp.get_probability( allParticles, current_BE_distances, -1 );
 																		// last -1 means place all particles in clusters
-		// cout << "current_BE_distances.size() = " << current_BE_distances.size() << endl;
-// cout << "Finished initializing cp." << endl;
-// cout << "CHECK: " << P1 << "  " << P1FP << endl;
 
 		//------------------------------------------------
 		// begin looping over particles
@@ -149,7 +140,7 @@ namespace shift_lib
 		{
 			swTotal.Reset();
 			swTotal.Start();
-			// cerr << "Loop #" << iLoop << ": \n";
+			cerr << "Loop #" << iLoop << ": \n";
 			for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 			{
 				// cerr << "  --> Particle #" << iParticle << "\n";
