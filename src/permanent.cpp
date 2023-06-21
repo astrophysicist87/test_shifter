@@ -147,8 +147,8 @@ if (abs(BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)]-tmp) > 1e-10)
   cout << "Particle 1: " << pair.p1 << "\n";
   cout << "Particle 2: " << pair.p2 << "\n";
   cout << tmp << "  " << UTindexer(pair.ID1, pair.ID2, total_n);
-  cout << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << "  ";
-  cout << abs(tmp-BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)]) << "\n\n";
+  cout << "  " << BE_distance.at(UTindexer(pair.ID1, pair.ID2, total_n)) << "  ";
+  cout << abs(tmp-BE_distance.at(UTindexer(pair.ID1, pair.ID2, total_n))) << "\n\n";
   cout << "CHECK: " << pair.ID1 << "  " << pair.ID2 << "  " << BE_distance[UTindexer(pair.ID1, pair.ID2, total_n)] << endl;
 
 	// cout << "======================================================================================\n";
