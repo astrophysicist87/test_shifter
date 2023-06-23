@@ -68,7 +68,8 @@ class MatrixPermanent
     //--------------------------------------------------------------------------
     double compute_permanent_from_cluster( const vector<Particle> & clusterList,
                                            const vector<double> & BE_distance );
-    double get_full_product_from_pairs( const vector<Pair> & pairs );
+    double get_full_product_from_pairs( const vector<Pair> & pairs,
+                                       const vector<double> & BE_distance );
     //--------------------------------------------------------------------------
     double permanent_by_decomposition( const vector<Particle> & particles,
                                        const vector<double> & BE_distance );
