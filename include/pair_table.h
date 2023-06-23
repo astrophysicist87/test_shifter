@@ -8,7 +8,7 @@ class SymmetricPairTable<T>
 {
   private:
     long n {0};
-    std::vector<long> v;
+    std::vector<T> v;
 
     inline long UTindexer(const long i, const long j)
     {

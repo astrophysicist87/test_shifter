@@ -83,17 +83,15 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
   unsigned long long count = 0;
   unsigned long long C = (1ULL << n); // bitshift equals integer pow() for base2
 
-	// if (n>=25) cout << "C(n=" << n<< ") = " << C << " vs. " << ULLONG_MAX << endl;
-
   vector<bool> chi(n);
   vector<double> rowsums(n, 0.0);
   for ( unsigned long long k = 0; k < C - 1; ++k )
   {
     // order submatrices by gray code, identify which bit changes
-    unsigned long long mask = 1, index = 0;
+    unsigned long long mask = 1ULL, index = 0;
 		while (k & mask)
 		{
-			mask <<= 1;
+			mask <<= 1ULL;
 			++index;
 		}
 
@@ -124,6 +122,7 @@ double MatrixPermanent::permanent_RNW( const vector<double> & A, const long long
 vector<double> MatrixPermanent::get_A( const vector<Pair> & pairs, const int np,
                       const vector<double> & BE_distance )
 {
+	// linear indexer for upper-triangular matrix
 	auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
   int index = 0;
   vector<double> A(np*np);
@@ -282,16 +281,13 @@ double MatrixPermanent::compute_permanent_from_cluster(
 }
 
 //------------------------------------------------------------------------------
-double MatrixPermanent::get_full_product_from_pairs( const vector<Pair> & pairs )
+double MatrixPermanent::get_full_product_from_pairs( const vector<Pair> & pairs,
+                                   const vector<double> & BE_distance )
 {
   // full product
   double full_product = 1.0;
-  for (const auto & pair: pairs)
-  {
-    double q2 = inner_product( pair.q.cbegin(), pair.q.cend(),
-                               pair.q.cbegin(), 0.0 );
-    full_product *= 1.0 + exp(-0.5*q2*R*R);
-  }
+	for (const auto & BEd: BE_distance)
+		full_product *= 1.0 + BEd*BEd;
 
   return full_product;
 }
