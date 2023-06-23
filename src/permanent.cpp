@@ -242,7 +242,7 @@ double MatrixPermanent::compute_permanent_from_cluster(
   // approximate this cluster with full product, if necessary
 	const int n = clusterList.size();
   if (APPROXIMATE_LARGE_N && n >= CUTOFF)
-    return get_full_product_from_pairs( pairs );
+    return get_full_product_from_pairs( pairs, BE_distance );
 
   //------------------------------------------------------------------------
   // set matrix
@@ -379,7 +379,7 @@ double MatrixPermanent::evaluate_full_product(
                           const vector<double> & BE_distance,
                           const int shifted_particle_index )
 {
-  return get_full_product_from_pairs( get_pairs( particles ) );
+  return get_full_product_from_pairs( get_pairs( particles ), BE_distance );
 }
 
 
