@@ -32,12 +32,15 @@ class BoseEinsteinDistance
     inline double get_distance_single_scale(const Particle & p1, const Particle & p2)
   	{
       // note: 0.25 should eventually be replaced by 0.5
-      // auto & [p1, p2] = pair;
-      // auto & p1 = pair.first;
-      // auto & p2 = pair.second;
+      // return exp( -0.25 * R * R * norm2( { p1.p.x() - p2.p.x(),
+      //                                      p1.p.y() - p2.p.y(),
+      //                                      p1.p.z() - p2.p.z() } ) );
       return exp( -0.25 * R * R * norm2( { p1.p.x() - p2.p.x(),
                                            p1.p.y() - p2.p.y(),
-                                           p1.p.z() - p2.p.z() } ) );
+                                           p1.p.z() - p2.p.z() } )
+                  -0.125 * norm2( { p1.p.x() + p2.p.x(),
+                                           p1.p.y() + p2.p.y(),
+                                           p1.p.z() + p2.p.z() } ) );
     }
 
   //----------------------------------------------------------------------------
