@@ -136,7 +136,7 @@ namespace shift_lib
 		{
 			swTotal.Reset();
 			swTotal.Start();
-			cerr << "Loop #" << iLoop << ": \n";
+			// cerr << "Loop #" << iLoop << ": \n";
 			for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 			{
 				// cerr << "  --> Particle #" << iParticle << "\n";
@@ -207,7 +207,7 @@ namespace shift_lib
 
 			}
 			swTotal.Stop();
-			cout << "finished in " << swTotal.printTime() << " s.\n";
+			// cout << "finished in " << swTotal.printTime() << " s.\n";
 		}
 
 		// Done.
