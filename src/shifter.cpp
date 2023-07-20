@@ -56,19 +56,16 @@ namespace shift_lib
 	}
 
 	//--------------------------------
-	vector<vector<double>> shifter::get_pairs( const vector<Particle> & particles )
+	vector<particle_pair> shifter::get_pairs( const vector<Particle> & particles )
 	{
-		vector<vector<double>> result;
+		vector<particle_pair> result;
 
 		const int number_of_particles = particles.size();
 
 		// get all values in vector first
 		for (int i1 = 0; i1 < number_of_particles - 1; ++i1)
 		for (int i2 = i1 + 1; i2 < number_of_particles; ++i2)
-		{
-			Vec4 q = particles[i1].p - particles[i2].p;
-			result.push_back( vector<double>({q.x(), q.y(), q.z()}) );
-		}
+			result.push_back( { particles[i1], particles[i2] } );
 
 		return result;
 	}
@@ -107,17 +104,16 @@ namespace shift_lib
 		vector<Particle> allParticles_Original = allParticles;
 
 		//------------------------------------------------
-		// compute current pairs (shifted pairs needed below)
-		current_pairs = get_pairs(allParticles);
-		shifted_pairs = current_pairs;
-
-		//------------------------------------------------
 		// set tabulated BE distances for below
 		double R = paraRdr->getVal("RNG_R") / HBARC;
 		BoseEinsteinDistance BEdist( "SingleScale", { {"R", R} } );
-		vector<double> current_BE_distances(current_pairs.size(), 0.0);
-		std::transform( current_pairs.cbegin(), current_pairs.cend(),
-	                  current_BE_distances.begin(), BEdist.get_distance_v );
+
+		// initialize BE distances
+		vector<double> current_BE_distances;
+		for ( const auto & pair: get_pairs(allParticles) )
+			current_BE_distances.push_back(
+				BEdist.get_distance( pair.first, pair.second ) );
+
 		vector<double> shifted_BE_distances = current_BE_distances;
 
 		//------------------------------------------------
@@ -140,7 +136,7 @@ namespace shift_lib
 		{
 			swTotal.Reset();
 			swTotal.Start();
-			// cerr << "Loop #" << iLoop << ": \n";
+			cerr << "Loop #" << iLoop << ": \n";
 			for (int iParticle = 0; iParticle < number_of_particles; iParticle++) // loop over particles, re-sample one at a time
 			{
 				// cerr << "  --> Particle #" << iParticle << "\n";
@@ -165,8 +161,7 @@ namespace shift_lib
 				allParticles_with_shift[iParticle].p.z(z2);
 
 				// get shifted pairs
-				get_shifted_pairs( /*shifted_pairs,*/ shifted_BE_distances,
-													 allParticles_with_shift, iParticle, BEdist );
+				get_shifted_pairs( shifted_BE_distances, allParticles_with_shift, iParticle, BEdist );
 
 				// get probability of shifted configuration
 				double P2 = cp.get_probability( allParticles_with_shift,
@@ -194,9 +189,7 @@ namespace shift_lib
 				// re-set shifted quantities
 				if (shift_this_particle)
 				{
-					// current_pairs = shifted_pairs;		// re-set current configuration
-					get_shifted_pairs( /*current_pairs,*/ current_BE_distances,
-														 allParticles_with_shift, iParticle, BEdist );
+					get_shifted_pairs( current_BE_distances, allParticles_with_shift, iParticle, BEdist );
 					P1 = P2;													// re-set probability of current configuration
 					allParticles[iParticle].p.x(x2);	// re-set momentum of particle
 					allParticles[iParticle].p.y(y2);	// re-set momentum of particle
@@ -205,8 +198,7 @@ namespace shift_lib
 				else	// overwrite shifted pairs with current (unshifted)
 				{
 					// current particles vector used to overwrite shifted pairs and distances
-					get_shifted_pairs( /*shifted_pairs,*/ shifted_BE_distances,
-														 allParticles, iParticle, BEdist );
+					get_shifted_pairs( shifted_BE_distances, allParticles, iParticle, BEdist );
 
 					// unshifted particles and distances overwrite current internal state
 					// of ConfigurationProbability cp object, if any
@@ -215,7 +207,7 @@ namespace shift_lib
 
 			}
 			swTotal.Stop();
-			// cout << "finished in " << swTotal.printTime() << " s.\n";
+			cout << "finished in " << swTotal.printTime() << " s.\n";
 		}
 
 		// Done.
@@ -224,8 +216,7 @@ namespace shift_lib
 
 
 	//--------------------------------
-	void shifter::get_shifted_pairs( //vector<vector<double>> & pairs,
-																	 vector<double> & BE_distances,
+	void shifter::get_shifted_pairs( vector<double> & BE_distances,
 																   const vector<Particle> & particles,
 															     const int shifted_particle_index,
  																	 const BoseEinsteinDistance & BEdist )
@@ -236,38 +227,15 @@ namespace shift_lib
 		// indexes upper-triangular list of pairs given indices (i,j)
 		auto UTindexer = [](int i, int j, int n){return -1 + j - i*(3 + i - 2*n)/2;};
 
+		// update particles BEFORE shifted particle
 		for (int i1 = 0; i1 < spi; ++i1)
-		{
-			// int iPair = UTindexer(i1, spi, np);
-			// auto q = { particles[i1].p.x() - particles[spi].p.x(),
-			// 					 particles[i1].p.y() - particles[spi].p.y(),
-			// 					 particles[i1].p.z() - particles[spi].p.z() };
-			// BE_distances[iPair] = BEdist.get_distance(vector<double>(q));
-			// cout << "Updating: " << i1 << "  " << spi << "  " << UTindexer(i1, spi, np) << "  "
-			// 			<< BE_distances[UTindexer(i1, spi, np)] << " --> ";
 			BE_distances[UTindexer(i1, spi, np)]
-				= BEdist.get_distance({ particles[i1].p.x() - particles[spi].p.x(),
-								 particles[i1].p.y() - particles[spi].p.y(),
-								 particles[i1].p.z() - particles[spi].p.z() });
-			 // cout << BE_distances[UTindexer(i1, spi, np)] << "\n";
-			// pairs[iPair].assign(q);
-		}
+				= BEdist.get_distance(particles[i1], particles[spi]);
 
+		// update particles AFTER shifted particle
 		for (int i1 = spi+1; i1 < np; ++i1)
-		{
-			// int iPair = UTindexer(spi, i1, np);
-			// auto q = { particles[spi].p.x() - particles[i1].p.x(),
-			// 					 particles[spi].p.y() - particles[i1].p.y(),
-			// 					 particles[spi].p.z() - particles[i1].p.z() };
-			// cout << "Updating: " << spi << "  " << i1 << "  " << UTindexer(spi, i1, np) << "  "
-			// 			<< BE_distances[UTindexer(spi, i1, np)] << " --> ";
 			BE_distances[UTindexer(spi, i1, np)]
-				= BEdist.get_distance({ particles[spi].p.x() - particles[i1].p.x(),
-								 particles[spi].p.y() - particles[i1].p.y(),
-								 particles[spi].p.z() - particles[i1].p.z() });
-		 	// cout << BE_distances[UTindexer(spi, i1, np)] << "\n";
-			// pairs[iPair].assign(q);
-		}
+				= BEdist.get_distance(particles[spi], particles[i1]);
 
 		return;
 	}

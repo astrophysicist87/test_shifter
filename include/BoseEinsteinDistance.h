@@ -10,6 +10,10 @@ using namespace std;
 
 #include "param_list.h"
 #include "ParameterReader.h"
+#include "Particle.h"
+
+using shift_lib::Particle;
+using shift_lib::particle_pair;
 
 //==============================================================================
 class BoseEinsteinDistance
@@ -20,14 +24,20 @@ class BoseEinsteinDistance
 		ostream & out;
 		ostream & err;
 
-    inline double get_distance_single_scale_v(const vector<double> & q)
-  	{
-      return exp(-0.25 * R * R * (q[0]*q[0] + q[1]*q[1] + q[2]*q[2]));
+    inline double norm2(std::initializer_list<double> il)
+    {
+      return inner_product( il.begin(), il.end(), il.begin(), 0.0 );
     }
-    inline double get_distance_single_scale(std::initializer_list<double> q)
+
+    inline double get_distance_single_scale(const Particle & p1, const Particle & p2)
   	{
-      return exp(-0.25 * R * R * inner_product( q.begin(), q.end(),
-                                                q.begin(), 0.0 ));
+      // note: 0.25 should eventually be replaced by 0.5
+      // auto & [p1, p2] = pair;
+      // auto & p1 = pair.first;
+      // auto & p2 = pair.second;
+      return exp( -0.25 * R * R * norm2( { p1.p.x() - p2.p.x(),
+                                           p1.p.y() - p2.p.y(),
+                                           p1.p.z() - p2.p.z() } ) );
     }
 
   //----------------------------------------------------------------------------
@@ -42,10 +52,8 @@ class BoseEinsteinDistance
 			if (mode == "SingleScale")
 			{
 				R = std::get<double>(parameters.at("R"));
-				get_distance_v = [this](const vector<double> & q)
-                       { return get_distance_single_scale_v(q); };
-        get_distance = [this](const std::initializer_list<double> & q)
-                       { return get_distance_single_scale(q); };
+        get_distance = [this](const Particle & p1, const Particle & p2)
+                       { return get_distance_single_scale(p1, p2); };
 			}
 			else
 			{
@@ -55,8 +63,7 @@ class BoseEinsteinDistance
 		}
     ~BoseEinsteinDistance(){}
 
-    std::function<double(const vector<double> &)> get_distance_v;
-    std::function<double(const std::initializer_list<double>)> get_distance;
+    std::function<double(const Particle &, const Particle &)> get_distance;
 };
 
 #endif

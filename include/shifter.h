@@ -51,8 +51,6 @@ namespace shift_lib
 			// need these objects for finding combinations
 			vector<int> indices;
 
-			vector<vector<double>> current_pairs, shifted_pairs;
-
 			//------------------------------------------------------------------------
 			void process_event( vector<Particle> & allParticles_in );
 
@@ -60,8 +58,7 @@ namespace shift_lib
 
 			bool setSortedPairs( const vector<Particle> & particles_to_sort );
 
-			vector<vector<double>> get_pairs(
-				const vector<Particle> & particles );
+			vector<particle_pair> get_pairs( const vector<Particle> & particles );
 
 			void get_shifted_pairs(
 				// vector<vector<double>> & pairs,
