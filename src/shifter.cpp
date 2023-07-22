@@ -118,7 +118,7 @@ namespace shift_lib
 
 		//------------------------------------------------
 		// compute probability of initial configuration
-		const double precision = 1e-2;
+		const double precision = 1e-4;
 		const bool assume_sparse_pair_matrix = false;
 		param_list parameters ( { {"precision", precision},
 															{"n_particles", (int)allParticles.size()},
