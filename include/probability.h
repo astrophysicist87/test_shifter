@@ -114,9 +114,9 @@ class ConfigurationProbability
 			}
       else if (mode == "Exact")
       {
-        bool assume_sparse = std::get<bool>(parameters.at("assume_sparse"));
+        bool assume_sparse = false; // assume completely full matrix
         int n_particles    = std::get<int>(parameters.at("n_particles"));
-        double precision   = std::get<double>(parameters.at("precision"));
+        double precision   = 0.0;   // do not set anything to zero
 
         // set function for computing probability of given configuration
         get_probability = [this]( const vector<Particle> & particles,
