@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
 	const int nLoops = paraRdr->getVal("RNG_nLoops");
 	int number_of_completed_events = 0;
 
-	// #pragma omp parallel for schedule(static)
-	#pragma omp parallel for schedule(dynamic, 100000)
+	// #pragma omp parallel for schedule(dynamic, 100000)
+	#pragma omp parallel for schedule(static)
 	for (int iLoop = 0; iLoop < nLoops; ++iLoop)
 	{
 		// Vector to hold all event information
