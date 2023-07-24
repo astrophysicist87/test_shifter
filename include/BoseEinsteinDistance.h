@@ -20,7 +20,7 @@ class BoseEinsteinDistance
 {
   //----------------------------------------------------------------------------
   private:
-    double R{0.0};
+    double R{0.0}, m{0.13957};
 		ostream & out;
 		ostream & err;
 
@@ -31,16 +31,25 @@ class BoseEinsteinDistance
 
     inline double get_distance_single_scale(const Particle & p1, const Particle & p2)
   	{
+      // assume units are fine
+      double adhoc_R2 = R*R/(1.0
+                            + 3.0*sqrt(m*m
+                                      + 0.25*norm2( { p1.p.x() + p2.p.x(),
+                                                      p1.p.y() + p2.p.y(),
+                                                      p1.p.z() + p2.p.z() }) ));
       // note: 0.25 should eventually be replaced by 0.5
+      return exp( -0.25 * adhoc_R2 * norm2( { p1.p.x() - p2.p.x(),
+                                              p1.p.y() - p2.p.y(),
+                                              p1.p.z() - p2.p.z() } ) );
       // return exp( -0.25 * R * R * norm2( { p1.p.x() - p2.p.x(),
       //                                      p1.p.y() - p2.p.y(),
       //                                      p1.p.z() - p2.p.z() } ) );
-      return exp( -0.25 * R * R * norm2( { p1.p.x() - p2.p.x(),
-                                           p1.p.y() - p2.p.y(),
-                                           p1.p.z() - p2.p.z() } )
-                  -0.125 * norm2( { p1.p.x() + p2.p.x(),
-                                           p1.p.y() + p2.p.y(),
-                                           p1.p.z() + p2.p.z() } ) );
+      // return exp( -0.25 * R * R * norm2( { p1.p.x() - p2.p.x(),
+      //                                      p1.p.y() - p2.p.y(),
+      //                                      p1.p.z() - p2.p.z() } )
+      //             -0.125 * norm2( { p1.p.x() + p2.p.x(),
+      //                                      p1.p.y() + p2.p.y(),
+      //                                      p1.p.z() + p2.p.z() } ) );
     }
 
   //----------------------------------------------------------------------------

@@ -17,6 +17,7 @@
 #include "Particle.h"
 #include "BoseEinsteinDistance.h"
 #include "probability.h"
+// #include "QuantumCorrelator.h"
 #include "QuantumSampler.h"
 #include "stopwatch.h"
 
